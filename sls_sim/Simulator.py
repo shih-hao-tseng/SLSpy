@@ -27,17 +27,17 @@ class Simulator (ObjBase):
         if self._horizon < 0:
             return None, None
 
+        if not self.system.sanityCheck ():
+            return None, None
+
         y_history = []
         u_history = []
 
         for t in range (self._horizon):
             y = self.system.getMeasurement()
             y_history.append(y)
-            u = self.controller.getControl (measurement=y)
+            u = self.controller.getControl(y=y)
             u_history.append(u)
-            self.system.systemProgress(
-                u=u,
-                w=None
-            )
+            self.system.systemProgress(u=u)
 
         return y_history, u_history
