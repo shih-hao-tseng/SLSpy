@@ -1,5 +1,5 @@
 from Base import ObjBase
-from NoiseModel import NoiseModel
+from NoiseModel import NoiseModel, GuassianNoise
 import numpy as np
 
 class SystemModel (ObjBase):
@@ -42,7 +42,7 @@ class SystemModel (ObjBase):
     def stateFeedback (self, state_feedback=True):
         self._state_feedback = state_feedback
 
-    def useExternalNoiseModel (self, noise_model=None):
+    def useNoiseModel (self, noise_model=None):
         if isinstance (noise_model,NoiseModel):
             self._noise_model = noise_model
 
@@ -73,6 +73,8 @@ class LTISystem(SystemModel):
         self._Nu = 0  # control 
         self._Nz = 0  # output
         self._Ny = 0  # measurement
+
+        self._noise_model = GuassianNoise ()
     
     def initialize (self, x0, **kwargs):
         # set x0
@@ -88,11 +90,14 @@ class LTISystem(SystemModel):
 
     def sanityCheck (self):
         # check the system parameters are coherent
-        self._Nx = self._A.shape[0]
+        if self._Nx == 0:
+            return self.errorMessage('Zero dimension (missing initialization): x')
+
         Nw = self._noise_model._Nw
         self._Nu = self._B2.shape[1]
 
-        if self._A.shape[1] != self._Nx:
+        if ((self._A.shape[0] != self._Nx) or
+            (self._A.shape[1] != self._Nx)):
             return self.errorMessage('Dimension mismatch: A')
         if ((self._B1.shape[0] != self._Nx) or
             (self._B1.shape[1] != Nw)):
@@ -125,27 +130,50 @@ class LTISystem(SystemModel):
         return True
 
     def systemProgress(self, u, **kwargs):
-        self._x = (
-            np.dot (self._A, self._x) +
-            np.dot (self._B1, w) + 
-            np.dot (self._B2, u)
-        )
-
-        w = self._noise_model.getNoise()
-
         if u.shape[0] != self._Nu:
             return self.errorMessage('Dimension mismatch: u')
 
-        if not self._ignore_output:
-            self._z = (
-                np.dot (self._C1, self._x) +
-                np.dot (self._D11, w) + 
-                np.dot (self._D12, u)
+        if self._noise_model is not None:
+            w = self._noise_model.getNoise()
+
+            if not isinstance(w, np.ndarray):
+                # in case w is a list
+                w = np.array(w)
+            
+            self._x = (
+                np.dot (self._A, self._x) +
+                np.dot (self._B1, w) + 
+                np.dot (self._B2, u)
             )
 
-        if not self._state_feedback:
-            self._y = (
-                np.dot (self._C2, self._x) +
-                np.dot (self._D21, w) + 
-                np.dot (self._D22, u)
+            if not self._ignore_output:
+                self._z = (
+                    np.dot (self._C1, self._x) +
+                    np.dot (self._D11, w) + 
+                    np.dot (self._D12, u)
+                )
+
+            if not self._state_feedback:
+                self._y = (
+                    np.dot (self._C2, self._x) +
+                    np.dot (self._D21, w) + 
+                    np.dot (self._D22, u)
+                )
+        else:
+            # noise free
+            self._x = (
+                np.dot (self._A, self._x) +
+                np.dot (self._B2, u)
             )
+
+            if not self._ignore_output:
+                self._z = (
+                    np.dot (self._C1, self._x) +
+                    np.dot (self._D12, u)
+                )
+
+            if not self._state_feedback:
+                self._y = (
+                    np.dot (self._C2, self._x) +
+                    np.dot (self._D22, u)
+                )
