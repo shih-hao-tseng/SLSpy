@@ -19,7 +19,7 @@ class OpenLoopController (ControllerModel):
     def __init__ (self, Nu=0):
         self.setDimension(Nu)
     
-    def setDimension(Nu=0):
+    def setDimension(self,Nu=0):
         self._u = np.zeros([Nu,1])
 
     def getControl(self, y):
@@ -40,10 +40,15 @@ class SLS_State_Feedback_FIR_Controller (ControllerModel):
         self._delta = []
         self._hat_x = np.zeros([Nx,1])
 
-    def initialize (self, delta0):
+    def initialize (self, delta0=None):
         self._delta = []
-        self._delta.append(delta0)
-        self._hat_x = np.zeros([Nx,1])
+        if delta0 is not None:
+            self._delta.append(delta0)
+        else:
+            # zero initialization
+            self._delta.append(np.zeros([self._Nx,1]))
+
+        self._hat_x = np.zeros([self._Nx,1])
 
     def getControl(self, y):
         self._delta.insert(0,y - self._hat_x)
@@ -60,7 +65,7 @@ class SLS_State_Feedback_FIR_Controller (ControllerModel):
     def convolve(A,B,lower_bound,upper_bound,offset):
         # perform sum_{tau >= lower_bound}^{upper_bound} A[tau]B[offset-tau]
         if (len(A) == 0) or (len(B) == 0):
-            return []
+            return np.empty([1,1])
 
         conv = np.zeros(A[0].shape[0],B[0].shape[1])
 

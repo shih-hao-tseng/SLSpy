@@ -13,6 +13,21 @@ class NoiseModel (ObjBase):
         # the noise can depend on some parameters such as state or control
         return 0
 
+class ZeroNoise (NoiseModel):
+    '''
+    Generate zero vector as the noise
+    '''
+    def __init__ (self, Nw=0):
+        self.setDimension(Nw)
+    
+    def setDimension(self,Nw=0):
+        self._Nw = Nw
+        self._w = np.zeros([Nw,1])
+
+    def getNoise(self,**kwargs):
+        return self._w
+
+
 class GuassianNoise(NoiseModel):
     '''
     Generate Gaussian noise
@@ -52,6 +67,10 @@ class FixedNoiseVector(NoiseModel):
     def generateNoiseFromNoiseModel (self, cls=NoiseModel):
         noise_model = cls(Nw=self._Nw)
         self.generateNoiseFromNoiseModelInstance (noise_model=noise_model)
+    
+    def setNoise (self,w=None):
+        # directly assign the _w vector
+        self._w = w
 
     def getNoise (self,**kwargs):
         if self._t < self._horizon:

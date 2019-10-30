@@ -52,6 +52,6 @@ class Simulator (ObjBase):
 
             u = self._controller.getControl(y=y)
             u_history.append(u)
-            self.system.systemProgress(u=u)
+            self._system.systemProgress(u=u)
 
         return x_history, y_history, z_history, u_history

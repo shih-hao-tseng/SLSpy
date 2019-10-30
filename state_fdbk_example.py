@@ -1,25 +1,30 @@
 from sls_sim.SystemModel import LTISystem
 from sls_sim.Simulator import Simulator
 from sls_sim.SynthesisAlgorithm import SLS
+from sls_sim.NoiseModel import *
 import numpy as np
 
 def state_fdbk_example():
     sys = LTISystem(
-        Nx=10
+        Nx=10, Nw=10
     )
 
     sys._B1 = np.eye(sys._Nx)
     sys._C1 = np.concatenate( (np.eye(sys._Nx),np.zeros([sys._Nx,sys._Nu])), axis=1)
     sys._D12 = np.concatenate( (np.zeros([sys._Nu,sys._Nx]),np.eye(sys._Nu)), axis=1)
 
+    sim_horizon = 25
+
     simulator = Simulator (
         system = sys,
-        horizon = 25
+        horizon = sim_horizon
     )
 
-    ## (1) basic sls (centralized controller)
-    sys.initialize(x0=np.zeros([sys._Nx,1]))
+    noise = FixedNoiseVector(Nw=sys._Nx,horizon=sim_horizon)
+    noise.generateNoiseFromNoiseModel(cls=ZeroNoise)
+    noise._w[0][sys._Nx/2] = 10
 
+    ## (1) basic sls (centralized controller)
     synthesizer = SLS(
         FIR_horizon=20
     )
@@ -30,6 +35,8 @@ def state_fdbk_example():
 
     simulator.setController (controller=controller)
 
+    sys.initialize(x0=np.zeros([sys._Nx,1]))
+    controller.initialize()
     x,y,z,u = simulator.run ()
 
 
