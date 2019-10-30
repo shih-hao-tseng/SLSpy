@@ -17,7 +17,11 @@ class SystemModel (ObjBase):
 
         self._noise_model = None
 
-    def systemProgress (self,**kwargs):
+    def initialize (self, x0):
+        # set the initial state
+        pass
+
+    def systemProgress (self, **kwargs):
         # this function takes the input and progress to next time 
         pass
 
@@ -87,7 +91,12 @@ class LTISystem(SystemModel):
 
         self._noise_model = GuassianNoise (Nw=Nw)
     
-    def initialize (self, x0, **kwargs):
+    def initialize (self, x0=None):
+        if x0 is None:
+            # use the previous x0
+            x0 = self._x0
+        else:
+            self._x0 = x0
         # set x0
         self._Nx = x0.shape[0]
         self._x  = x0
@@ -140,7 +149,7 @@ class LTISystem(SystemModel):
 
         return True
 
-    def systemProgress(self, u, **kwargs):
+    def systemProgress(self, u):
         if u.shape[0] != self._Nu:
             return self.errorMessage('Dimension mismatch: u')
 

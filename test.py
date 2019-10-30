@@ -38,5 +38,10 @@ def test ():
     sp = np.concatenate( (np.eye(2),np.zeros([2,3])), axis=1) 
     print(sp)
 
+    conv = None
+    conv += np.eye(2)
+
+    #sim = Simulator(system=model,controller=ControllerModel())
+
 if __name__ == '__main__':
     test ()
