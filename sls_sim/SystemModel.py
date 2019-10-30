@@ -50,31 +50,42 @@ class LTISystem(SystemModel):
     '''
     Contains all matrices of an LTI system as per (3.1)
     '''
-    def __init__(self):
+    def __init__(self,Nx=0,Nw=0,Nu=0,Ny=0,Nz=0):
         SystemModel.__init__(self)
 
+        if not isinstance(Nx,int):
+            Nx = 0
+        if not isinstance(Nw,int):
+            Nw = 0
+        if not isinstance(Nu,int):
+            Nu = 0
+        if not isinstance(Ny,int):
+            Ny = 0
+        if not isinstance(Nz,int):
+            Nz = 0
+
         # state       : x(t+1)= A*x(t)  + B1*w(t)  + B2*u(t)
-        self._A  = np.empty([0,0])
-        self._B1 = np.empty([0,0])
-        self._B2 = np.empty([0,0])
+        self._A  = np.zeros([Nx,Nx])
+        self._B1 = np.zeros([Nx,Nw])
+        self._B2 = np.zeros([Nx,Nu])
 
         # reg output  : z_(t) = C1*x(t) + D11*w(t) + D12*u(t)
-        self._C1  = np.empty([0,0])
-        self._D11 = np.empty([0,0])
-        self._D12 = np.empty([0,0])
+        self._C1  = np.zeros([Nz,Nx])
+        self._D11 = np.zeros([Nz,Nw])
+        self._D12 = np.zeros([Nz,Nu])
 
         # measurement : y(t)  = C2*x(t) + D21*w(t) + D22*u(t)
-        self._C2  = np.empty([0,0])
-        self._D21 = np.empty([0,0])
-        self._D22 = np.empty([0,0])
+        self._C2  = np.zeros([Ny,Nx])
+        self._D21 = np.zeros([Ny,Nw])
+        self._D22 = np.zeros([Ny,Nu])
 
         # vector dimensions of
-        self._Nx = 0  # state
-        self._Nu = 0  # control 
-        self._Nz = 0  # output
-        self._Ny = 0  # measurement
+        self._Nx = Nx  # state
+        self._Nu = Nu  # control
+        self._Nz = Nz  # output
+        self._Ny = Ny  # measurement
 
-        self._noise_model = GuassianNoise ()
+        self._noise_model = GuassianNoise (Nw=Nw)
     
     def initialize (self, x0, **kwargs):
         # set x0

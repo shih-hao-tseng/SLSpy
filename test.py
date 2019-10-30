@@ -3,16 +3,16 @@ from sls_sim.NoiseModel import *
 import numpy as np
 
 def test ():
-    model = LTISystem()
-    model._A = np.zeros ([2,2])
+    model = LTISystem(
+        Nx=2, Nw=2, Nu=1
+    )
     model._B1 = np.eye (2)
-    model._B2 = np.zeros ([2,1])
     
     model.stateFeedback()
     model.ignoreOutput()
 
-    fixed_noise = FixedNoiseVector (Nw=2,horizon=10)
-    fixed_noise.generateNoiseFromNoiseModel (cls=GuassianNoise)
+    fixed_noise = FixedNoiseVector (horizon=10)
+    fixed_noise.generateNoiseFromNoiseModelInstance (noise_model=model._noise_model)
     fixed_noise.startAtTime(0)
 
     w = fixed_noise.getNoise()
