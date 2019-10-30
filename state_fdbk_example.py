@@ -1,11 +1,15 @@
 from sls_sim.SystemModel import LTISystem
 from sls_sim.Simulator import Simulator
+import numpy as np
 
 def state_fdbk_example():
 
-    sys = LTISystem(
-        Nx = 10
-    )
+    sys = LTISystem()
+    sys._Nx = 10
+
+    sys._B1 = np.eye(sys._Nx)
+    sys._C1 = np.concatenate( (np.eye(sys._Nx),np.zeros([sys._Nx,sys._Nu])), axis=1)
+    sys._D12 = np.concatenate( (np.zeros([sys._Nu,sys._Nx]),np.eye(sys._Nu)), axis=1)
 
     simulator = Simulator (
         system = sys,
@@ -13,10 +17,11 @@ def state_fdbk_example():
     )
 
     ## (1) basic sls (centralized controller)
-    
 
+    sys.initialize(x0=np.zeros(sys._Nx,1))
     simulator.setController ()
 
+    simulator.run ()
 
 
 

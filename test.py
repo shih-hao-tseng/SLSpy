@@ -35,5 +35,8 @@ def test ():
 
     print(model.getState())
 
+    sp = np.concatenate( (np.eye(2),np.zeros([2,3])), axis=1) 
+    print(sp)
+
 if __name__ == '__main__':
     test ()
