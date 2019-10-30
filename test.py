@@ -3,6 +3,10 @@ from sls_sim.NoiseModel import *
 import numpy as np
 
 def test ():
+    conv = 0.3*np.eye(4)
+    conv[1:,1:] += np.eye(3)
+    print(conv)
+
     model = LTISystem(
         Nx=2, Nw=2, Nu=1
     )
@@ -38,8 +42,7 @@ def test ():
     sp = np.concatenate( (np.eye(2),np.zeros([2,3])), axis=1) 
     print(sp)
 
-    conv = None
-    conv += np.eye(2)
+
 
     #sim = Simulator(system=model,controller=ControllerModel())
 

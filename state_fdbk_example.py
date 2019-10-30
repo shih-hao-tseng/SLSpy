@@ -2,6 +2,7 @@ from sls_sim.SystemModel import LTISystem
 from sls_sim.Simulator import Simulator
 from sls_sim.SynthesisAlgorithm import SLS
 from sls_sim.NoiseModel import *
+from sls_sim.PlantGenerator import *
 import numpy as np
 
 def state_fdbk_example():
@@ -9,12 +10,20 @@ def state_fdbk_example():
         Nx=10, Nw=10
     )
 
+    # specify system matrices
     sys._B1 = np.eye(sys._Nx)
     sys._C1 = np.concatenate( (np.eye(sys._Nx),np.zeros([sys._Nx,sys._Nu])), axis=1)
     sys._D12 = np.concatenate( (np.zeros([sys._Nu,sys._Nx]),np.eye(sys._Nu)), axis=1)
 
-    sim_horizon = 25
+    # generate sys._A, sys._B2
+    GenerateDoubleStochasticChain(
+        system_model = sys,
+        rho = 1,
+        actuator_density = 1,
+        alpha = 0.2
+    )
 
+    sim_horizon = 25
     simulator = Simulator (
         system = sys,
         horizon = sim_horizon
@@ -23,6 +32,8 @@ def state_fdbk_example():
     noise = FixedNoiseVector(Nw=sys._Nx,horizon=sim_horizon)
     noise.generateNoiseFromNoiseModel(cls=ZeroNoise)
     noise._w[0][sys._Nx/2] = 10
+
+    sys.useNoiseModel(noise_model=noise)
 
     ## (1) basic sls (centralized controller)
     synthesizer = SLS(
@@ -40,29 +51,13 @@ def state_fdbk_example():
     x,y,z,u = simulator.run ()
 
 
-#    # specify system matrices
-#    sys    = LTISystem
-#    sys.Nx = 10
-#
-#    alpha = 0.2
-#    rho = 1
-#    actDens = 1
-#    generate_dbl_stoch_chain(sys, rho, actDens, alpha) # generate sys.A, sys.B2
-#
-#    sys.B1  = eye(sys.Nx) # used in simulation
-#    sys.C1  = [speye(sys.Nx) sparse(sys.Nu, sys.Nx)] # used in H2/HInf ctrl
-#    sys.D12 = [sparse(sys.Nx, sys.Nu) speye(sys.Nu)]
-#
+#    
 #    # sls parameters
 #    slsParams       = SLSParams
-#    slsParams.tFIR_ = 20
 #    slsParams.obj_  = Objective.H2 # objective function
 #
 #    # simulation parameters
 #    simParams           = SimParams
-#    simParams.tSim_     = 25
-#    simParams.w_        = zeros(sys.Nx, simParams.tSim_) # disturbance
-#    simParams.w_(floor(sys.Nx/2), 1) = 10
 #    simParams.openLoop_ = false
 #
 #    ## (1) basic sls (centralized controller)

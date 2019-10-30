@@ -63,13 +63,13 @@ class SLS_State_Feedback_FIR_Controller (ControllerModel):
     
     @staticmethod
     def convolve(A,B,lower_bound,upper_bound,offset):
-        # perform sum_{tau >= lower_bound}^{upper_bound} A[tau]B[offset-tau]
+        # perform sum_{tau >= lower_bound}^{upper_bound-1} A[tau]B[offset-tau]
         if (len(A) == 0) or (len(B) == 0):
             return np.empty([1,1])
 
         conv = np.zeros(A[0].shape[0],B[0].shape[1])
 
-        for tau in range(lower_bound,upper_bound+1):
+        for tau in range(lower_bound,upper_bound):
             if (tau < len(A)) and (offset-tau < len(B)):
                 conv += np.dot(A[tau],B[offset-tau])
 

@@ -50,7 +50,9 @@ class SLS (SynthesisAlgorithm):
             )
 
             # TODO: the algorithm
-
+            # objective
+            # constraint set
+            # obtain results and put into controller
 
 
 
