@@ -10,11 +10,6 @@ def state_fdbk_example():
         Nx=10, Nw=10
     )
 
-    # specify system matrices
-    sys._B1 = np.eye(sys._Nx)
-    sys._C1 = np.concatenate( (np.eye(sys._Nx),np.zeros([sys._Nx,sys._Nu])), axis=1)
-    sys._D12 = np.concatenate( (np.zeros([sys._Nu,sys._Nx]),np.eye(sys._Nu)), axis=1)
-
     # generate sys._A, sys._B2
     GenerateDoubleStochasticChain(
         system_model = sys,
@@ -22,6 +17,11 @@ def state_fdbk_example():
         actuator_density = 1,
         alpha = 0.2
     )
+
+    # specify system matrices
+    sys._B1  = np.eye(sys._Nx)
+    sys._C1  = np.stack( (np.eye(sys._Nx),np.zeros([sys._Nu,sys._Nx])), axis=0)
+    sys._D12 = np.stack( (np.zeros([sys._Nx,sys._Nu]),np.eye(sys._Nu)), axis=0)
 
     sim_horizon = 25
     simulator = Simulator (

@@ -136,26 +136,55 @@ class LTISystem(SystemModel):
             return self.errorMessage('Dimension mismatch: B2')
 
         if not self._ignore_output:
-            self._Nz = self._C1.shape[0]
+            Nz = self._Nz = (
+                self._C1.shape[0]  if self._C1 is not None else
+                self._D11.shape[0] if self._D11 is not None else
+                self._D12.shape[0] if self._D12 is not None else
+                None
+            )
+            if self._Nz is None:
+                return self.errorMessage('None of C1, D11, D12 is set while the output is not ignorable.')
 
-            if self._C1.shape[1] != self._Nx:
+            if self._C1 is None:
+                self._C1 = np.zeros([Nz,Nx])
+            elif self._C1.shape[1] != Nx:  # remark: no need to check self._C1.shape[0] == Nz
                 return self.errorMessage('Dimension mismatch: C1')
-            if ((self._D11.shape[0] != self._Nz) or
-                (self._D11.shape[1] != Nw)):
+
+            if self._D11 is None:
+                self._D11 = np.zeros([Nz,Nw])
+            elif ((self._D11.shape[0] != Nz) or
+                  (self._D11.shape[1] != Nw)):
                 return self.errorMessage('Dimension mismatch: D11')
-            if ((self._D12.shape[0] != self._Nz) or
-                (self._D12.shape[1] != self._Nu)):
+
+            if self._D12 is None:
+                self._D12 = np.zeros([Nz,Nu])
+            elif ((self._D12.shape[0] != Nz) or
+                  (self._D12.shape[1] != Nu)):
                 return self.errorMessage('Dimension mismatch: D12')
     
         if not self._state_feedback:
-            self._Ny = self._C2.shape[0]
-            if self._C2.shape[1] != self._Nx:
+            Ny = self._Ny = (
+                self._C2.shape[0]  if self._C2 is not None else
+                self._D21.shape[0] if self._D21 is not None else
+                self._D22.shape[0] if self._D22 is not None else
+                None
+            )
+
+            if self._C2 is None:
+                self._C2 = np.zeros([Ny,Nx])
+            elif self._C2.shape[1] != Nx:  # remark: no need to check self._C2.shape[0] == Ny
                 return self.errorMessage('Dimension mismatch: C2')
-            if ((self._D21.shape[0] != self._Ny) or
-                (self._D21.shape[1] != Nw)):
+
+            if self._D21 is None:
+                self._D21 = np.zeros([Ny,Nw])
+            elif ((self._D21.shape[0] != Ny) or
+                  (self._D21.shape[1] != Nw)):
                 return self.errorMessage('Dimension mismatch: D21')
-            if ((self._D22.shape[0] != self._Ny) or
-                (self._D22.shape[1] != self._Nu)):
+
+            if self._D22 is None:
+                self._D22 = np.zeros([Ny,Nu])
+            elif ((self._D22.shape[0] != Ny) or
+                  (self._D22.shape[1] != Nu)):
                 return self.errorMessage('Dimension mismatch: D22')
 
         return True
