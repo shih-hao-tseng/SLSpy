@@ -41,14 +41,23 @@ class SLS_State_Feedback_FIR_Controller (ControllerModel):
         self._hat_x = np.zeros([Nx,1])
 
     def initialize (self, delta0=None):
+        # empty initialization
         self._delta = []
         if delta0 is not None:
-            self._delta.append(delta0)
-        else:
-            # zero initialization
-            self._delta.append(np.zeros([self._Nx,1]))
+            if isinstance (delta0,list):
+                for delta in delta0:
+                    self.__addDeltaIfValid(delta)
+            else:
+                self.__addDeltaIfValid(delta0)
 
+        # initialize as zero
         self._hat_x = np.zeros([self._Nx,1])
+
+    def __addDeltaIfValid(self,delta=None):
+        # check if the content is valid
+        if ((delta.shape[0] == self._Nx) and
+            (delta.shape[1] == 1)):
+            self._delta.append(delta)
 
     def getControl(self, y):
         self._delta.insert(0,y - self._hat_x)
