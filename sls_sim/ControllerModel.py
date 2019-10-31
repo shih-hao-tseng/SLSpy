@@ -23,7 +23,7 @@ class OpenLoopController (ControllerModel):
         self._u = np.zeros([Nu,1])
 
     def getControl(self, y):
-        return self._u
+        return self._u.copy()
 
 class SLS_State_Feedback_FIR_Controller (ControllerModel):
     '''

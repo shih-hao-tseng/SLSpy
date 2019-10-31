@@ -25,7 +25,7 @@ class ZeroNoise (NoiseModel):
         self._w = np.zeros([Nw,1])
 
     def getNoise(self,**kwargs):
-        return self._w
+        return self._w.copy()
 
 
 class GuassianNoise(NoiseModel):
@@ -63,7 +63,7 @@ class FixedNoiseVector(NoiseModel):
         self._w = []
         for t in range (self._horizon):
             self._w.append(noise_model.getNoise())
-    
+        
     def generateNoiseFromNoiseModel (self, cls=NoiseModel):
         noise_model = cls(Nw=self._Nw)
         self.generateNoiseFromNoiseModelInstance (noise_model=noise_model)
