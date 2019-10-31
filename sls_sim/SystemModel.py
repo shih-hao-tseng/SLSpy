@@ -26,19 +26,19 @@ class SystemModel (ObjBase):
         pass
 
     def getState(self):
-        return self._x
+        return self._x.copy()
 
     def getMeasurement(self):
         if self._state_feedback:
-            return self._x
+            return self._x.copy()
         else:
-            return self._y
+            return self._y.copy()
     
     def getOutput(self):
         if self._ignore_output:
             return None
         else:
-            return self._z
+            return self._z.copy()
 
     def ignoreOutput (self, ignore_output=False):
         self._ignore_output = ignore_output

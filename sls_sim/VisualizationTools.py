@@ -1,6 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+def Matrix_List_Multiplication (matrix_A=None, list_B=[]):
+    AB = []
+    for t in range(len(list_B)):
+        AB.append(np.dot(matrix_A,list_B[t]))
+    return AB
+
 def Plot_Heat_Map (x=None, Bu=None, myTitle='title'):
     '''
     Plots log-based heat map for x, u

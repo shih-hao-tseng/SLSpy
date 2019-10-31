@@ -1,9 +1,9 @@
 from sls_sim.SystemModel import LTISystem
 from sls_sim.Simulator import Simulator
-from sls_sim.SynthesisAlgorithm import SLS
+from sls_sim.SynthesisAlgorithm import *
 from sls_sim.NoiseModel import *
 from sls_sim.PlantGenerator import *
-from sls_sim.VisualizationTools import Plot_Heat_Map
+from sls_sim.VisualizationTools import *
 import numpy as np
 
 def state_fdbk_example():
@@ -58,29 +58,28 @@ def state_fdbk_example():
     # run the simulation
     x_history, y_history, z_history, u_history = simulator.run ()
 
-    Bu_history = []
-    for t in range(len(u_history)):
-        Bu_history.append(np.dot(sys._B2,u_history[t]))
-    
+    Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
     Plot_Heat_Map(x_history, Bu_history, 'Centralized')
 
-#    
-#    # sls parameters
-#    slsParams       = SLSParams
-#    slsParams.obj_  = Objective.H2 # objective function
-#
-#    # simulation parameters
-#    simParams           = SimParams
-#    simParams.openLoop_ = false
-#
-#    ## (1) basic sls (centralized controller)
-#    slsParams.mode_ = SLSMode.Basic
-#
-#    slsOuts1 = state_fdbk_sls(sys, slsParams)
-#    [x1, u1] = simulate_system(sys, slsParams, slsOuts1, simParams)
-#    plot_heat_map(x1, sys.B2*u1, 'Centralized')
-#
-#    ## (2) d-localized sls
+    ## (2) d-localized sls
+    dlocalized_synthesizer = dLocalizedSLS (
+        base = synthesizer,
+        actDelay = 1,
+        cSpeed = 2,
+        d = 3
+    )
+    controller = dlocalized_synthesizer.synthesizeControllerModel ()
+    simulator.setController (controller=controller)
+
+    # reuse the predefined initialization
+    sys.initialize ()
+    controller.initialize ()
+
+    x_history, y_history, z_history, u_history = simulator.run ()
+
+    Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
+    Plot_Heat_Map(x_history, Bu_history, 'Localized')
+
 #    slsParams.mode_     = SLSMode.DLocalized
 #    slsParams.actDelay_ = 1
 #    slsParams.cSpeed_   = 2 # communication speed must be sufficiently large
