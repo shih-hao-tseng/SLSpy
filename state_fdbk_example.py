@@ -3,6 +3,7 @@ from sls_sim.Simulator import Simulator
 from sls_sim.SynthesisAlgorithm import SLS
 from sls_sim.NoiseModel import *
 from sls_sim.PlantGenerator import *
+from sls_sim.VisualizationTools import Plot_Heat_Map
 import numpy as np
 
 def state_fdbk_example():
@@ -29,6 +30,7 @@ def state_fdbk_example():
         horizon = sim_horizon
     )
 
+    # generate noise
     noise = FixedNoiseVector (Nw = sys._Nx, horizon = sim_horizon)
     noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
     noise._w[0][sys._Nx/2] = 10
@@ -36,21 +38,31 @@ def state_fdbk_example():
     sys.useNoiseModel (noise_model = noise)
 
     ## (1) basic sls (centralized controller)
+    # use SLS controller synthesis algorithm
     synthesizer = SLS (
         FIR_horizon = 20,
         obj_type = SLS.Objective.H2
     )
-
     synthesizer.setSystemModel (sys)
 
+    # synthesize controller (the generated controller is actually initialized)
     controller = synthesizer.synthesizeControllerModel ()
 
+    # use the synthesized controller in simulation
     simulator.setController (controller=controller)
 
+    # initialize the system and the controller
     sys.initialize (x0 = np.zeros([sys._Nx, 1]))
     controller.initialize ()
-    x,y,z,u = simulator.run ()
 
+    # run the simulation
+    x_history, y_history, z_history, u_history = simulator.run ()
+
+    Bu_history = []
+    for t in range(len(u_history)):
+        Bu_history.append(np.dot(sys._B2,u_history[t]))
+    
+    Plot_Heat_Map(x_history, Bu_history, 'Centralized')
 
 #    
 #    # sls parameters

@@ -128,23 +128,25 @@ class SLS (SynthesisAlgorithm):
     def __getObjective(self,Phi_x,Phi_u):
         objective_value = None
 
-        if self._obj_type == SLS.Objective.H2:
+        if self._obj_type != SLS.Objective.ZERO:
             if self._system_model._ignore_output:
                 self.warningMessage('H2 output ignored. Objective is zero.')
                 objective_value = 0
             else:
-                objective_value = SLS_Objective_Value_H2(
+                obj_val_function = None
+                if self._obj_type == SLS.Objective.H2:
+                    obj_val_function = SLS_Objective_Value_H2
+                elif self._obj_type == SLS.Objective.HInf:
+                    obj_val_function = SLS_Objective_Value_HInf
+                elif self._obj_type == SLS.Objective.L1:
+                    obj_val_function = SLS_Objective_Value_L1
+                
+                objective_value = obj_val_function (
                     C1=self._system_model._C1,
                     D12=self._system_model._D12,
                     Phi_x=Phi_x,
                     Phi_u=Phi_u
                 )
-        elif self._obj_type == SLS.Objective.HInf:
-            # TODO
-            pass
-        elif self._obj_type == SLS.Objective.L1:
-            # TODO
-            pass
         else:  # self._obj_type == SLS.Objective.ZERO:
             self.warningMessage('Objective is zero.')
             objective_value = 0
