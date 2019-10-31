@@ -13,3 +13,7 @@ class ObjBase:
     def errorMessage (self,msg):
         print(self.__class__.__name__+'-'+inspect.stack()[1][3]+': [ERROR] '+msg+'\n')
         return False
+
+    def warningMessage (self,msg):
+        print(self.__class__.__name__+'-'+inspect.stack()[1][3]+': [WARNING] '+msg+'\n')
+        return False

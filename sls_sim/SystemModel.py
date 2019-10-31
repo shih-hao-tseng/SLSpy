@@ -1,5 +1,5 @@
-from Base import ObjBase
-from NoiseModel import NoiseModel, GuassianNoise
+from .Base import ObjBase
+from .NoiseModel import NoiseModel, GuassianNoise
 import numpy as np
 
 class SystemModel (ObjBase):
@@ -12,7 +12,7 @@ class SystemModel (ObjBase):
         self._y = np.empty([0])  # measurement
         self._z = np.empty([0])  # regularized output
 
-        self._ignore_output = True
+        self._ignore_output = False
         self._state_feedback = True
 
         self._noise_model = None
@@ -40,7 +40,7 @@ class SystemModel (ObjBase):
         else:
             return self._z
 
-    def ignoreOutput (self, ignore_output=True):
+    def ignoreOutput (self, ignore_output=False):
         self._ignore_output = ignore_output
 
     def stateFeedback (self, state_feedback=True):
@@ -69,19 +69,19 @@ class LTISystem(SystemModel):
             Nz = 0
 
         # state       : x(t+1)= A*x(t)  + B1*w(t)  + B2*u(t)
-        self._A  = np.zeros([Nx,Nx])
-        self._B1 = np.zeros([Nx,Nw])
-        self._B2 = np.zeros([Nx,Nu])
+        self._A  = None # np.zeros([Nx,Nx])
+        self._B1 = None # np.zeros([Nx,Nw])
+        self._B2 = None # np.zeros([Nx,Nu])
 
         # reg output  : z_(t) = C1*x(t) + D11*w(t) + D12*u(t)
-        self._C1  = np.zeros([Nz,Nx])
-        self._D11 = np.zeros([Nz,Nw])
-        self._D12 = np.zeros([Nz,Nu])
+        self._C1  = None # np.zeros([Nz,Nx])
+        self._D11 = None # np.zeros([Nz,Nw])
+        self._D12 = None # np.zeros([Nz,Nu])
 
         # measurement : y(t)  = C2*x(t) + D21*w(t) + D22*u(t)
-        self._C2  = np.zeros([Ny,Nx])
-        self._D21 = np.zeros([Ny,Nw])
-        self._D22 = np.zeros([Ny,Nu])
+        self._C2  = None # np.zeros([Ny,Nx])
+        self._D21 = None # np.zeros([Ny,Nw])
+        self._D22 = None # np.zeros([Ny,Nu])
 
         # vector dimensions of
         self._Nx = Nx  # state
@@ -113,20 +113,31 @@ class LTISystem(SystemModel):
         if self._Nx == 0:
             return self.errorMessage('Zero dimension (missing initialization): x')
 
+        Nx = self._Nx
         Nw = self._noise_model._Nw
-        self._Nu = self._B2.shape[1]
+        Nu = self._Nu = self._B2.shape[1]
 
-        if ((self._A.shape[0] != self._Nx) or
-            (self._A.shape[1] != self._Nx)):
+        # fill in zero matrices if undefined
+        if self._A is None:
+            self._A = np.zeros([Nx,Nx])
+        elif ((self._A.shape[0] != Nx) or
+            (self._A.shape[1] != Nx)):
             return self.errorMessage('Dimension mismatch: A')
-        if ((self._B1.shape[0] != self._Nx) or
+        
+        if self._B1 is None:
+            self._B1 = np.zeros([Nx,Nw])
+        elif ((self._B1.shape[0] != Nx) or
             (self._B1.shape[1] != Nw)):
             return self.errorMessage('Dimension mismatch: B1')
-        if self._B2.shape[0] != self._Nx:
+
+        if self._B2 is None:
+            self._B2 = np.zeros([Nx,Nu])
+        elif self._B2.shape[0] != Nx:
             return self.errorMessage('Dimension mismatch: B2')
 
         if not self._ignore_output:
             self._Nz = self._C1.shape[0]
+
             if self._C1.shape[1] != self._Nx:
                 return self.errorMessage('Dimension mismatch: C1')
             if ((self._D11.shape[0] != self._Nz) or

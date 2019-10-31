@@ -1,6 +1,6 @@
-from Base import ObjBase
-from SystemModel import SystemModel
-from ControllerModel import ControllerModel
+from .Base import ObjBase
+from .SystemModel import SystemModel
+from .ControllerModel import ControllerModel
 import numpy as np
 
 class Simulator (ObjBase):

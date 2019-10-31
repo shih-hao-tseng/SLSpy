@@ -1,4 +1,4 @@
-from SystemModel import LTISystem
+from .SystemModel import LTISystem
 from math import floor, ceil
 import numpy as np
 
