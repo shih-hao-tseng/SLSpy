@@ -109,6 +109,8 @@ class SLS (SynthesisAlgorithm):
 
             # additional constraints
             self._additionalObjectiveOrConstraints(
+                Phi_x=Phi_x,
+                Phi_u=Phi_u,
                 objective_value=objective_value,
                 constraints=constraints
             )
@@ -167,7 +169,7 @@ class SLS (SynthesisAlgorithm):
         # we can extend the function here to include some penalty function
         return objective_value
     
-    def _additionalObjectiveOrConstraints(self,objective_value=None, constraints=None):
+    def _additionalObjectiveOrConstraints(self,Phi_x=[],Phi_u=[],objective_value=None, constraints=None):
         # for inherited classes to introduce additional terms
         pass
 
@@ -189,30 +191,35 @@ class dLocalizedSLS(SLS):
         self._cSpeed = cSpeed
         self._d = d
     
-    def _additionalObjectiveOrConstraints(self,objective_value=None, constraints=None):
+    def _additionalObjectiveOrConstraints(self,Phi_x=[],Phi_u=[],objective_value=None, constraints=None):
         # localized constraints
-
         # get localized supports
-        RSupport = []
-        MSupport = []
-        count = 0
+        XSupport = []
+        USupport = []
 
         commsAdj = np.absolute(self._system_model._A) > 0
-        localityR = np.linalg.matrix_power(commsAdj, self._d-1) > 0
+        localityR = np.linalg.matrix_power(commsAdj, self._d - 1) > 0
 
         # adjacency matrix for available information 
-        infoAdj = np.eye(self._system_model._Nx)
+        infoAdj = np.eye(self._system_model._Nx) > 0
         transmission_time = -self._actDelay
         for t in range(self._FIR_horizon):
             transmission_time += self._cSpeed
-            if transmission_time >= 1:
+            while transmission_time >= 1:
                 transmission_time -= 1
                 infoAdj = np.dot(infoAdj,commsAdj)
 
-            support = np.minimum(infoAdj, localityR) > 0
+            support_x = np.logical_and(infoAdj, localityR)
+            XSupport.append(support_x)
 
-            RSupport.append(support)
-            MSupport.append(np.dot(self._system_model._B2.T,support) > 0)
-            count += np.sum(RSupport[-1]) + np.sum(MSupport[-1])
+            support_u = np.dot(self._system_model._B2.T,support_x.astype(int)) > 0
+            USupport.append(support_u)
 
-
+        for t in range(self._FIR_horizon):
+            # shutdown those not in the support
+            for ix,iy in np.ndindex(XSupport[t].shape):
+                if XSupport[t][ix,iy] == False:
+                    constraints += [ Phi_x[t][ix,iy] == 0 ]
+            for ix,iy in np.ndindex(USupport[t].shape):
+                if USupport[t][ix,iy] == False:
+                    constraints += [ Phi_u[t][ix,iy] == 0 ]
