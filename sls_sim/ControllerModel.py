@@ -56,21 +56,21 @@ class SLS_State_Feedback_FIR_Controller (ControllerModel):
         while len(self._delta) > self._FIR_horizon:
             self._delta.pop(-1)
 
-        u           = self.convolve(A=self._Phi_u, B=self._delta, lower_bound=1, upper_bound=self._FIR_horizon, offset=1)
-        self._hat_x = self.convolve(A=self._Phi_x, B=self._delta, lower_bound=2, upper_bound=self._FIR_horizon, offset=2)
+        u           = self.convolve(A=self._Phi_u, B=self._delta, lower_bound=0, upper_bound=self._FIR_horizon)
+        self._hat_x = self.convolve(A=self._Phi_x, B=self._delta, lower_bound=1, upper_bound=self._FIR_horizon)
 
         return u
     
     @staticmethod
-    def convolve(A,B,lower_bound,upper_bound,offset):
-        # perform sum_{tau >= lower_bound}^{upper_bound-1} A[tau]B[offset-tau]
+    def convolve(A,B,lower_bound,upper_bound):
+        # perform sum_{tau >= lower_bound}^{upper_bound-1} A[tau]B[tau]
         if (len(A) == 0) or (len(B) == 0):
             return np.empty([1,1])
 
         conv = np.zeros([A[0].shape[0],B[0].shape[1]])
 
         for tau in range(lower_bound,upper_bound):
-            if (tau < len(A)) and (offset-tau < len(B)) and (offset-tau >= 0):
-                conv += np.dot(A[tau],B[offset-tau])
+            if (tau < len(A)) and (tau < len(B)):
+                conv += np.dot(A[tau],B[tau])
 
         return conv

@@ -41,7 +41,7 @@ def state_fdbk_example():
     # use SLS controller synthesis algorithm
     synthesizer = SLS (
         FIR_horizon = 20,
-        obj_type = SLS.Objective.L1
+        obj_type = SLS.Objective.H2
     )
     synthesizer.setSystemModel (sys)
 
