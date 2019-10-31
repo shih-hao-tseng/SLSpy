@@ -27,6 +27,10 @@ def Plot_Heat_Map (x=None, Bu=None, myTitle='title'):
     plt_x  = np.log10(np.absolute(plt_x))
     plt_Bu = np.log10(np.absolute(plt_Bu))
 
+    # cut at the min
+    plt_x  = np.clip(plt_x,  logmin - 1, logmax + 1)
+    plt_Bu = np.clip(plt_Bu, logmin - 1, logmax + 1)
+
     if Bu is None:  # or pure zero?
         # don't subplot; plot only x
         plt.pcolor(

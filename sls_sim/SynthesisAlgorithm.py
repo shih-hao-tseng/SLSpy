@@ -173,23 +173,22 @@ class SLS (SynthesisAlgorithm):
         # for inherited classes to introduce additional terms
         pass
 
-class dLocalizedSLS(SLS):
+class dLocalizedSLS (SLS):
     def __init__(self,
-        base=None,
-        system_model=None,FIR_horizon=1,state_feedback=True,obj_type=SLS.Objective.ZERO,
-        actDelay=0, cSpeed=1, d=1
+        actDelay=0, cSpeed=1, d=1,
+        **kwargs
     ):
-        SLS.__init__(
-            self,
-            base=base,
-            system_model=system_model,
-            FIR_horizon=FIR_horizon,
-            state_feedback=state_feedback,
-            obj_type=obj_type
-        )
-        self._actDelay = actDelay
-        self._cSpeed = cSpeed
-        self._d = d
+        SLS.__init__(self,**kwargs)
+
+        base = kwargs['base']
+        if isinstance(base,dLocalizedSLS):
+            self._actDelay = base._actDelay
+            self._cSpeed = base._cSpeed
+            self._d = base._d
+        else:
+            self._actDelay = actDelay
+            self._cSpeed = cSpeed
+            self._d = d
     
     def _additionalObjectiveOrConstraints(self,Phi_x=[],Phi_u=[],objective_value=None, constraints=None):
         # localized constraints
@@ -215,11 +214,25 @@ class dLocalizedSLS(SLS):
             support_u = np.dot(self._system_model._B2.T,support_x.astype(int)) > 0
             USupport.append(support_u)
 
-        for t in range(self._FIR_horizon):
-            # shutdown those not in the support
+        # shutdown those not in the support
+        for t in range(1,self._FIR_horizon-1):
             for ix,iy in np.ndindex(XSupport[t].shape):
                 if XSupport[t][ix,iy] == False:
                     constraints += [ Phi_x[t][ix,iy] == 0 ]
+        for t in range(self._FIR_horizon):
             for ix,iy in np.ndindex(USupport[t].shape):
                 if USupport[t][ix,iy] == False:
                     constraints += [ Phi_u[t][ix,iy] == 0 ]
+
+class ApproxdLocalizedSLS (dLocalizedSLS):
+    def __init__(self,
+        robCoeff=0,
+        **kwargs
+    ):
+        dLocalizedSLS.__init__(self,**kwargs)
+
+        base = kwargs['base']
+        if isinstance(base,ApproxdLocalizedSLS):
+            self._robCoeff = base._robCoeff
+        else:
+            self._robCoeff = robCoeff

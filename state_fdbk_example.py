@@ -37,6 +37,7 @@ def state_fdbk_example():
 
     sys.useNoiseModel (noise_model = noise)
 
+
     ## (1) basic sls (centralized controller)
     # use SLS controller synthesis algorithm
     synthesizer = SLS (
@@ -54,12 +55,14 @@ def state_fdbk_example():
     # initialize the system and the controller
     sys.initialize (x0 = np.zeros([sys._Nx, 1]))
     controller.initialize ()
+    noise.startAtTime(0)
 
     # run the simulation
     x_history, y_history, z_history, u_history = simulator.run ()
 
     Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
     Plot_Heat_Map(x_history, Bu_history, 'Centralized')
+
 
     ## (2) d-localized sls
     dlocalized_synthesizer = dLocalizedSLS (
@@ -74,29 +77,33 @@ def state_fdbk_example():
     # reuse the predefined initialization
     sys.initialize ()
     controller.initialize ()
+    noise.startAtTime(0)
 
     x_history, y_history, z_history, u_history = simulator.run ()
 
     Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
     Plot_Heat_Map(x_history, Bu_history, 'Localized')
 
-#    slsParams.mode_     = SLSMode.DLocalized
-#    slsParams.actDelay_ = 1
-#    slsParams.cSpeed_   = 2 # communication speed must be sufficiently large
-#    slsParams.d_        = 3
-#
-#    slsOuts2 = state_fdbk_sls(sys, slsParams)
-#    [x2, u2] = simulate_system(sys, slsParams, slsOuts2, simParams)
-#    plot_heat_map(x2, sys.B2*u2, 'Localized')
-#
-#    ## (3) approximate d-localized sls
-#    slsParams.mode_     = SLSMode.ApproxDLocalized
-#    slsParams.cSpeed_   = 1
-#    slsParams.robCoeff_ = 10^3
-#
-#    slsOuts3 = state_fdbk_sls(sys, slsParams)
-#    [x3, u3] = simulate_system(sys, slsParams, slsOuts3, simParams)
-#    plot_heat_map(x3, sys.B2*u3, 'Approximately Localized')
+
+    ## (3) approximate d-localized sls
+    approx_dlocalized_synthesizer = ApproxdLocalizedSLS (
+        base = dlocalized_synthesizer,
+        cSpeed = 1,
+        robCoeff = 10e3
+    )
+
+    controller = dlocalized_synthesizer.synthesizeControllerModel ()
+    simulator.setController (controller=controller)
+
+    # reuse the predefined initialization
+    sys.initialize ()
+    controller.initialize ()
+    noise.startAtTime(0)
+
+    x_history, y_history, z_history, u_history = simulator.run ()
+
+    Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
+    Plot_Heat_Map(x_history, Bu_history, 'Approximately Localized')
 
 
 if __name__ == '__main__':
