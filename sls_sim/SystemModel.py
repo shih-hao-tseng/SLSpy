@@ -50,7 +50,7 @@ class SystemModel (ObjBase):
         if isinstance (noise_model,NoiseModel):
             self._noise_model = noise_model
 
-class LTISystem(SystemModel):
+class LTISystem (SystemModel):
     '''
     Contains all matrices of an LTI system as per (3.1)
     '''
@@ -189,7 +189,7 @@ class LTISystem(SystemModel):
 
         return True
 
-    def systemProgress(self, u):
+    def systemProgress (self, u):
         if u.shape[0] != self._Nu:
             return self.errorMessage('Dimension mismatch: u')
 

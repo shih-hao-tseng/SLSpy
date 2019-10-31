@@ -6,7 +6,7 @@ import numpy as np
 Some helper functions to generate the LTI system plant matrices
 '''
 
-def GenerateDoubleStochasticChain(system_model=None, rho=0, actuator_density=1, alpha=0):
+def GenerateDoublyStochasticChain(system_model=None, rho=0, actuator_density=1, alpha=0):
     '''
     Populates (A, B2) of the specified system with these dynamics:
     x_1(t+1) = rho*[(1-alpha)*x_1(t) + alpha x_2(t)] + B(1,1)u_1(t)

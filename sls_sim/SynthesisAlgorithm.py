@@ -35,6 +35,7 @@ class SLS (SynthesisAlgorithm):
         self.setSystemModel(system_model=system_model)
         self._FIR_horizon = FIR_horizon
         self._state_feedback = state_feedback
+        self._optimal_objective_value = float('inf')
         self.setObjectiveType(obj_type)
     
     def setObjectiveType(self,obj_type=Objective.ZERO):
@@ -42,7 +43,10 @@ class SLS (SynthesisAlgorithm):
             self._obj_type=obj_type
         else:
             self._obj_type=Objective.ZERO
-        
+    
+    def getOptimalObjectiveValue (self):
+        return self._optimal_objective_value
+
     def sanityCheck (self):
         # TODO: we can extend the algorithm to work for non-state-feedback SLS
         if not self._state_feedback:
@@ -58,6 +62,7 @@ class SLS (SynthesisAlgorithm):
         return True
     
     def synthesizeControllerModel(self):
+        self._optimal_objective_value = float('inf')
         if not self.sanityCheck():
             return None
         if not self._system_model.sanityCheck():
@@ -72,23 +77,47 @@ class SLS (SynthesisAlgorithm):
                 FIR_horizon=self._FIR_horizon
             )
 
-            # TODO: the algorithm
-            # objective
-            # constraint set
-            # obtain results and put into controller
-
+            # declare variables
             Phi_x = []
             Phi_u = []
             for tau in range(self._FIR_horizon):
                 Phi_x.append(cp.Variable(shape=(Nx,Nx)))
                 Phi_u.append(cp.Variable(shape=(Nu,Nx)))
 
+            # objective
             objective = self.__getObjective(Phi_x=Phi_x,Phi_u=Phi_u)
             if objective is None:
                 self.errorMessage('Objective generation fails.')
                 return None
 
-            
+            # sls constraints
+            constraints = [ Phi_x[0] == np.eye(Nx) ]
+            constraints += [ Phi_x[self._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
+            for tau in range(self._FIR_horizon-1):
+                constraints += [ Phi_x[tau+1] == (
+                        self._system_model._A * Phi_x[tau] +
+                        self._system_model._B2 * Phi_u[tau]
+                    )
+                ]
+
+            # obtain results and put into controller
+            sls_problem = cp.Problem(objective,constraints)
+            sls_problem.solve()
+
+            if sls_problem.status is "infeasible":
+                self.warningMessage('SLS problem infeasible')
+                return None
+            elif sls_problem.status is "unbounded":
+                self.warningMessage('SLS problem unbounded')
+                return None
+            else:
+                self._optimal_objective_value = sls_problem.value
+                controller._Phi_x = []
+                controller._Phi_u = []
+                for tau in range(self._FIR_horizon):
+                    controller._Phi_x.append(Phi_x[tau].value)
+                    controller._Phi_u.append(Phi_u[tau].value)
+                controller.initialize()
 
             return controller
         else:
@@ -97,22 +126,28 @@ class SLS (SynthesisAlgorithm):
             return None
     
     def __getObjective(self,Phi_x,Phi_u):
+        objective_value = None
+
         if self._obj_type == SLS.Objective.H2:
             if self._system_model._ignore_output:
                 self.warningMessage('H2 output ignored. Objective is zero.')
-                return 0
-            return SLS_Objective_H2(
-                C1=self._system_model._C1,
-                D12=self._system_model._D12,
-                Phi_x=Phi_x,
-                Phi_u=Phi_u
-            )
+                objective_value = 0
+            else:
+                objective_value = SLS_Objective_Value_H2(
+                    C1=self._system_model._C1,
+                    D12=self._system_model._D12,
+                    Phi_x=Phi_x,
+                    Phi_u=Phi_u
+                )
         elif self._obj_type == SLS.Objective.HInf:
             # TODO
-            return None
+            pass
         elif self._obj_type == SLS.Objective.L1:
             # TODO
-            return None
+            pass
         else:  # self._obj_type == SLS.Objective.ZERO:
             self.warningMessage('Objective is zero.')
-        return 0
+            objective_value = 0
+        
+        # we can extend the function here to include some penalty function
+        return cp.Minimize(objective_value)

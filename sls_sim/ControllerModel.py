@@ -67,10 +67,10 @@ class SLS_State_Feedback_FIR_Controller (ControllerModel):
         if (len(A) == 0) or (len(B) == 0):
             return np.empty([1,1])
 
-        conv = np.zeros(A[0].shape[0],B[0].shape[1])
+        conv = np.zeros([A[0].shape[0],B[0].shape[1]])
 
         for tau in range(lower_bound,upper_bound):
-            if (tau < len(A)) and (offset-tau < len(B)):
+            if (tau < len(A)) and (offset-tau < len(B)) and (offset-tau >= 0):
                 conv += np.dot(A[tau],B[offset-tau])
 
         return conv
