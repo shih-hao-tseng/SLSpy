@@ -34,7 +34,6 @@ def Plot_Heat_Map (x=None, Bu=None, myTitle='title'):
         plt.xlabel('Time')
         plt.ylabel('Space')
         
-        plt.show()
     else:
         plt.subplot(1,2,1)
         plt.pcolor(
@@ -59,4 +58,4 @@ def Plot_Heat_Map (x=None, Bu=None, myTitle='title'):
         plt.title('log10(|u|)')
         plt.xlabel('Time')
 
-        plt.show()
+    plt.show()
