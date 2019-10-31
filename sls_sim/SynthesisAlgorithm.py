@@ -95,7 +95,7 @@ class SLS (SynthesisAlgorithm):
             constraints += [ Phi_x[self._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
             for tau in range(self._FIR_horizon-1):
                 constraints += [ Phi_x[tau+1] == (
-                        self._system_model._A * Phi_x[tau] +
+                        self._system_model._A  * Phi_x[tau] +
                         self._system_model._B2 * Phi_u[tau]
                     )
                 ]
