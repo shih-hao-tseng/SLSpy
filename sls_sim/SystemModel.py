@@ -269,3 +269,5 @@ class LTISystem (SystemModel):
         sys._Ny = self._Ny
 
         sys._noise_model = self._noise_model
+
+        return sys
