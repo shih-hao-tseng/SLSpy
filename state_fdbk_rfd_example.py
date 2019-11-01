@@ -25,7 +25,6 @@ def state_fdbk_rfd_example():
     generate_BCD_and_zero_initialization(sys)
 
     synthesizer = SLS (FIR_horizon = 15)
-    synthesizer.setSystemModel (sys)
     # objective function
     obj_H2 = SLSObj_H2 ()
     synthesizer += obj_H2
@@ -40,6 +39,7 @@ def state_fdbk_rfd_example():
     obj_rfd = SLSObj_RFD()
 
     for rfdCoeff in rfdCoeffs:
+        synthesizer.setSystemModel (sys)
         obj_rfd._rfdCoeff = rfdCoeff
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
@@ -48,7 +48,7 @@ def state_fdbk_rfd_example():
         num_acts.append(len(new_act_ids))
         print (num_acts)
         
-        ## check performance with rfd-designed system
+        # check performance with rfd-designed system
         sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
 
         # only H2
