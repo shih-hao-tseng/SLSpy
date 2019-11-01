@@ -208,7 +208,7 @@ class dLocalizedSLS (SLS):
 
         # adjacency matrix for available information 
         infoAdj = np.eye(self._system_model._Nx) > 0
-        transmission_time = -self._actDelay
+        transmission_time = -self._cSpeed*self._actDelay
         for t in range(self._FIR_horizon):
             transmission_time += self._cSpeed
             while transmission_time >= 1:
@@ -270,5 +270,5 @@ class ApproxdLocalizedSLS (dLocalizedSLS):
             ]
             pos += Nx
 
-        robustStab = cp.norm(Delta, 'inf')
+        robustStab = cp.norm(Delta, 'inf')  # < 1 means we can guarantee stability
         objective_value += self._robCoeff * robustStab
