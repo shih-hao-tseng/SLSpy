@@ -104,3 +104,15 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
     def __init__ (self, Nx=0, Nu=0, Ny=0, FIR_horizon=1):
         SLS_FIR_Controller.__init__(Nx=Nx, Nu=Nu, FIR_horizon=FIR_horizon)
         self._Ny = Ny # dimension of measurement
+
+        self._Phi_xx = []
+        self._Phi_ux = []
+        self._Phi_xy = []
+        self._Phi_uy = []
+
+
+    def getControl(self, y):
+        # TODO suppose D22 = 0?
+        self.errorMessage('Output-feedback controller is not yet implemented.')
+
+        return None

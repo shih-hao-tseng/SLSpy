@@ -144,6 +144,8 @@ class SLS (SynthesisAlgorithm):
                 self._Phi_ux.append(cp.Variable(shape=(Nu,Nx)))
                 self._Phi_xy.append(cp.Variable(shape=(Nx,Ny)))
                 self._Phi_uy.append(cp.Variable(shape=(Nu,Ny)))
+            # Phi_uy is in RH_{\inf} instead of z^{-1} RH_{\inf}
+            self._Phi_uy.append(cp.Variable(shape=(Nu,Ny)))
 
         # objective
         objective_value = 0
@@ -154,19 +156,32 @@ class SLS (SynthesisAlgorithm):
             )
 
         # sls constraints
-        if use_state_feedback_version:
-            constraints =  [ self._Phi_x[0] == np.eye(Nx) ]
-            constraints += [ self._Phi_x[self._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
+        # the below constraints work for output-feedback case as well because
+        # self._Phi_x = self._Phi_xx and self._Phi_u = self._Phi_ux
+        constraints =  [ self._Phi_x[0] == np.eye(Nx) ]
+        constraints += [ self._Phi_x[self._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
+        for tau in range(self._FIR_horizon-1):
+            constraints += [
+                 self._Phi_x[tau+1] == (
+                    self._system_model._A  * self._Phi_x[tau] +
+                    self._system_model._B2 * self._Phi_u[tau]
+                )
+            ]
+
+        if not use_state_feedback_version::
+            # output-feedback constraints for D22 == 0
+            if not np.any(self._system_model._D22):
+                self.errorMessage('Only support output-feedback case with D22 is 0 for now.')
+                return None
+
+            constraints += [ 
+                self._Phi_xy[0] - self._system_model._B2 * self._Phi_uy[0] == np.zeros([Nx,Ny])
+            ]
             for tau in range(self._FIR_horizon-1):
-                constraints += [
-                     self._Phi_x[tau+1] == (
-                        self._system_model._A  * self._Phi_x[tau] +
-                        self._system_model._B2 * self._Phi_u[tau]
-                    )
-                ]
-        else:
-            # TODO
-            pass
+                pass
+
+            # TODO : constraints
+            self.errorMessage('Output-feedback control constraints are not yet finished.')
 
         # the constraints might also introduce additional terms at the objective
         for cons in self._constraints:
@@ -195,7 +210,15 @@ class SLS (SynthesisAlgorithm):
                     controller._Phi_x.append(self._Phi_x[tau].value)
                     controller._Phi_u.append(self._Phi_u[tau].value)
             else:
-                # TODO
+                controller._Phi_xx = []
+                controller._Phi_ux = []
+                controller._Phi_xy = []
+                controller._Phi_uy = []
+                for tau in range(self._FIR_horizon):
+                    controller._Phi_xx.append(self._Phi_xx[tau].value)
+                    controller._Phi_ux.append(self._Phi_ux[tau].value)
+                    controller._Phi_xy.append(self._Phi_xy[tau].value)
+                    controller._Phi_uy.append(self._Phi_uy[tau].value)
                 pass
 
         controller.initialize()
