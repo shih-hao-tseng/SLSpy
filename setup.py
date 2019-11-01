@@ -13,6 +13,7 @@ setup(
     name=distname,
     version=VERSION,
     description='Python-based Simulation Framework for System Level Synthesis',
+    url='https://github.com/shih-hao-tseng/SLSpy',
     author='Shih-Hao Tseng',
     author_email='shtseng@caltech.edu',
     packages=[ 'slspy', 'slspy.examples' ],
