@@ -13,7 +13,7 @@ def robust_simulations():
     )
 
     # generate sys._A, sys._B2
-    GenerateDoublyStochasticChain (
+    generate_doubly_stochastic_chain (
         system_model = sys,
         rho = 1,
         actuator_density = 0.5,
@@ -66,10 +66,10 @@ def robust_simulations():
             simulator.setController (controller=controller)
             x_history, y_history, z_history, u_history = simulator.run ()
 
-            Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
+            Bu_history = matrix_list_multiplication(sys._B2,u_history)
             Plot_Heat_Map(x_history, Bu_history, 'Comms = %d' % cSpeed)
 
-    Plot_Line_Chart(
+    plot_line_chart(
         list_x=cSpeeds,
         list_y=clnorms,
         title='%d Node Chain' % sys._Nx,
@@ -77,7 +77,7 @@ def robust_simulations():
         ylabel='Localized H_2-Norm Cost'
     )
 
-    Plot_Line_Chart(
+    plot_line_chart(
         list_x=cSpeeds,
         list_y=robustStabs,
         title='%d Node Chain' % sys._Nx,

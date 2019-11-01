@@ -6,7 +6,7 @@ import numpy as np
 Some helper functions to generate the LTI system plant matrices
 '''
 
-def GenerateDoublyStochasticChain(system_model=None, rho=0, actuator_density=1, alpha=0):
+def generate_doubly_stochastic_chain(system_model=None, rho=0, actuator_density=1, alpha=0):
     '''
     Populates (A, B2) of the specified system with these dynamics:
     x_1(t+1) = rho*[(1-alpha)*x_1(t) + alpha x_2(t)] + B(1,1)u_1(t)
@@ -43,3 +43,15 @@ def GenerateDoublyStochasticChain(system_model=None, rho=0, actuator_density=1, 
     for i in range (0,Nu):
         x = int(floor(i/actuator_density)) % Nx
         system_model._B2[x,i] = 1
+
+def Generate_Random_Chain(sys, rho, actDens):
+    '''
+    Populates (A, B2) of the specified system with a random chain 
+    (tridiagonal A matrix) and a random actuation (B) matrix
+    Also sets Nu of the system accordingly
+    Inputs
+       sys     : LTISystem containing system matrices
+       rho     : normalization value; A is generated s.t. max |eig(A)| = rho
+       actDens : actuation density of B, in (0, 1]
+                 this is approximate; only exact if things divide exactly
+    '''

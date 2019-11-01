@@ -12,7 +12,7 @@ def state_fdbk_example():
     )
 
     # generate sys._A, sys._B2
-    GenerateDoublyStochasticChain (
+    generate_doubly_stochastic_chain (
         system_model = sys,
         rho = 1,
         actuator_density = 1,
@@ -61,8 +61,8 @@ def state_fdbk_example():
     # run the simulation
     x_history, y_history, z_history, u_history = simulator.run ()
 
-    Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
-    Plot_Heat_Map(x_history, Bu_history, 'Centralized')
+    Bu_history = matrix_list_multiplication(sys._B2,u_history)
+    plot_heat_map(x_history, Bu_history, 'Centralized')
 
 
     ## (2) d-localized sls
@@ -82,8 +82,8 @@ def state_fdbk_example():
 
     x_history, y_history, z_history, u_history = simulator.run ()
 
-    Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
-    Plot_Heat_Map(x_history, Bu_history, 'Localized')
+    Bu_history = matrix_list_multiplication(sys._B2,u_history)
+    plot_heat_map(x_history, Bu_history, 'Localized')
 
 
     ## (3) approximate d-localized sls
@@ -103,8 +103,8 @@ def state_fdbk_example():
 
     x_history, y_history, z_history, u_history = simulator.run ()
 
-    Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
-    Plot_Heat_Map(x_history, Bu_history, 'Approximately Localized')
+    Bu_history = matrix_list_multiplication(sys._B2,u_history)
+    plot_heat_map(x_history, Bu_history, 'Approximately Localized')
 
 
 if __name__ == '__main__':

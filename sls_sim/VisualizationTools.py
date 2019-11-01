@@ -1,13 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def Matrix_List_Multiplication (matrix_A=None, list_B=[]):
+def matrix_list_multiplication (matrix_A=None, list_B=[]):
     AB = []
     for t in range(len(list_B)):
         AB.append(np.dot(matrix_A,list_B[t]))
     return AB
 
-def Plot_Heat_Map (x=None, Bu=None, myTitle='title'):
+def plot_heat_map (x=None, Bu=None, myTitle='title'):
     '''
     Plots log-based heat map for x, u
     Inputs
@@ -70,7 +70,7 @@ def Plot_Heat_Map (x=None, Bu=None, myTitle='title'):
 
     plt.show()
 
-def Plot_Line_Chart(list_x=[], list_y=[], title='title', xlabel='xlabel', ylabel='ylabel'):
+def plot_line_chart(list_x=[], list_y=[], title='title', xlabel='xlabel', ylabel='ylabel'):
     plt.figure()
     plt.plot(list_x,list_y,'o-')
     plt.gca().invert_xaxis()
