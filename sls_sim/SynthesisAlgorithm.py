@@ -187,7 +187,7 @@ class dLocalizedSLS (SLS):
     ):
         SLS.__init__(self,**kwargs)
 
-        base = kwargs['base']
+        base = kwargs.get('base')
         if isinstance(base,dLocalizedSLS):
             self._actDelay = base._actDelay
             self._cSpeed = base._cSpeed
@@ -240,11 +240,16 @@ class ApproxdLocalizedSLS (dLocalizedSLS):
     ):
         dLocalizedSLS.__init__(self,**kwargs)
 
-        base = kwargs['base']
+        base = kwargs.get('base')
         if isinstance(base,ApproxdLocalizedSLS):
             self._robCoeff = base._robCoeff
         else:
             self._robCoeff = robCoeff
+
+        self._stability_margin = -1
+
+    def getStabilityMargin (self):
+        return self._stability_margin
 
     def _additionalObjectiveOrConstraints(self,Phi_x=[],Phi_u=[],objective_value=None, constraints=None):
         # reset constraints
@@ -272,7 +277,7 @@ class ApproxdLocalizedSLS (dLocalizedSLS):
             ]
             pos += Nx
 
-        robustStab = cp.norm(Delta, 'inf')  # < 1 means we can guarantee stability
-        objective_value += self._robCoeff * robustStab
+        self._stability_margin = cp.norm(Delta, 'inf')  # < 1 means we can guarantee stability
+        objective_value += self._robCoeff * self._stability_margin
 
         return objective_value, constraints

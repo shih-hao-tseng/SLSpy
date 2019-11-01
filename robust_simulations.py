@@ -22,6 +22,7 @@ def robust_simulations():
     sys._B1  = np.eye (sys._Nx)  # used in simulation
     sys._C1  = np.concatenate ((np.eye(sys._Nx), np.zeros([sys._Nu, sys._Nx])), axis = 0)  #  used in H2/HInf ctrl
     sys._D12 = np.concatenate ((np.zeros([sys._Nx, sys._Nu]), np.eye(sys._Nu)), axis = 0)
+    sys.initialize (x0 = np.zeros([sys._Nx, 1]))
 
     synthesizer = ApproxdLocalizedSLS (
         FIR_horizon = 10,
@@ -46,31 +47,39 @@ def robust_simulations():
     cSpeeds = [2, 1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4]
     cPrints = [2, 1, 0.4]  # which comm speeds to simulate & plot
 
-    clnorms     = zeros(length(cSpeeds), 1)
-    robustStabs = zeros(length(cSpeeds), 1)
-    for i=1:length(cSpeeds)
-        slsParams.cSpeed_ = cSpeeds(i);
-        slsOuts           = state_fdbk_sls(sys, slsParams);
-        clnorms(i)        = slsOuts.clnorm_;
-        robustStabs(i)    = slsOuts.robustStab_;
+    clnorms     = []
+    robustStabs = []
+    for cSpeed in cSpeeds:
+        synthesizer._cSpeed = cSpeed
+        controller = synthesizer.synthesizeControllerModel()
 
-        if ismember(cSpeeds(i), cPrints)
-            [x, u] = simulate_system(sys, slsParams, slsOuts, simParams);
-            plot_heat_map(x, sys.B2*u, ['Comms = ',num2str(cSpeeds(i))]);
-        end
-    end
+        clnorms.append(synthesizer.getOptimalObjectiveValue())
+        robustStabs.append(synthesizer.getStabilityMargin())
 
-    figure;
-    p1=plot(cSpeeds, clnorms,'o-');
-    set(gca, 'xdir', 'reverse');
-    title([int2str(sys.Nx), ' Node Chain']);
-    xlabel('Comm Speed'); ylabel('Localized H_2-Norm Cost');
+        if cSpeed in cPrints:
+            # initialize
+            sys.initialize ()
+            controller.initialize ()
+            noise.startAtTime(0)
 
-    figure;
-    p2=plot(cSpeeds,robustStabs,'o-');
-    set(gca, 'xdir', 'reverse');
-    title([int2str(sys.Nx), ' Node Chain']);
-    xlabel('Comm Speed'); ylabel('Stability Margin');
+            # run the simulation
+            simulator.setController (controller=controller)
+            x_history, y_history, z_history, u_history = simulator.run ()
+
+            Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
+            Plot_Heat_Map(x_history, Bu_history, 'Comms = %d' % cSpeed)
+
+#    figure;
+#    p1=plot(cSpeeds, clnorms,'o-');
+#    set(gca, 'xdir', 'reverse');
+#    title([int2str(sys.Nx), ' Node Chain']);
+#    xlabel('Comm Speed'); ylabel('Localized H_2-Norm Cost');
+#
+#    figure;
+#    p2=plot(cSpeeds,robustStabs,'o-');
+#    set(gca, 'xdir', 'reverse');
+#    title([int2str(sys.Nx), ' Node Chain']);
+#    xlabel('Comm Speed'); ylabel('Stability Margin');
 
 if __name__ == '__main__':
     robust_simulations()

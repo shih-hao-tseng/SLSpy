@@ -23,6 +23,7 @@ def state_fdbk_example():
     sys._B1  = np.eye (sys._Nx)
     sys._C1  = np.concatenate ((np.eye(sys._Nx), np.zeros([sys._Nu, sys._Nx])), axis = 0)
     sys._D12 = np.concatenate ((np.zeros([sys._Nx, sys._Nu]), np.eye(sys._Nu)), axis = 0)
+    sys.initialize (x0 = np.zeros([sys._Nx, 1]))
 
     sim_horizon = 25
     simulator = Simulator (
@@ -53,7 +54,7 @@ def state_fdbk_example():
     simulator.setController (controller=controller)
 
     # initialize the system and the controller
-    sys.initialize (x0 = np.zeros([sys._Nx, 1]))
+    sys.initialize ()
     controller.initialize ()
     noise.startAtTime(0)
 
