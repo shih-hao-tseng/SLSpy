@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+from matplotlib.pyplot import *
 import numpy as np
 
 def matrix_list_multiplication (matrix_A=None, list_B=[]):
@@ -37,8 +37,8 @@ def plot_heat_map (x=None, Bu=None, myTitle='title'):
     myTitle  : overall title of the heat maps
     '''
 
-    plt.figure()
-    plt.suptitle(myTitle)
+    figure()
+    suptitle(myTitle)
 
     logmin = -4
     logmax = 0
@@ -55,50 +55,50 @@ def plot_heat_map (x=None, Bu=None, myTitle='title'):
 
     if Bu is None:  # or pure zero?
         # don't subplot; plot only x
-        plt.pcolor(
+        pcolor(
             plt_x,
             cmap='jet',
             vmin=logmin,
             vmax=logmax
         )
-        plt.colorbar()
-        plt.title('log10(|x|)')
-        plt.xlabel('Time')
-        plt.ylabel('Space')
+        colorbar()
+        title('log10(|x|)')
+        xlabel('Time')
+        ylabel('Space')
         
     else:
-        plt.subplot(1,2,1)
-        plt.pcolor(
+        subplot(1,2,1)
+        pcolor(
             plt_x,
             cmap='jet',
             vmin=logmin,
             vmax=logmax
         )
-        plt.colorbar()
-        plt.title('log10(|x|)')
-        plt.xlabel('Time')
-        plt.ylabel('Space')
+        colorbar()
+        title('log10(|x|)')
+        xlabel('Time')
+        ylabel('Space')
 
-        plt.subplot(1,2,2)
-        plt.pcolor(
+        subplot(1,2,2)
+        pcolor(
             plt_Bu,
             cmap='jet',
             vmin=logmin,
             vmax=logmax
         )
-        plt.colorbar()
-        plt.title('log10(|u|)')
-        plt.xlabel('Time')
+        colorbar()
+        title('log10(|u|)')
+        xlabel('Time')
 
-    plt.show()
+    show()
 
 def plot_line_chart(list_x=[], list_y=[], title='title', xlabel='xlabel', ylabel='ylabel',line_format='o-'):
-    plt.figure()
-    plt.plot(list_x,list_y,line_format)
-    plt.gca().invert_xaxis()
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
+    figure()
+    plot(list_x,list_y,line_format)
+    gca().invert_xaxis()
+    xlabel(xlabel)
+    ylabel(ylabel)
+    show()
 
 def plot_time_trajectory(x=None, Bu=None, xDes=None):
     '''
@@ -107,7 +107,20 @@ def plot_time_trajectory(x=None, Bu=None, xDes=None):
        x, Bu : state and actuation values at nodes
        xDes  : desired trajectory
     '''
-    # TODO
+    figure()
+
+    # nothing to plot
+    if x is None:
+        return
+    if len(x) < 1:
+        return
+
+    Nx = x[0].shape[0]
+    TMax = x[0].shape[1]
+
+    #maxy = max([max(vec(x)) max(vec(Bu)) max(vec(xDes))]) + 2;
+    #miny = min([min(vec(x)) min(vec(Bu)) max(vec(xDes))]) - 2;
+
 
 def plot_vertex(node, nodeCoords, colour):
     '''
