@@ -30,7 +30,7 @@ def state_fdbk_rfd_example():
     obj_H2 = SLSObj_H2 ()
     synthesizer += obj_H2
 
-    rfdCoeffs = [10**-2, 10**-1, 1, 10, 100, 1000]
+    rfdCoeffs = [0.01, 0.1, 1, 10, 100, 1000]
 
     ## (1) basic sls (centralized controller) with rfd
     num_acts = []
@@ -40,12 +40,13 @@ def state_fdbk_rfd_example():
     obj_rfd = SLSObj_RFD()
 
     for rfdCoeff in rfdCoeffs:
-        synthesizer += obj_rfd
         obj_rfd._rfdCoeff = rfdCoeff
+        synthesizer += obj_rfd
         controller = synthesizer.synthesizeControllerModel ()
 
         num_acts.append(len(obj_rfd.getActsRFD()))
-
+        print (num_acts)
+        
         ## check performance with rfd-designed system
         #sysAfterRFD1     = updateActuation(sys, slsOutsRFD1)
         

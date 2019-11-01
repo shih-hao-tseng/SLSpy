@@ -115,7 +115,7 @@ class SLSObj_RFD(SLSObjective):
         tol = 1e-4
         
         acts = []
-        for i in range(self._acts_rfd):
+        for i in range(len(self._acts_rfd)):
             if self._acts_rfd[i].value > tol:
                 acts.append(i)
 
