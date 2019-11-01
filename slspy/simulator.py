@@ -25,7 +25,7 @@ class Simulator (ObjBase):
         if isinstance(horizon, int):
             self._horizon = horizon
 
-    def run (self):
+    def run (self,initialize=True):
         # run the system and return 
         #   system state (x)
         #   system measurement (y)
@@ -36,6 +36,11 @@ class Simulator (ObjBase):
 
         if not self._system.sanityCheck ():
             return None, None, None, None
+
+        if initialize:
+            # initialize the system and the controller
+            self._system.initialize()
+            self._controller.initialize()
 
         x_history = []
         y_history = []

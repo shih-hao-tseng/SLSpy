@@ -17,6 +17,8 @@ class SystemModel (ObjBase):
 
         self._noise_model = None
 
+        self._x0 = None
+
     def initialize (self, x0):
         # set the initial state
         pass
@@ -94,9 +96,14 @@ class LTISystem (SystemModel):
     def initialize (self, x0=None):
         if x0 is None:
             # use the previous x0
+            if self._x0 is None:
+                # use zero initialization if self._Nx is set
+                if self._Nx > 0:
+                    self._x0 = np.zeros([self._Nx,1])
             x0 = self._x0
         else:
             self._x0 = x0
+
         # set x0
         self._Nx = x0.shape[0]
         self._x  = x0

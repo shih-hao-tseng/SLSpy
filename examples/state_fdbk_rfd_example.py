@@ -39,7 +39,8 @@ def state_fdbk_rfd_example():
     obj_rfd = SLSObj_RFD()
 
     for rfdCoeff in rfdCoeffs:
-        synthesizer.setSystemModel (sys)
+        # equivalent to synthesizer.setSystemModel(sys)
+        synthesizer <= sys
         obj_rfd._rfdCoeff = rfdCoeff
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
@@ -51,8 +52,7 @@ def state_fdbk_rfd_example():
         sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
 
         # only H2
-        synthesizer.setSystemModel(sysAfterRFD)
-        synthesizer <= obj_H2
+        synthesizer <= sysAfterRFD <= obj_H2
         synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())
@@ -78,7 +78,7 @@ def state_fdbk_rfd_example():
     synthesizer <= dlocalized
 
     for rfdCoeff in rfdCoeffs:
-        synthesizer.setSystemModel (sys)
+        synthesizer <= sys
         obj_rfd._rfdCoeff = rfdCoeff
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
@@ -90,8 +90,7 @@ def state_fdbk_rfd_example():
         sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
 
         # only H2
-        synthesizer.setSystemModel(sysAfterRFD)
-        synthesizer <= obj_H2
+        synthesizer <= sysAfterRFD <= obj_H2
         synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())
@@ -116,7 +115,7 @@ def state_fdbk_rfd_example():
     synthesizer <= approx_dlocalized
 
     for rfdCoeff in rfdCoeffs:
-        synthesizer.setSystemModel (sys)
+        synthesizer <= sys
         obj_rfd._rfdCoeff = rfdCoeff
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
@@ -128,8 +127,7 @@ def state_fdbk_rfd_example():
         sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
 
         # only H2
-        synthesizer.setSystemModel(sysAfterRFD)
-        synthesizer <= obj_H2
+        synthesizer <= sysAfterRFD <= obj_H2
         synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())
