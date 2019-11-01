@@ -16,7 +16,7 @@ To install SLSpy, one may type
 
 `sudo make install`
 
-which has been tested under Fedora 30. Ubuntu support will be available soon.
+which has been tested under Fedora 30.
 
 To install the packages manually, the user should install
 * blas-devel/libblas-dev
