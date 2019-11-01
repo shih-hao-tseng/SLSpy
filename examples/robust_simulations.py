@@ -1,11 +1,11 @@
-from sls_sim.SystemModel import LTISystem
-from sls_sim.Simulator import Simulator
-from sls_sim.SynthesisAlgorithm import *
-from sls_sim.SLSObjective import *
-from sls_sim.SLSConstraint import *
-from sls_sim.NoiseModel import *
-from sls_sim.PlantGenerator import *
-from sls_sim.VisualizationTools import *
+from slspy.SystemModel import LTISystem
+from slspy.Simulator import Simulator
+from slspy.SynthesisAlgorithm import *
+from slspy.SLSObjective import *
+from slspy.SLSConstraint import *
+from slspy.NoiseModel import *
+from slspy.PlantGenerator import *
+from slspy.VisualizationTools import *
 import numpy as np
 
 def robust_simulations():

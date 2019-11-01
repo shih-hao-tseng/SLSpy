@@ -1,7 +1,7 @@
-# Python-based Simulation Framework for System Level Synthesis
+# SLSpy: Python-based Simulation Framework for System Level Synthesis
 
 ## Synopsis
-*sls_sim* provides a Python-based framework to simulate model-based control systems, especially for system level synthesis (SLS) methods.
+*SLSpy* provides a Python-based framework to simulate model-based control systems, especially for system level synthesis (SLS) methods.
 
 ## System Requirement
 * Python 2.7 or higher
