@@ -7,16 +7,10 @@ from slspy.visualization_tool import *
 import numpy as np
 
 def test():
-    sys = LTISystem (
-        Nx = 10, Nw = 10
-    )
-    generate_random_chain(
-        system_model = sys,
-        rho = 0.5,
-        actuator_density = 0.3
-    )
-    sys.ignoreOutput(True)
-    sys.sanityCheck()
+    x = [np.ones([3,1]),np.ones([3,1]),np.ones([3,1])]
+    Bu = [np.ones([3,1]),np.ones([3,1]),np.ones([3,1])]
+    xDes = [np.ones([3,1]),np.ones([3,1]),np.ones([3,1])]
+    plot_time_trajectory(x, Bu, xDes)
 
 if __name__ == '__main__':
     test()

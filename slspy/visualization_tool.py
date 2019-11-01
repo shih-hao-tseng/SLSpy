@@ -112,21 +112,24 @@ def plot_time_trajectory(x=None, Bu=None, xDes=None):
     # nothing to plot
     if x is None:
         return
-    if len(x) < 1:
+
+    TMax = len(x)
+    if TMax < 1:
         return
 
     Nx = x[0].shape[0]
-    TMax = x[0].shape[1]
 
     def get_max_from_list (value, list_x):
         for tmp in list_x:
             val = np.max(tmp)
-            value = val if maxy < val
+            if value < val:
+                value = val
 
     def get_min_from_list (value, list_x):
         for tmp in list_x:
             val = np.min(tmp)
-            value = val if maxy > val
+            if value > val:
+                value = val
 
     #maxy = max([max(vec(x)) max(vec(Bu)) max(vec(xDes))]) + 2;
     maxy = np.max(x[0])
@@ -152,15 +155,15 @@ def plot_time_trajectory(x=None, Bu=None, xDes=None):
             maxv = np.max(val)
             if maxe is None:
                 maxe = maxv
-            else:
-                maxe = maxv if maxe < maxv
+            elif maxe < maxv:
+                maxe = maxv
             minv = np.min(val)
             if mine is None:
                 mine = minv
-            else:
-                mine = minv if mine > minv
+            elif mine > minv:
+                mine = minv
 
-    TMax_series = range(1,TMax + 1)
+    TMax_series = np.arange(1,TMax + 1)
 
     for node in range(Nx):
         subplot(Nx, 2, node * 2 + 1)
@@ -175,7 +178,8 @@ def plot_time_trajectory(x=None, Bu=None, xDes=None):
         step(TMax_series, err[node])
         xticks([])
         ylabel('%d' % (node+1))
-        ylim((mine,maxe))
+        if mine != maxe:
+            ylim((mine,maxe))
     
     subplot(Nx, 2, Nx * 2 - 1)
     legend(['x', 'xDes', 'u'])
@@ -184,6 +188,8 @@ def plot_time_trajectory(x=None, Bu=None, xDes=None):
     subplot(Nx, 2, Nx * 2)
     legend('error')
     xlabel('time step')
+
+    show()
 
 def plot_vertex(node, nodeCoords, colour):
     '''
