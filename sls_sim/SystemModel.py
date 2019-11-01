@@ -237,3 +237,35 @@ class LTISystem (SystemModel):
                     np.dot (self._C2, self._x) +
                     np.dot (self._D22, u)
                 )
+
+    def updateActuation (self,new_act_ids=[]):
+        '''
+        make a new system with the dynamics of the old system and updated
+        actuation (based on rfd output)
+        '''
+        sys = self.__copy()
+        sys._B2  = self._B2 [:, new_act_ids]
+        sys._D12 = self._D12[:, new_act_ids]
+        sys._Nu  = len(new_act_ids)
+    
+    def __copy(self):
+        sys = LTISystem()
+        # state
+        sys._A  = self._A 
+        sys._B1 = self._B1
+
+        # reg output
+        sys._C1  = self._C1 
+        sys._D11 = self._D11
+        sys._D12 = self._D12
+
+        # measurement
+        sys._C2  = self._C2 
+        sys._D22 = self._D22
+
+        # vector dimensions
+        sys._Nx = self._Nx
+        sys._Nz = self._Nz
+        sys._Ny = self._Ny
+
+        sys._noise_model = self._noise_model

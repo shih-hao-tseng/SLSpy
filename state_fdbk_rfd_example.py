@@ -42,17 +42,19 @@ def state_fdbk_rfd_example():
     for rfdCoeff in rfdCoeffs:
         obj_rfd._rfdCoeff = rfdCoeff
         synthesizer += obj_rfd
-        controller = synthesizer.synthesizeControllerModel ()
+        synthesizer.synthesizeControllerModel ()
 
-        num_acts.append(len(obj_rfd.getActsRFD()))
+        new_act_ids = obj_rfd.getActsRFD()
+        num_acts.append(len(new_act_ids))
         print (num_acts)
         
         ## check performance with rfd-designed system
-        #sysAfterRFD1     = updateActuation(sys, slsOutsRFD1)
-        
+        sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
+
         # only H2
+        synthesizer.setSystemModel(sysAfterRFD)
         synthesizer.setObjOrCons(obj_H2)
-        #slsOutsAfterRFD1 = state_fdbk_sls(sysAfterRFD1, slsParams)
+        synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())
 
