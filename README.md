@@ -12,7 +12,7 @@ Shih-Hao Tseng and James Anderson, ``Deployment Architectures for Cyber-Physical
 For Python 3 or higher version, the user might need to install cvxpy manually. The current pip install method may fail.  
 
 ## Install
-To install necessary packages, one may type
+To install SLSpy, one may type
 
 `pip install -e .`
 
