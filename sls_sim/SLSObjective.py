@@ -1,6 +1,5 @@
 import numpy as np
 import cvxpy as cp
-from scipy.linalg import block_diag as blkdiag
 
 class SLSObjective:
     '''

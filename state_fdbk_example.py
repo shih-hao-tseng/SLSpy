@@ -66,13 +66,11 @@ def state_fdbk_example():
 
 
     ## (2) d-localized sls
-    dlocalized = SLSCons_dLocalized (
+    synthesizer += SLSCons_dLocalized (
         actDelay = 1,
         cSpeed = 2,
         d = 3
     )
-    # add d-localized constriants
-    synthesizer += dlocalized
 
     controller = synthesizer.synthesizeControllerModel ()
     simulator.setController (controller=controller)

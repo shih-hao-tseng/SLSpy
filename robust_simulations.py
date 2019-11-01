@@ -1,6 +1,8 @@
 from sls_sim.SystemModel import LTISystem
 from sls_sim.Simulator import Simulator
 from sls_sim.SynthesisAlgorithm import *
+from sls_sim.SLSObjective import *
+from sls_sim.SLSConstraint import *
 from sls_sim.NoiseModel import *
 from sls_sim.PlantGenerator import *
 from sls_sim.VisualizationTools import *
@@ -24,14 +26,17 @@ def robust_simulations():
     sys._D12 = np.concatenate ((np.zeros([sys._Nx, sys._Nu]), np.eye(sys._Nu)), axis = 0)
     sys.initialize (x0 = np.zeros([sys._Nx, 1]))
 
-    synthesizer = ApproxdLocalizedSLS (
-        FIR_horizon = 10,
-        obj_type = SLS.Objective.H2,
+    synthesizer = SLS (FIR_horizon = 10)
+    synthesizer.setSystemModel (sys)
+    # add objective
+    synthesizer += SLSObj_H2 ()
+    # add constraints
+    approx_dlocalized = SLSCons_ApproxdLocalized (
         actDelay = 1,
         d = 6,
         robCoeff = 10e3
     )
-    synthesizer.setSystemModel (sys)
+    synthesizer += approx_dlocalized
 
     sim_horizon = 25
     simulator = Simulator (
@@ -50,11 +55,11 @@ def robust_simulations():
     clnorms     = []
     robustStabs = []
     for cSpeed in cSpeeds:
-        synthesizer._cSpeed = cSpeed
+        approx_dlocalized._cSpeed = cSpeed
         controller = synthesizer.synthesizeControllerModel()
 
         clnorms.append(synthesizer.getOptimalObjectiveValue())
-        robustStabs.append(synthesizer.getStabilityMargin())
+        robustStabs.append(approx_dlocalized.getStabilityMargin())
 
         if cSpeed in cPrints:
             # initialize
@@ -67,7 +72,7 @@ def robust_simulations():
             x_history, y_history, z_history, u_history = simulator.run ()
 
             Bu_history = matrix_list_multiplication(sys._B2,u_history)
-            Plot_Heat_Map(x_history, Bu_history, 'Comms = %d' % cSpeed)
+            plot_heat_map(x_history, Bu_history, 'Comms = %d' % cSpeed)
 
     plot_line_chart(
         list_x=cSpeeds,
