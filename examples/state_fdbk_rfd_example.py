@@ -27,7 +27,7 @@ def state_fdbk_rfd_example():
     synthesizer = SLS (FIR_horizon = 15)
     # objective function
     obj_H2 = SLSObj_H2 ()
-    synthesizer += obj_H2
+    synthesizer <= obj_H2
 
     rfdCoeffs = [0.01, 0.1, 1, 10, 100, 1000]
 
@@ -52,7 +52,7 @@ def state_fdbk_rfd_example():
 
         # only H2
         synthesizer.setSystemModel(sysAfterRFD)
-        synthesizer.setObjOrCons(obj_H2)
+        synthesizer <= obj_H2
         synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())
@@ -75,7 +75,7 @@ def state_fdbk_rfd_example():
         cSpeed = 2,
         d = 3
     )
-    synthesizer += dlocalized
+    synthesizer <= dlocalized
 
     for rfdCoeff in rfdCoeffs:
         synthesizer.setSystemModel (sys)
@@ -91,7 +91,7 @@ def state_fdbk_rfd_example():
 
         # only H2
         synthesizer.setSystemModel(sysAfterRFD)
-        synthesizer.setObjOrCons(obj_H2)
+        synthesizer <= obj_H2
         synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())
@@ -113,7 +113,7 @@ def state_fdbk_rfd_example():
         base = dlocalized,
         robCoeff = 10e4
     )
-    synthesizer.setObjOrCons(approx_dlocalized)
+    synthesizer <= approx_dlocalized
 
     for rfdCoeff in rfdCoeffs:
         synthesizer.setSystemModel (sys)
@@ -129,7 +129,7 @@ def state_fdbk_rfd_example():
 
         # only H2
         synthesizer.setSystemModel(sysAfterRFD)
-        synthesizer.setObjOrCons(obj_H2)
+        synthesizer <= obj_H2
         synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())

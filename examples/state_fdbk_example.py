@@ -66,7 +66,7 @@ def state_fdbk_example():
         cSpeed = 2,
         d = 3
     )
-    synthesizer += dlocalized
+    synthesizer <= dlocalized
 
     controller = synthesizer.synthesizeControllerModel ()
     simulator.setController (controller=controller)
@@ -90,7 +90,7 @@ def state_fdbk_example():
     approx_dlocalized._cSpeed = 1
 
     # set the constriant
-    synthesizer.setObjOrCons(approx_dlocalized)
+    synthesizer <= approx_dlocalized
 
     controller = synthesizer.synthesizeControllerModel ()
     simulator.setController (controller=controller)

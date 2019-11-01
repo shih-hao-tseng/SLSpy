@@ -34,13 +34,12 @@ class SLS (SynthesisAlgorithm):
         
         self.resetObjAndCons()
     
-    # overload plus operator
+    # overload plus and less than or equal operators as syntactic sugars
     def __add__(self, obj_or_cons):
-        if isinstance(obj_or_cons, SLSObjective):
-            self._objectives.append(obj_or_cons)
-        if isinstance(obj_or_cons, SLSConstraint):
-            self._constraints.append(obj_or_cons)
-        return self
+        return self.addObjOrCons(obj_or_cons)
+
+    def __le__ (self, obj_or_cons):
+        return self.setObjOrCons(obj_or_cons)
 
     def resetObjAndCons (self):
         self.resetObjectives ()
@@ -53,6 +52,13 @@ class SLS (SynthesisAlgorithm):
     def resetConstraints (self):
         self._constraints = []
 
+    def addObjOrCons (self, obj_or_cons):
+        if isinstance(obj_or_cons, SLSObjective):
+            self._objectives.append(obj_or_cons)
+        if isinstance(obj_or_cons, SLSConstraint):
+            self._constraints.append(obj_or_cons)
+        return self
+
     def setObjOrCons (self, obj_or_cons):
         if isinstance(obj_or_cons, SLSObjective):
             self._objectives = []
@@ -60,6 +66,7 @@ class SLS (SynthesisAlgorithm):
         if isinstance(obj_or_cons, SLSConstraint):
             self._constraints = []
             self._constraints.append(obj_or_cons)
+        return self
 
     def getOptimalObjectiveValue (self):
         return self._optimal_objective_value.copy()
