@@ -31,7 +31,13 @@ class SLS (SynthesisAlgorithm):
         HInf = 2
         L1 = 3
 
-    def __init__(self,base=None,system_model=None,FIR_horizon=1,state_feedback=True,obj_type=Objective.ZERO):
+    def __init__(self,
+        base=None,
+        system_model=None,
+        FIR_horizon=1,
+        state_feedback=True,
+        obj_type=Objective.ZERO
+    ):
         if isinstance(base,SLS):
             self.setSystemModel(system_model=base._system_model)
             self._FIR_horizon = base._FIR_horizon
@@ -101,7 +107,8 @@ class SLS (SynthesisAlgorithm):
             constraints = [ Phi_x[0] == np.eye(Nx) ]
             constraints += [ Phi_x[self._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
             for tau in range(self._FIR_horizon-1):
-                constraints += [ Phi_x[tau+1] == (
+                constraints += [
+                    Phi_x[tau+1] == (
                         self._system_model._A  * Phi_x[tau] +
                         self._system_model._B2 * Phi_u[tau]
                     )
@@ -236,3 +243,32 @@ class ApproxdLocalizedSLS (dLocalizedSLS):
             self._robCoeff = base._robCoeff
         else:
             self._robCoeff = robCoeff
+
+    def _additionalObjectiveOrConstraints(self,Phi_x=[],Phi_u=[],objective_value=None, constraints=None):
+        # reset constraints
+        Nx = self._system_model._Nx
+        constraints = [ Phi_x[0] == np.eye(Nx) ]
+        constraints += [ Phi_x[self._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
+
+        dLocalizedSLS._additionalObjectiveOrConstraints(self,
+            Phi_x=Phi_x,
+            Phi_u=Phi_u,
+            objective_value=objective_value,
+            constraints=constraints
+        )
+
+        Delta = cp.Variable(shape=(Nx,Nx*self._FIR_horizon))
+
+        pos = 0
+        for t in range(self._FIR_horizon-1):
+            constraints += [
+                Delta[:,pos:pos+Nx] == (
+                    Phi_x[t+1]
+                    - self._system_model._A  * Phi_x[t]
+                    - self._system_model._B2 * Phi_u[t]
+                ) 
+            ]
+            pos += Nx
+
+        robustStab = cp.norm(Delta, 'inf')
+        objective_value += self._robCoeff * robustStab

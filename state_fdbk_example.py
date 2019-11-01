@@ -47,21 +47,21 @@ def state_fdbk_example():
     synthesizer.setSystemModel (sys)
 
     # synthesize controller (the generated controller is actually initialized)
-    controller = synthesizer.synthesizeControllerModel ()
+    #controller = synthesizer.synthesizeControllerModel ()
 
     # use the synthesized controller in simulation
-    simulator.setController (controller=controller)
+    #simulator.setController (controller=controller)
 
     # initialize the system and the controller
     sys.initialize (x0 = np.zeros([sys._Nx, 1]))
-    controller.initialize ()
+    #controller.initialize ()
     noise.startAtTime(0)
 
     # run the simulation
-    x_history, y_history, z_history, u_history = simulator.run ()
+    #x_history, y_history, z_history, u_history = simulator.run ()
 
-    Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
-    Plot_Heat_Map(x_history, Bu_history, 'Centralized')
+    #Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
+    #Plot_Heat_Map(x_history, Bu_history, 'Centralized')
 
 
     ## (2) d-localized sls
@@ -71,28 +71,28 @@ def state_fdbk_example():
         cSpeed = 2,
         d = 3
     )
-    controller = dlocalized_synthesizer.synthesizeControllerModel ()
-    simulator.setController (controller=controller)
+    #controller = dlocalized_synthesizer.synthesizeControllerModel ()
+    #simulator.setController (controller=controller)
 
     # reuse the predefined initialization
     sys.initialize ()
-    controller.initialize ()
+    #controller.initialize ()
     noise.startAtTime(0)
 
-    x_history, y_history, z_history, u_history = simulator.run ()
+    #x_history, y_history, z_history, u_history = simulator.run ()
 
-    Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
-    Plot_Heat_Map(x_history, Bu_history, 'Localized')
+    #Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
+    #Plot_Heat_Map(x_history, Bu_history, 'Localized')
 
 
     ## (3) approximate d-localized sls
     approx_dlocalized_synthesizer = ApproxdLocalizedSLS (
         base = dlocalized_synthesizer,
-        cSpeed = 1,
         robCoeff = 10e3
     )
+    approx_dlocalized_synthesizer._cSpeed = 1
 
-    controller = dlocalized_synthesizer.synthesizeControllerModel ()
+    controller = approx_dlocalized_synthesizer.synthesizeControllerModel ()
     simulator.setController (controller=controller)
 
     # reuse the predefined initialization
