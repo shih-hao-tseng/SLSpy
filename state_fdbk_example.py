@@ -1,6 +1,7 @@
 from sls_sim.SystemModel import LTISystem
 from sls_sim.Simulator import Simulator
 from sls_sim.SynthesisAlgorithm import *
+from sls_sim.SLSObjective import *
 from sls_sim.NoiseModel import *
 from sls_sim.PlantGenerator import *
 from sls_sim.VisualizationTools import *
@@ -41,10 +42,8 @@ def state_fdbk_example():
 
     ## (1) basic sls (centralized controller)
     # use SLS controller synthesis algorithm
-    synthesizer = SLS (
-        FIR_horizon = 20,
-        obj_type = SLS.Objective.H2
-    )
+    synthesizer = SLS (FIR_horizon = 20)
+    synthesizer += SLSObj_H2()
     synthesizer.setSystemModel (sys)
 
     # synthesize controller (the generated controller is actually initialized)

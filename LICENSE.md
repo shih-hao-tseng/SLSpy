@@ -1,7 +1,7 @@
 # Python-based Simulation Framework for System Level Synthesis
 
     Copyright (C) 2019  Shih-Hao Tseng <shtseng@caltech.edu>
-        Refactored from the Matlab version by Lisa Li
+        Redesigned from the Matlab version by Lisa Li
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

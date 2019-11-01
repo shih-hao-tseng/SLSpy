@@ -1,7 +1,7 @@
 from .Base import ObjBase
 from .SystemModel import *
 from .ControllerModel import *
-from .SLSHelpers import *
+from .SLSObjective import SLSObjective
 from enum import Enum, unique
 import cvxpy as cp
 
@@ -23,40 +23,34 @@ class SLS (SynthesisAlgorithm):
     '''
     Synthesizing the controller using System Level Synthesis method.
     '''
-    @unique
-    class Objective (Enum):
-        # specify the number for the support og python 2.7
-        ZERO = 0
-        H2 = 1
-        HInf = 2
-        L1 = 3
-
     def __init__(self,
-        base=None,
         system_model=None,
         FIR_horizon=1,
-        state_feedback=True,
-        obj_type=Objective.ZERO
+        state_feedback=True
     ):
-        if isinstance(base,SLS):
-            self.setSystemModel(system_model=base._system_model)
-            self._FIR_horizon = base._FIR_horizon
-            self._state_feedback = base._state_feedback
-            self.setObjectiveType(base._obj_type)
-        else:
-            self.setSystemModel(system_model=system_model)
-            self._FIR_horizon = FIR_horizon
-            self._state_feedback = state_feedback
-            self.setObjectiveType(obj_type)
+        self.setSystemModel(system_model=system_model)
+        self._FIR_horizon = FIR_horizon
+        self._state_feedback = state_feedback
+        
+        self.reset()
+    
+    # overload plus operator
+    def __add__(self, obj_or_con):
+        if isinstance(obj_or_con, SLSObjective):
+            self._objectives.append(obj_or_con)
+        return self
 
+    def reset (self):
+        self.resetObjectives ()
+        self.resetConstraints ()
+    
+    def resetObjectives (self):
+        self._objectives = []
         self._optimal_objective_value = float('inf')
     
-    def setObjectiveType(self,obj_type=Objective.ZERO):
-        if isinstance(obj_type,self.Objective):
-            self._obj_type=obj_type
-        else:
-            self._obj_type=Objective.ZERO
-    
+    def resetConstraints (self):
+        self._constraints = []
+
     def getOptimalObjectiveValue (self):
         return self._optimal_objective_value.copy()
 
@@ -91,33 +85,35 @@ class SLS (SynthesisAlgorithm):
             )
 
             # declare variables
-            Phi_x = []
-            Phi_u = []
+            self._Phi_x = []
+            self._Phi_u = []
             for tau in range(self._FIR_horizon):
-                Phi_x.append(cp.Variable(shape=(Nx,Nx)))
-                Phi_u.append(cp.Variable(shape=(Nu,Nx)))
+                self._Phi_x.append(cp.Variable(shape=(Nx,Nx)))
+                self._Phi_u.append(cp.Variable(shape=(Nu,Nx)))
 
             # objective
-            objective_value = self.__getObjectiveValue(Phi_x=Phi_x,Phi_u=Phi_u)
-            if objective_value is None:
-                self.errorMessage('Objective generation fails.')
-                return None
+            objective_value = 0
+            for obj in self._objectives:
+                objective_value = obj.addObjectiveValue (
+                    sls=self,
+                    objective_value=objective_value
+                )
 
             # sls constraints
-            constraints = [ Phi_x[0] == np.eye(Nx) ]
-            constraints += [ Phi_x[self._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
+            constraints =  [ self._Phi_x[0] == np.eye(Nx) ]
+            constraints += [ self._Phi_x[self._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
             for tau in range(self._FIR_horizon-1):
                 constraints += [
-                    Phi_x[tau+1] == (
-                        self._system_model._A  * Phi_x[tau] +
-                        self._system_model._B2 * Phi_u[tau]
+                     self._Phi_x[tau+1] == (
+                        self._system_model._A  * self._Phi_x[tau] +
+                        self._system_model._B2 * self._Phi_u[tau]
                     )
                 ]
 
             # additional constraints
             objective_value, constraints = self._additionalObjectiveOrConstraints(
-                Phi_x=Phi_x,
-                Phi_u=Phi_u,
+                Phi_x=self._Phi_x,
+                Phi_u=self._Phi_u,
                 objective_value=objective_value,
                 constraints=constraints
             )
@@ -137,8 +133,8 @@ class SLS (SynthesisAlgorithm):
                 controller._Phi_x = []
                 controller._Phi_u = []
                 for tau in range(self._FIR_horizon):
-                    controller._Phi_x.append(Phi_x[tau].value)
-                    controller._Phi_u.append(Phi_u[tau].value)
+                    controller._Phi_x.append(self._Phi_x[tau].value)
+                    controller._Phi_u.append(self._Phi_u[tau].value)
                 controller.initialize()
 
             return controller
@@ -146,35 +142,6 @@ class SLS (SynthesisAlgorithm):
             # TODO
             self.errorMessage('Not yet support the output-feedback case.')
             return None
-    
-    def __getObjectiveValue(self,Phi_x,Phi_u):
-        objective_value = None
-
-        if self._obj_type != SLS.Objective.ZERO:
-            if self._system_model._ignore_output:
-                self.warningMessage('H2 output ignored. Objective is zero.')
-                objective_value = 0
-            else:
-                obj_val_function = None
-                if self._obj_type == SLS.Objective.H2:
-                    obj_val_function = SLS_objective_value_H2
-                elif self._obj_type == SLS.Objective.HInf:
-                    obj_val_function = SLS_objective_value_HInf
-                elif self._obj_type == SLS.Objective.L1:
-                    obj_val_function = SLS_objective_value_L1
-                
-                objective_value = obj_val_function (
-                    C1=self._system_model._C1,
-                    D12=self._system_model._D12,
-                    Phi_x=Phi_x,
-                    Phi_u=Phi_u
-                )
-        else:  # self._obj_type == SLS.Objective.ZERO:
-            self.warningMessage('Objective is zero.')
-            objective_value = 0
-        
-        # we can extend the function here to include some penalty function
-        return objective_value
     
     def _additionalObjectiveOrConstraints(self,Phi_x=[],Phi_u=[],objective_value=None, constraints=None):
         # for inherited classes to introduce additional terms
