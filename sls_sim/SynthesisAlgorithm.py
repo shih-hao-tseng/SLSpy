@@ -2,7 +2,7 @@ from .Base import ObjBase
 from .SystemModel import *
 from .ControllerModel import *
 from .SLSObjective import SLSObjective
-from enum import Enum, unique
+from .SLSConstraint import SLSConstraint
 import cvxpy as cp
 
 class SynthesisAlgorithm (ObjBase):
@@ -32,15 +32,17 @@ class SLS (SynthesisAlgorithm):
         self._FIR_horizon = FIR_horizon
         self._state_feedback = state_feedback
         
-        self.reset()
+        self.resetObjAndCons()
     
     # overload plus operator
-    def __add__(self, obj_or_con):
-        if isinstance(obj_or_con, SLSObjective):
-            self._objectives.append(obj_or_con)
+    def __add__(self, obj_or_cons):
+        if isinstance(obj_or_cons, SLSObjective):
+            self._objectives.append(obj_or_cons)
+        if isinstance(obj_or_cons, SLSConstraint):
+            self._constraints.append(obj_or_cons)
         return self
 
-    def reset (self):
+    def resetObjAndCons (self):
         self.resetObjectives ()
         self.resetConstraints ()
     
@@ -50,6 +52,14 @@ class SLS (SynthesisAlgorithm):
     
     def resetConstraints (self):
         self._constraints = []
+
+    def setObjOrCons (self, obj_or_cons):
+        if isinstance(obj_or_cons, SLSObjective):
+            self._objectives = []
+            self._objectives.append(obj_or_cons)
+        if isinstance(obj_or_cons, SLSConstraint):
+            self._constraints = []
+            self._constraints.append(obj_or_cons)
 
     def getOptimalObjectiveValue (self):
         return self._optimal_objective_value.copy()
@@ -95,8 +105,8 @@ class SLS (SynthesisAlgorithm):
             objective_value = 0
             for obj in self._objectives:
                 objective_value = obj.addObjectiveValue (
-                    sls=self,
-                    objective_value=objective_value
+                    sls = self,
+                    objective_value = objective_value
                 )
 
             # sls constraints
@@ -110,13 +120,13 @@ class SLS (SynthesisAlgorithm):
                     )
                 ]
 
-            # additional constraints
-            objective_value, constraints = self._additionalObjectiveOrConstraints(
-                Phi_x=self._Phi_x,
-                Phi_u=self._Phi_u,
-                objective_value=objective_value,
-                constraints=constraints
-            )
+            # the constraints might also introduce additional terms at the objective
+            for cons in self._constraints:
+                objective_value, constraints = cons.addConstraints (
+                    sls = self,
+                    objective_value = objective_value,
+                    constraints = constraints
+                )
 
             # obtain results and put into controller
             sls_problem = cp.Problem(cp.Minimize(objective_value),constraints)
@@ -142,109 +152,3 @@ class SLS (SynthesisAlgorithm):
             # TODO
             self.errorMessage('Not yet support the output-feedback case.')
             return None
-    
-    def _additionalObjectiveOrConstraints(self,Phi_x=[],Phi_u=[],objective_value=None, constraints=None):
-        # for inherited classes to introduce additional terms
-        return objective_value, constraints
-
-class dLocalizedSLS (SLS):
-    def __init__(self,
-        actDelay=0, cSpeed=1, d=1,
-        **kwargs
-    ):
-        SLS.__init__(self,**kwargs)
-
-        base = kwargs.get('base')
-        if isinstance(base,dLocalizedSLS):
-            self._actDelay = base._actDelay
-            self._cSpeed = base._cSpeed
-            self._d = base._d
-        else:
-            self._actDelay = actDelay
-            self._cSpeed = cSpeed
-            self._d = d
-    
-    def _additionalObjectiveOrConstraints(self,Phi_x=[],Phi_u=[],objective_value=None, constraints=None):
-        # localized constraints
-        # get localized supports
-        XSupport = []
-        USupport = []
-
-        commsAdj = np.absolute(self._system_model._A) > 0
-        localityR = np.linalg.matrix_power(commsAdj, self._d - 1) > 0
-
-        # adjacency matrix for available information 
-        infoAdj = np.eye(self._system_model._Nx) > 0
-        transmission_time = -self._cSpeed*self._actDelay
-        for t in range(self._FIR_horizon):
-            transmission_time += self._cSpeed
-            while transmission_time >= 1:
-                transmission_time -= 1
-                infoAdj = np.dot(infoAdj,commsAdj)
-
-            support_x = np.logical_and(infoAdj, localityR)
-            XSupport.append(support_x)
-
-            support_u = np.dot(np.absolute(self._system_model._B2).T,support_x.astype(int)) > 0
-            USupport.append(support_u)
-
-        # shutdown those not in the support
-        for t in range(1,self._FIR_horizon-1):
-            for ix,iy in np.ndindex(XSupport[t].shape):
-                if XSupport[t][ix,iy] == False:
-                    constraints += [ Phi_x[t][ix,iy] == 0 ]
-        for t in range(self._FIR_horizon):
-            for ix,iy in np.ndindex(USupport[t].shape):
-                if USupport[t][ix,iy] == False:
-                    constraints += [ Phi_u[t][ix,iy] == 0 ]
-
-        return objective_value, constraints
-
-class ApproxdLocalizedSLS (dLocalizedSLS):
-    def __init__(self,
-        robCoeff=0,
-        **kwargs
-    ):
-        dLocalizedSLS.__init__(self,**kwargs)
-
-        base = kwargs.get('base')
-        if isinstance(base,ApproxdLocalizedSLS):
-            self._robCoeff = base._robCoeff
-        else:
-            self._robCoeff = robCoeff
-
-        self._stability_margin = -1
-
-    def getStabilityMargin (self):
-        return self._stability_margin
-
-    def _additionalObjectiveOrConstraints(self,Phi_x=[],Phi_u=[],objective_value=None, constraints=None):
-        # reset constraints
-        Nx = self._system_model._Nx
-        constraints = [ Phi_x[0] == np.eye(Nx) ]
-        constraints += [ Phi_x[self._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
-
-        dLocalizedSLS._additionalObjectiveOrConstraints(self,
-            Phi_x=Phi_x,
-            Phi_u=Phi_u,
-            objective_value=objective_value,
-            constraints=constraints
-        )
-
-        Delta = cp.Variable(shape=(Nx,Nx*self._FIR_horizon))
-
-        pos = 0
-        for t in range(self._FIR_horizon-1):
-            constraints += [
-                Delta[:,pos:pos+Nx] == (
-                    Phi_x[t+1]
-                    - self._system_model._A  * Phi_x[t]
-                    - self._system_model._B2 * Phi_u[t]
-                )
-            ]
-            pos += Nx
-
-        self._stability_margin = cp.norm(Delta, 'inf')  # < 1 means we can guarantee stability
-        objective_value += self._robCoeff * self._stability_margin
-
-        return objective_value, constraints
