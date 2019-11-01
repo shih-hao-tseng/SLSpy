@@ -14,7 +14,7 @@ For Python 3 or higher version, the user might need to install cvxpy manually. T
 ## Install
 To install necessary packages, one may type
 
-`make install`
+`pip install -e .`
 
 which has been tested under Fedora 30. Ubuntu support will be available soon.
 

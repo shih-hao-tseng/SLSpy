@@ -3,14 +3,9 @@
 "Setuptools params"
 
 from setuptools import setup, find_packages
-from os.path import join
 
 # Get version number from source tree
-import sys
-sys.path.append( '.' )
-from slspy.__init__ import VERSION
-
-scripts = [ join( 'bin', filename ) for filename in [ 'mn' ] ]
+from slspy import VERSION
 
 modname = distname = 'slspy'
 
@@ -36,7 +31,10 @@ setup(
     keywords='SLS',
     license='GPLv3',
     install_requires=[
-        'setuptools'
+        'setuptools',
+        'numpy',
+        'cvxpy',
+        'matplotlib'
     ],
-    scripts=scripts,
+    python_requires='>=2.7'
 )
