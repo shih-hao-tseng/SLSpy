@@ -86,3 +86,37 @@ class SLSObj_L1(SLSObjective):
         block_diagonal_matrix = cp.bmat(matrix)
 
         return objective_value + cp.norm(block_diagonal_matrix,'inf')
+
+class SLSObj_RFD(SLSObjective):
+    '''
+    regularization for design (RFD) objective
+    '''
+    def __init__ (self,rfdCoeff=0):
+        self._rfdCoeff = rfdCoeff
+        self._acts_rfd = []
+
+    def addObjectiveValue(self, sls, objective_value):        self._sls = sls  # for output
+        actPenalty = 0
+        self._acts_rfd = []
+
+        for i in range (sls._system_model._Nu):
+            Phi_u_i = []
+            for t in range (sls._FIR_horizon):
+                u = sls._Phi_u[t][i,:]
+                Phi_u_i.append(u)
+                if t == 0:
+                    self._acts_rfd.append(cp.norm(u,2))
+
+            actPenalty += cp.norm(cp.bmat(Phi_u_i),2)
+
+        return objective_value + self._rfdCoeff * actPenalty 
+
+    def getActsRFD (self):
+        tol = 1e-4
+        
+        acts = []
+        for i in range(self._acts_rfd):
+            if self._acts_rfd[i].value > tol:
+                acts.append(i)
+
+        return acts
