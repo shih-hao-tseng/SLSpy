@@ -72,6 +72,7 @@ def generate_random_chain (system_model=None, rho=1, actuator_density=1):
 
     Nx = system_model._Nx
     Nu = int(ceil(Nx*actuator_density))
+    system_model._Nu = Nu
 
     system_model._A = np.eye(Nx)
     if Nx > 1:

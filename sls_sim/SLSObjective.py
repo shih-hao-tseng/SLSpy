@@ -95,7 +95,7 @@ class SLSObj_RFD(SLSObjective):
         self._rfdCoeff = rfdCoeff
         self._acts_rfd = []
 
-    def addObjectiveValue(self, sls, objective_value):        self._sls = sls  # for output
+    def addObjectiveValue(self, sls, objective_value):
         actPenalty = 0
         self._acts_rfd = []
 

@@ -69,6 +69,8 @@ class SLS (SynthesisAlgorithm):
         if not self._state_feedback:
             return self.errorMessage('Only support state-feedback case for now.')
 
+        if self._system_model is None:
+            return self.errorMessage('The system is not yet assigned.')
         if not isinstance(self._system_model,LTISystem):
             return self.errorMessage('The system must be LTI.')
         if not isinstance(self._FIR_horizon,int):

@@ -1,6 +1,8 @@
 from sls_sim.SystemModel import LTISystem
 from sls_sim.Simulator import Simulator
 from sls_sim.SynthesisAlgorithm import *
+from sls_sim.SLSObjective import *
+from sls_sim.SLSConstraint import *
 from sls_sim.NoiseModel import *
 from sls_sim.PlantGenerator import *
 from sls_sim.VisualizationTools import *
@@ -9,7 +11,7 @@ import numpy as np
 def state_fdbk_rfd_example():
     # specify system matrices
     sys = LTISystem (
-        Nx = 50, Nw = 50
+        Nx = 10, Nw = 10
     )
 
     np.random.seed(0)
@@ -23,6 +25,7 @@ def state_fdbk_rfd_example():
     generate_BCD_and_zero_initialization(sys)
 
     synthesizer = SLS (FIR_horizon = 15)
+    synthesizer.setSystemModel (sys)
     # objective function
     obj_H2 = SLSObj_H2 ()
     synthesizer += obj_H2
@@ -43,12 +46,12 @@ def state_fdbk_rfd_example():
 
         num_acts.append(len(obj_rfd.getActsRFD()))
 
-        # check performance with rfd-designed system
-        sysAfterRFD1     = updateActuation(sys, slsOutsRFD1)
-
+        ## check performance with rfd-designed system
+        #sysAfterRFD1     = updateActuation(sys, slsOutsRFD1)
+        
         # only H2
         synthesizer.setObjOrCons(obj_H2)
-        slsOutsAfterRFD1 = state_fdbk_sls(sysAfterRFD1, slsParams)
+        #slsOutsAfterRFD1 = state_fdbk_sls(sysAfterRFD1, slsParams)
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())
 
