@@ -20,12 +20,7 @@ def state_fdbk_example():
         actuator_density = 1,
         alpha = 0.2
     )
-
-    # specify system matrices
-    sys._B1  = np.eye (sys._Nx)
-    sys._C1  = np.concatenate ((np.eye(sys._Nx), np.zeros([sys._Nu, sys._Nx])), axis = 0)
-    sys._D12 = np.concatenate ((np.zeros([sys._Nx, sys._Nu]), np.eye(sys._Nu)), axis = 0)
-    sys.initialize (x0 = np.zeros([sys._Nx, 1]))
+    generate_BCD_and_zero_initialization(sys)
 
     sim_horizon = 25
     simulator = Simulator (
@@ -66,11 +61,12 @@ def state_fdbk_example():
 
 
     ## (2) d-localized sls
-    synthesizer += SLSCons_dLocalized (
+    dlocalized = SLSCons_dLocalized (
         actDelay = 1,
         cSpeed = 2,
         d = 3
     )
+    synthesizer += dlocalized
 
     controller = synthesizer.synthesizeControllerModel ()
     simulator.setController (controller=controller)

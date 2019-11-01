@@ -21,10 +21,7 @@ def robust_simulations():
         actuator_density = 0.5,
         alpha = 0.4
     )
-    sys._B1  = np.eye (sys._Nx)  # used in simulation
-    sys._C1  = np.concatenate ((np.eye(sys._Nx), np.zeros([sys._Nu, sys._Nx])), axis = 0)  #  used in H2/HInf ctrl
-    sys._D12 = np.concatenate ((np.zeros([sys._Nx, sys._Nu]), np.eye(sys._Nu)), axis = 0)
-    sys.initialize (x0 = np.zeros([sys._Nx, 1]))
+    generate_BCD_and_zero_initialization(sys)
 
     synthesizer = SLS (FIR_horizon = 10)
     synthesizer.setSystemModel (sys)
