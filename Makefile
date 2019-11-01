@@ -6,3 +6,6 @@ setup:
 
 install:
 	pip install -e slspy
+
+uninstall:
+	pip uninstall slspy
