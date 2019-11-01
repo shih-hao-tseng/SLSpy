@@ -1,20 +1,29 @@
-python 2.7 or higher
-to use the package under python 3, cvxpy for python 3 should be installed manually. the current pip install does not seem to work
+# Python-based Simulation Framework for System Level Synthesis
 
+## Synopsis
+*sls_sim* provides a Python-based framework to simulate model-based control systems, especially for system level synthesis (SLS) methods.
 
+## System Requirement
+* Python 2.7 or higher
+* Python pip
 
-install the necessary packages
-sudo make install
+For Python 3 or higher version, the user might need to install cvxpy manually. The current pip install method may fail.  
 
+## Install
+To install necessary packages, one may type
 
+`make install`
 
-current Makefile works for Fedora. Ubuntu left to test
+which has been tested under Fedora 30. Ubuntu support will be available soon.
 
-might need blas and lapack
-sudo dnf install blas blas-devel
-sudo dnf install lapack lapack-devel
+To install the packages manually, the user should install
+* blas-devel/libblas-dev
+* lapack-devel/liblapack-dev
 
-then reinstall scs
-pip install --no-cache-dir --ignore-installed scs
+first, then reinstall scs package by
+
+`pip install --no-cache-dir --ignore-installed scs`
+
 or
-pip install --no-cache-dir -I scs
+
+`pip install --no-cache-dir -I scs`
