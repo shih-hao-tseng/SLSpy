@@ -157,11 +157,11 @@ class SLS (SynthesisAlgorithm):
             else:
                 obj_val_function = None
                 if self._obj_type == SLS.Objective.H2:
-                    obj_val_function = SLS_Objective_Value_H2
+                    obj_val_function = SLS_objective_value_H2
                 elif self._obj_type == SLS.Objective.HInf:
-                    obj_val_function = SLS_Objective_Value_HInf
+                    obj_val_function = SLS_objective_value_HInf
                 elif self._obj_type == SLS.Objective.L1:
-                    obj_val_function = SLS_Objective_Value_L1
+                    obj_val_function = SLS_objective_value_L1
                 
                 objective_value = obj_val_function (
                     C1=self._system_model._C1,

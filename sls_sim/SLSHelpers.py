@@ -2,7 +2,7 @@ import numpy as np
 import cvxpy as cp
 from scipy.linalg import block_diag as blkdiag
 
-def SLS_Objective_Value_H2 (C1, D12, Phi_x=[], Phi_u=[]):
+def SLS_objective_value_H2 (C1, D12, Phi_x=[], Phi_u=[]):
     '''
     return || [C1, D12][Phi_x; Phi_u] ||_H2^2
     '''
@@ -12,7 +12,7 @@ def SLS_Objective_Value_H2 (C1, D12, Phi_x=[], Phi_u=[]):
     
     return objective_value
 
-def SLS_Objective_Value_HInf (C1, D12, Phi_x=[], Phi_u=[]):
+def SLS_objective_value_HInf (C1, D12, Phi_x=[], Phi_u=[]):
     '''
     return max singular value of [C1,D12][R;M]
     '''
@@ -38,7 +38,7 @@ def SLS_Objective_Value_HInf (C1, D12, Phi_x=[], Phi_u=[]):
 
     return cp.sigma_max(block_diagonal_matrix)
 
-def SLS_Objective_Value_L1 (C1, D12, Phi_x=[], Phi_u=[]):
+def SLS_objective_value_L1 (C1, D12, Phi_x=[], Phi_u=[]):
     '''
     return max row sum of [C1,D12][R;M]
     '''
