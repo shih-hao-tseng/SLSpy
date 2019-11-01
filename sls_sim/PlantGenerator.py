@@ -40,18 +40,44 @@ def generate_doubly_stochastic_chain(system_model=None, rho=0, actuator_density=
     system_model._A *= rho
 
     system_model._B2 = np.zeros([Nx,Nu])
-    for i in range (0,Nu):
+    for i in range (Nu):
         x = int(floor(i/actuator_density)) % Nx
         system_model._B2[x,i] = 1
 
-def Generate_Random_Chain(sys, rho, actDens):
+def generate_random_chain(system_model=None, rho=1, actuator_density=1):
     '''
     Populates (A, B2) of the specified system with a random chain 
     (tridiagonal A matrix) and a random actuation (B) matrix
     Also sets Nu of the system accordingly
     Inputs
-       sys     : LTISystem containing system matrices
-       rho     : normalization value; A is generated s.t. max |eig(A)| = rho
-       actDens : actuation density of B, in (0, 1]
-                 this is approximate; only exact if things divide exactly
+       system_model     : LTISystem containing system matrices
+       rho              : normalization value; A is generated s.t. max |eig(A)| = rho
+       actuator_density : actuation density of B, in (0, 1]
+                          this is approximate; only exact if things divide exactly
     '''
+    if not isinstance(system_model,LTISystem):
+        # only modify LTISystem plant
+        return
+
+    if system_model._Nx == 0:
+        return
+
+    Nx = system_model._Nx
+    Nu = int(ceil(Nx*actuator_density))
+
+    system_model._A = np.eye(Nx)
+    if Nx > 1:
+        system_model._A[0:-1,1:] += np.diag(np.random.randn(Nx-1)) # TODO
+        system_model._A[1:,0:-1] += np.diag(np.random.randn(Nx-1))
+
+    eigenvalues, eigenvectors = np.linalg.eig(system_model._A)
+    largest_eigenvalue = np.max(np.absolute(eigenvalues))
+
+    # normalization
+    system_model._A /= largest_eigenvalue
+    system_model._A *= rho
+
+    system_model._B2 = np.zeros([Nx,Nu])
+    for i in range (Nu):
+        x = int(floor(i/actuator_density)) % Nx
+        system_model._B2[x,i] = np.random.randn ()

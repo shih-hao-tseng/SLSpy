@@ -7,10 +7,16 @@ from sls_sim.VisualizationTools import *
 import numpy as np
 
 def test():
-    cSpeedx = [2, 1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4]
-    cSpeedy = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-
-    plot_line_chart(cSpeedx,cSpeedy,'test')
+    sys = LTISystem (
+        Nx = 10, Nw = 10
+    )
+    generate_random_chain(
+        system_model = sys,
+        rho = 0.5,
+        actuator_density = 0.3
+    )
+    sys.ignoreOutput(True)
+    sys.sanityCheck()
 
 if __name__ == '__main__':
     test()

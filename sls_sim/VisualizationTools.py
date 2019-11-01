@@ -7,6 +7,28 @@ def matrix_list_multiplication (matrix_A=None, list_B=[]):
         AB.append(np.dot(matrix_A,list_B[t]))
     return AB
 
+def plot_graph(adjMtx, nodeCoords, colour):
+    '''
+    Visualizes graph
+      adjMtx     : adjacency matrix
+      nodeCoords : x,y coordinates of each node (in order)
+      colour     : colour of nodes, either a letter or a RGB coordinate
+    '''
+    # TODO
+
+def plot_graph_animation(adjMtx, nodeCoords, slsParams, x, Bu, waitTime, logScale):
+    '''
+    Plots topology of graph and animates states values at nodes
+    Inputs
+      adjMtx     : adjacency matrix
+      nodeCoords : x,y coordinates of each node (in order)
+      slsParams  : SLSParams containing parameters
+      x, Bu      : state and actuation values at nodes
+      waitTime   : amount of time to wait between steps
+      logScale   : whether to use the same scale as heat map plotter
+    '''
+    # TODO
+
 def plot_heat_map (x=None, Bu=None, myTitle='title'):
     '''
     Plots log-based heat map for x, u
@@ -77,3 +99,21 @@ def plot_line_chart(list_x=[], list_y=[], title='title', xlabel='xlabel', ylabel
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.show()
+
+def plot_time_trajectory(x=None, Bu=None, xDes=None):
+    '''
+    Plots time trajectories and errors (useful for trajectory tracking)
+    Inputs
+       x, Bu : state and actuation values at nodes
+       xDes  : desired trajectory
+    '''
+    # TODO
+
+def plot_vertex(node, nodeCoords, colour):
+    '''
+    Adds colour & label to specified vertex / node
+      node       : the node we're plotting
+      nodeCoords : x,y coordinates of each node (in order)
+      colour     : colour of node, either a letter or a RGB coordinate
+    '''
+    # TODO
