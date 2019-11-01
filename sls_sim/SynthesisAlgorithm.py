@@ -218,7 +218,7 @@ class dLocalizedSLS (SLS):
             support_x = np.logical_and(infoAdj, localityR)
             XSupport.append(support_x)
 
-            support_u = np.dot(self._system_model._B2.T,support_x.astype(int)) > 0
+            support_u = np.dot(np.absolute(self._system_model._B2).T,support_x.astype(int)) > 0
             USupport.append(support_u)
 
         # shutdown those not in the support
