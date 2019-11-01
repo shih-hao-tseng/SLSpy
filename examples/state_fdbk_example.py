@@ -38,19 +38,19 @@ def state_fdbk_example():
 
     ## (1) basic sls (centralized controller)
     # use SLS controller synthesis algorithm
-    synthesizer = SLS (FIR_horizon = 20)
-    synthesizer += SLSObj_H2()
-    synthesizer.setSystemModel (sys)
+    synthesizer = SLS (
+        system_model = sys,
+        FIR_horizon = 20
+    )
+    # set SLS objective
+    synthesizer <= SLSObj_H2()
 
     # synthesize controller (the generated controller is actually initialized)
-    controller = synthesizer.synthesizeControllerModel ()
+    # and use the synthesized controller in simulation
+    simulator.setController (
+        controller = synthesizer.synthesizeControllerModel ()
+    )
 
-    # use the synthesized controller in simulation
-    simulator.setController (controller=controller)
-
-    # initialize the system and the controller
-    sys.initialize ()
-    controller.initialize ()
     noise.startAtTime(0)
 
     # run the simulation
@@ -68,12 +68,10 @@ def state_fdbk_example():
     )
     synthesizer <= dlocalized
 
-    controller = synthesizer.synthesizeControllerModel ()
-    simulator.setController (controller=controller)
+    simulator.setController (
+        controller = synthesizer.synthesizeControllerModel ()
+    )
 
-    # reuse the predefined initialization
-    sys.initialize ()
-    controller.initialize ()
     noise.startAtTime(0)
 
     x_history, y_history, z_history, u_history = simulator.run ()
@@ -96,8 +94,6 @@ def state_fdbk_example():
     simulator.setController (controller=controller)
 
     # reuse the predefined initialization
-    sys.initialize ()
-    controller.initialize ()
     noise.startAtTime(0)
 
     x_history, y_history, z_history, u_history = simulator.run ()

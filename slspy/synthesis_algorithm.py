@@ -12,9 +12,14 @@ class SynthesisAlgorithm (ObjBase):
     def __init__(self,system_model=None):
         self.setSystemModel(system_model=system_model)
 
+    # overload the less than or equal operator as a syntactic sugar
+    def __le__ (self, sytem):
+        return self.setSystemModel(system_model=system)
+
     def setSystemModel(self,system_model):
         if isinstance(system_model,SystemModel):
             self._system_model = system_model
+        return self
     
     def synthesizeControllerModel(self):
         return None
@@ -38,8 +43,11 @@ class SLS (SynthesisAlgorithm):
     def __add__(self, obj_or_cons):
         return self.addObjOrCons(obj_or_cons)
 
-    def __le__ (self, obj_or_cons):
-        return self.setObjOrCons(obj_or_cons)
+    def __le__ (self, obj_or_cons_or_system):
+        if isinstance(obj_or_cons_or_system,SystemModel):
+            return self.setSystemModel(system_model=obj_or_cons_or_system)
+        else:
+            return self.setObjOrCons(obj_or_cons_or_system)
 
     def resetObjAndCons (self):
         self.resetObjectives ()

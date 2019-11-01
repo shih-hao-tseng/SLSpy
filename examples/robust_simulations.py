@@ -23,8 +23,10 @@ def robust_simulations():
     )
     generate_BCD_and_zero_initialization(sys)
 
-    synthesizer = SLS (FIR_horizon = 10)
-    synthesizer.setSystemModel (sys)
+    synthesizer = SLS (
+        system_model = sys,
+        FIR_horizon = 10
+    )
     # add objective
     synthesizer += SLSObj_H2 ()
     # add constraints
@@ -60,8 +62,6 @@ def robust_simulations():
 
         if cSpeed in cPrints:
             # initialize
-            sys.initialize ()
-            controller.initialize ()
             noise.startAtTime(0)
 
             # run the simulation
