@@ -1,8 +1,8 @@
-from .Base import ObjBase
-from .SystemModel import *
-from .ControllerModel import *
-from .SLSObjective import SLSObjective
-from .SLSConstraint import SLSConstraint
+from .base import ObjBase
+from .system_model import *
+from .controller_model import *
+from .sls_objective import SLSObjective
+from .sls_constraint import SLSConstraint
 import cvxpy as cp
 
 class SynthesisAlgorithm (ObjBase):

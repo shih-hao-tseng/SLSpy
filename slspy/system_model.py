@@ -1,5 +1,5 @@
-from .Base import ObjBase
-from .NoiseModel import NoiseModel, GuassianNoise
+from .base import ObjBase
+from .noise_model import NoiseModel, GuassianNoise
 import numpy as np
 
 class SystemModel (ObjBase):

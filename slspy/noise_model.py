@@ -1,4 +1,4 @@
-from .Base import ObjBase
+from .base import ObjBase
 import numpy as np
 
 class NoiseModel (ObjBase):
