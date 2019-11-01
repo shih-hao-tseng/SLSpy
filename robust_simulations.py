@@ -69,17 +69,21 @@ def robust_simulations():
             Bu_history = Matrix_List_Multiplication(sys._B2,u_history)
             Plot_Heat_Map(x_history, Bu_history, 'Comms = %d' % cSpeed)
 
-#    figure;
-#    p1=plot(cSpeeds, clnorms,'o-');
-#    set(gca, 'xdir', 'reverse');
-#    title([int2str(sys.Nx), ' Node Chain']);
-#    xlabel('Comm Speed'); ylabel('Localized H_2-Norm Cost');
-#
-#    figure;
-#    p2=plot(cSpeeds,robustStabs,'o-');
-#    set(gca, 'xdir', 'reverse');
-#    title([int2str(sys.Nx), ' Node Chain']);
-#    xlabel('Comm Speed'); ylabel('Stability Margin');
+    Plot_Line_Chart(
+        list_x=cSpeeds,
+        list_y=clnorms,
+        title='%d Node Chain' % sys._Nx,
+        xlabel='Comm Speed',
+        ylabel='Localized H_2-Norm Cost'
+    )
+
+    Plot_Line_Chart(
+        list_x=cSpeeds,
+        list_y=robustStabs,
+        title='%d Node Chain' % sys._Nx,
+        xlabel='Comm Speed',
+        ylabel='Stability Margin'
+    )
 
 if __name__ == '__main__':
     robust_simulations()

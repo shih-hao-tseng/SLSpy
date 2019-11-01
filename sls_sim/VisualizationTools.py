@@ -69,3 +69,11 @@ def Plot_Heat_Map (x=None, Bu=None, myTitle='title'):
         plt.xlabel('Time')
 
     plt.show()
+
+def Plot_Line_Chart(list_x=[], list_y=[], title='title', xlabel='xlabel', ylabel='ylabel'):
+    plt.figure()
+    plt.plot(list_x,list_y,'o-')
+    plt.gca().invert_xaxis()
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.show()
