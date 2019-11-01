@@ -118,9 +118,72 @@ def plot_time_trajectory(x=None, Bu=None, xDes=None):
     Nx = x[0].shape[0]
     TMax = x[0].shape[1]
 
-    #maxy = max([max(vec(x)) max(vec(Bu)) max(vec(xDes))]) + 2;
-    #miny = min([min(vec(x)) min(vec(Bu)) max(vec(xDes))]) - 2;
+    def get_max_from_list (value, list_x):
+        for tmp in list_x:
+            val = np.max(tmp)
+            value = val if maxy < val
 
+    def get_min_from_list (value, list_x):
+        for tmp in list_x:
+            val = np.min(tmp)
+            value = val if maxy > val
+
+    #maxy = max([max(vec(x)) max(vec(Bu)) max(vec(xDes))]) + 2;
+    maxy = np.max(x[0])
+    get_max_from_list (maxy, x)
+    get_max_from_list (maxy, Bu)
+    get_max_from_list (maxy, xDes)
+    maxy += 2
+
+    #miny = min([min(vec(x)) min(vec(Bu)) max(vec(xDes))]) - 2;
+    miny = np.min(x[0])
+    get_min_from_list (miny, x)
+    get_min_from_list (miny, Bu)
+    get_min_from_list (miny, xDes)
+    miny -= 2
+
+    err = []
+    maxe = None
+    mine = None
+    for i in range(len(xDes)):
+        if i < len(x):
+            val = np.absolute(xDes[i]-x[i])
+            err.append(val)
+            maxv = np.max(val)
+            if maxe is None:
+                maxe = maxv
+            else:
+                maxe = maxv if maxe < maxv
+            minv = np.min(val)
+            if mine is None:
+                mine = minv
+            else:
+                mine = minv if mine > minv
+
+    TMax_series = range(1,TMax + 1)
+
+    for node in range(Nx):
+        subplot(Nx, 2, node * 2 + 1)
+        step(TMax_series, x[node])
+        step(TMax_series, xDes[node])
+        step(TMax_series, Bu[node])
+        xticks([])
+        ylabel('%d' % (node+1))
+        ylim((miny,maxy))
+
+        subplot(Nx, 2, node * 2 + 2)
+        step(TMax_series, err[node])
+        xticks([])
+        ylabel('%d' % (node+1))
+        ylim((mine,maxe))
+    
+    subplot(Nx, 2, Nx * 2 - 1)
+    legend(['x', 'xDes', 'u'])
+    xlabel('time step')
+
+    subplot(Nx, 2, Nx * 2)
+    legend('error')
+    xlabel('time step')
 
 def plot_vertex(node, nodeCoords, colour):
     '''
