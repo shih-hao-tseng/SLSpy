@@ -7,28 +7,6 @@ def matrix_list_multiplication (matrix_A=None, list_B=[]):
         AB.append(np.dot(matrix_A,list_B[t]))
     return AB
 
-def plot_graph(adjMtx, nodeCoords, colour):
-    '''
-    Visualizes graph
-      adjMtx     : adjacency matrix
-      nodeCoords : x,y coordinates of each node (in order)
-      colour     : colour of nodes, either a letter or a RGB coordinate
-    '''
-    # TODO
-
-def plot_graph_animation(adjMtx, nodeCoords, slsParams, x, Bu, waitTime, logScale):
-    '''
-    Plots topology of graph and animates states values at nodes
-    Inputs
-      adjMtx     : adjacency matrix
-      nodeCoords : x,y coordinates of each node (in order)
-      slsParams  : SLSParams containing parameters
-      x, Bu      : state and actuation values at nodes
-      waitTime   : amount of time to wait between steps
-      logScale   : whether to use the same scale as heat map plotter
-    '''
-    # TODO
-
 def plot_heat_map (x=None, Bu=None, myTitle='title'):
     '''
     Plots log-based heat map for x, u
@@ -197,5 +175,66 @@ def plot_vertex(node, nodeCoords, colour):
       node       : the node we're plotting
       nodeCoords : x,y coordinates of each node (in order)
       colour     : colour of node, either a letter or a RGB coordinate
+    '''
+    txtOffset = 0.08
+    coord_x = nodeCoords[node][0]
+    coord_y = nodeCoords[node][1]
+
+    plot(
+        coord_x, coord_y, 'o',
+        markersize=10,
+        markerfacecolor=colour,
+        markeredgecolor='k'
+    )
+    text(
+        coord_x + txtOffset, coord_y + txtOffset,
+        '%d' % node
+    )
+
+def plot_graph(adjMtx, nodeCoords, colour):
+    '''
+    Visualizes graph
+      adjMtx     : adjacency matrix
+      nodeCoords : x,y coordinates of each node (in order)
+      colour     : colour of nodes, either a letter or a RGB coordinate
+    '''
+    for ia,ib in np.ndindex(adjMtx.shape):
+        if adjMtx[ia,ib] > 0:
+            plot(
+                [nodeCoords[ia][0],nodeCoords[ib][0]],
+                [nodeCoords[ia][1],nodeCoords[ib][1]],
+                '-ok'
+            )
+
+    numNodes = len(nodeCoords)
+    
+    minCoords = None
+    maxCoords = None
+
+    for node in range(numNodes):
+        plot_vertex(node, nodeCoords, colour)
+        minCoords = nodeCoords[node] if minCoords is None else np.minimum(minCoords,nodeCoords[node])
+        maxCoords = nodeCoords[node] if maxCoords is None else np.maximum(maxCoords,nodeCoords[node])
+
+    # dynamic axis limits
+    xlowerlim = minCoords[0] - 0.5
+    xupperlim = maxCoords[0] + 0.5
+    ylowerlim = minCoords[1] - 0.5
+    yupperlim = maxCoords[1] + 0.5
+
+    axis([xlowerlim,xupperlim,ylowerlim,yupperlim])
+
+    show()
+
+def plot_graph_animation(adjMtx, nodeCoords, slsParams, x, Bu, waitTime, logScale):
+    '''
+    Plots topology of graph and animates states values at nodes
+    Inputs
+      adjMtx     : adjacency matrix
+      nodeCoords : x,y coordinates of each node (in order)
+      slsParams  : SLSParams containing parameters
+      x, Bu      : state and actuation values at nodes
+      waitTime   : amount of time to wait between steps
+      logScale   : whether to use the same scale as heat map plotter
     '''
     # TODO
