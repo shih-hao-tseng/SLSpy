@@ -5,7 +5,7 @@ setup:
 	pip install matplotlib
 
 install:
-	pip install -e slspy
+	pip install -e .
 
 uninstall:
 	pip uninstall slspy
