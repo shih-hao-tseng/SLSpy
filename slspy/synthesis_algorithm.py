@@ -181,23 +181,23 @@ class SLS (SynthesisAlgorithm):
                 self.errorMessage('Only support output-feedback case with D22 is 0 for now.')
                 return None
 
-            constraints += [ 
+            constraints += [
                 self._Phi_xy[0] == self._system_model._B2 * self._Phi_uy[0]
             ]
             constraints += [ 
                 (self._system_model._A  * self._Phi_xy[self._FIR_horizon-1] +
-                 self._system_model._B2 * self._Phi_uy[self._FIR_horizon  ]) == np.zeros([Nx, Ny]) 
+                 self._system_model._B2 * self._Phi_uy[self._FIR_horizon  ]) == np.zeros([Nx, Ny])
             ]
             constraints += [ 
                 (self._Phi_xx[self._FIR_horizon-1] * self._system_model._A  +
-                 self._Phi_xy[self._FIR_horizon-1] * self._system_model._C2 ) == np.zeros([Nx, Nx]) 
+                 self._Phi_xy[self._FIR_horizon-1] * self._system_model._C2 ) == np.zeros([Nx, Nx])
             ]
-            constraints += [ 
+            constraints += [
                 self._Phi_ux[0] == self._Phi_uy[0] * self._system_model._C2
             ]
-            constraints += [ 
+            constraints += [
                 (self._Phi_ux[self._FIR_horizon-1] * self._system_model._A  +
-                 self._Phi_uy[self._FIR_horizon  ] * self._system_model._C2 ) == np.zeros([Nu, Nx]) 
+                 self._Phi_uy[self._FIR_horizon  ] * self._system_model._C2 ) == np.zeros([Nu, Nx])
             ]
             for tau in range(self._FIR_horizon-1):
                 constraints += [ 
