@@ -38,7 +38,12 @@ class SLS (SynthesisAlgorithm):
         self._state_feedback = state_feedback
         
         self.resetObjAndCons()
-    
+
+        self._Phi_x = self._Phi_xx = []
+        self._Phi_u = self._Phi_ux = []
+        self._Phi_xy = []
+        self._Phi_uy = []
+   
     # overload plus and less than or equal operators as syntactic sugars
     def __add__(self, obj_or_cons):
         return self.addObjOrCons(obj_or_cons)
@@ -80,9 +85,9 @@ class SLS (SynthesisAlgorithm):
         return self._optimal_objective_value.copy()
 
     def sanityCheck (self):
-        # TODO: we can extend the algorithm to work for non-state-feedback SLS
-        if not self._state_feedback:
-            return self.errorMessage('Only support state-feedback case for now.')
+        # we can extend the algorithm to work for non-state-feedback SLS
+        #if not self._state_feedback:
+        #    return self.errorMessage('Only support state-feedback case for now.')
 
         if self._system_model is None:
             return self.errorMessage('The system is not yet assigned.')
@@ -103,69 +108,120 @@ class SLS (SynthesisAlgorithm):
             self.errorMessage('System model check fails.')
             return None
 
-        if self._state_feedback:
-            Nx = self._system_model._Nx
-            Nu = self._system_model._Nu
-            controller = SLS_State_Feedback_FIR_Controller(
+        Nx = self._system_model._Nx
+        Nu = self._system_model._Nu
+
+        use_state_feedback_version = self._state_feedback or self._system_model._state_feedback
+
+        if use_state_feedback_version:
+            controller = SLS_State_Feedback_FIR_Controller (
                 Nx=Nx, Nu=Nu,
                 FIR_horizon=self._FIR_horizon
             )
 
             # declare variables
-            self._Phi_x = []
-            self._Phi_u = []
+            # don't use Phi_x = [], which breaks the link between Phi_x and Phi_xx
+            del self._Phi_x[:]
+            del self._Phi_u[:]
             for tau in range(self._FIR_horizon):
                 self._Phi_x.append(cp.Variable(shape=(Nx,Nx)))
                 self._Phi_u.append(cp.Variable(shape=(Nu,Nx)))
+        else:
+            # output-feedback
+            Ny = self._system_model._Ny
 
-            # objective
-            objective_value = 0
-            for obj in self._objectives:
-                objective_value = obj.addObjectiveValue (
-                    sls = self,
-                    objective_value = objective_value
+            controller = SLS_Output_Feedback_FIR_Controller (
+                Nx=Nx, Nu=Nu, Ny=Ny,
+                FIR_horizon=self._FIR_horizon
+            )
+
+            # declare variables
+            # don't use Phi_xx = [], which breaks the link between Phi_x and Phi_xx
+            del self._Phi_xx[:]
+            del self._Phi_ux[:]
+            del self._Phi_xy[:]
+            del self._Phi_uy[:]
+            for tau in range(self._FIR_horizon):
+                self._Phi_xx.append(cp.Variable(shape=(Nx,Nx)))
+                self._Phi_ux.append(cp.Variable(shape=(Nu,Nx)))
+                self._Phi_xy.append(cp.Variable(shape=(Nx,Ny)))
+                self._Phi_uy.append(cp.Variable(shape=(Nu,Ny)))
+            # Phi_uy is in RH_{\inf} instead of z^{-1} RH_{\inf}
+            self._Phi_uy.append(cp.Variable(shape=(Nu,Ny)))
+
+        # objective
+        objective_value = 0
+        for obj in self._objectives:
+            objective_value = obj.addObjectiveValue (
+                sls = self,
+                objective_value = objective_value
+            )
+
+        # sls constraints
+        # the below constraints work for output-feedback case as well because
+        # self._Phi_x = self._Phi_xx and self._Phi_u = self._Phi_ux
+        constraints =  [ self._Phi_x[0] == np.eye(Nx) ]
+        constraints += [ self._Phi_x[self._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
+        for tau in range(self._FIR_horizon-1):
+            constraints += [
+                 self._Phi_x[tau+1] == (
+                    self._system_model._A  * self._Phi_x[tau] +
+                    self._system_model._B2 * self._Phi_u[tau]
                 )
+            ]
 
-            # sls constraints
-            constraints =  [ self._Phi_x[0] == np.eye(Nx) ]
-            constraints += [ self._Phi_x[self._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
+        if not use_state_feedback_version:
+            # output-feedback constraints for D22 == 0
+            if not np.any(self._system_model._D22):
+                self.errorMessage('Only support output-feedback case with D22 is 0 for now.')
+                return None
+
+            constraints += [ 
+                self._Phi_xy[0] - self._system_model._B2 * self._Phi_uy[0] == np.zeros([Nx,Ny])
+            ]
             for tau in range(self._FIR_horizon-1):
-                constraints += [
-                     self._Phi_x[tau+1] == (
-                        self._system_model._A  * self._Phi_x[tau] +
-                        self._system_model._B2 * self._Phi_u[tau]
-                    )
-                ]
+                pass
 
-            # the constraints might also introduce additional terms at the objective
-            for cons in self._constraints:
-                objective_value, constraints = cons.addConstraints (
-                    sls = self,
-                    objective_value = objective_value,
-                    constraints = constraints
-                )
+            # TODO : constraints
+            self.errorMessage('Output-feedback control constraints are not yet finished.')
 
-            # obtain results and put into controller
-            sls_problem = cp.Problem(cp.Minimize(objective_value),constraints)
-            sls_problem.solve()
+        # the constraints might also introduce additional terms at the objective
+        for cons in self._constraints:
+            objective_value, constraints = cons.addConstraints (
+                sls = self,
+                objective_value = objective_value,
+                constraints = constraints
+            )
 
-            if sls_problem.status is "infeasible":
-                self.warningMessage('SLS problem infeasible')
-                return None
-            elif sls_problem.status is "unbounded":
-                self.warningMessage('SLS problem unbounded')
-                return None
-            else:
-                self._optimal_objective_value = sls_problem.value
+        # obtain results and put into controller
+        sls_problem = cp.Problem(cp.Minimize(objective_value),constraints)
+        sls_problem.solve()
+
+        if sls_problem.status is "infeasible":
+            self.warningMessage('SLS problem infeasible')
+            return None
+        elif sls_problem.status is "unbounded":
+            self.warningMessage('SLS problem unbounded')
+            return None
+        else:
+            self._optimal_objective_value = sls_problem.value
+            if use_state_feedback_version:
                 controller._Phi_x = []
                 controller._Phi_u = []
                 for tau in range(self._FIR_horizon):
                     controller._Phi_x.append(self._Phi_x[tau].value)
                     controller._Phi_u.append(self._Phi_u[tau].value)
-                controller.initialize()
+            else:
+                controller._Phi_xx = []
+                controller._Phi_ux = []
+                controller._Phi_xy = []
+                controller._Phi_uy = []
+                for tau in range(self._FIR_horizon):
+                    controller._Phi_xx.append(self._Phi_xx[tau].value)
+                    controller._Phi_ux.append(self._Phi_ux[tau].value)
+                    controller._Phi_xy.append(self._Phi_xy[tau].value)
+                    controller._Phi_uy.append(self._Phi_uy[tau].value)
+                pass
 
-            return controller
-        else:
-            # TODO
-            self.errorMessage('Not yet support the output-feedback case.')
-            return None
+        controller.initialize()
+        return controller
