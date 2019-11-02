@@ -31,8 +31,8 @@ class SLSCons_dLocalized (SLSConstraint):
         commsAdj = np.absolute(sls._system_model._A) > 0
         localityR = np.linalg.matrix_power(commsAdj, self._d - 1) > 0
 
+        # performance helpers
         absB2T = np.absolute(sls._system_model._B2).T
-
         x_range_test = range(1,sls._FIR_horizon-1)
 
         # adjacency matrix for available information 
