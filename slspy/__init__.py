@@ -1,1 +1,1 @@
-VERSION="beta-19.11.2"
+VERSION="beta-19.11.3"
