@@ -101,11 +101,14 @@ class SLSObj_RFD(SLSObjective):
 
         for i in range (sls._system_model._Nu):
             Phi_u_i = []
-            for t in range (sls._FIR_horizon):
-                u = sls._Phi_u[t][i,:]
-                Phi_u_i.append(u)
-                if t == 0:
-                    self._acts_rfd.append(cp.norm(u,2))
+
+            # for higher performance, with the assumption that horizon > 0
+            u = sls._Phi_u[0][i,:]
+            Phi_u_i.append(u)
+            self._acts_rfd.append(cp.norm(u,2))
+
+            for t in range (1,sls._FIR_horizon):
+                Phi_u_i.append(sls._Phi_u[t][i,:])
 
             actPenalty += cp.norm(cp.bmat(Phi_u_i),2)
 
