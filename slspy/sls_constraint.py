@@ -34,6 +34,8 @@ class SLSCons_dLocalized (SLSConstraint):
         commsAdj = np.absolute(sls._system_model._A) > 0
         localityR = np.linalg.matrix_power(commsAdj, self._d - 1) > 0
 
+        absB2T = np.absolute(sls._system_model._B2).T
+
         # adjacency matrix for available information 
         infoAdj = np.eye(sls._system_model._Nx) > 0
         transmission_time = -self._cSpeed*self._actDelay
@@ -46,7 +48,7 @@ class SLSCons_dLocalized (SLSConstraint):
             support_x = np.logical_and(infoAdj, localityR)
             XSupport.append(support_x)
 
-            support_u = np.dot(np.absolute(sls._system_model._B2).T,support_x.astype(int)) > 0
+            support_u = np.dot(absB2T,support_x.astype(int)) > 0
             USupport.append(support_u)
 
         # shutdown those not in the support
