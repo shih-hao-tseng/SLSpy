@@ -28,13 +28,12 @@ class SLSCons_dLocalized (SLSConstraint):
         Phi_x = sls._Phi_x
         Phi_u = sls._Phi_u
 
-        XSupport = []
-        USupport = []
-
         commsAdj = np.absolute(sls._system_model._A) > 0
         localityR = np.linalg.matrix_power(commsAdj, self._d - 1) > 0
 
         absB2T = np.absolute(sls._system_model._B2).T
+
+        x_range_test = range(1,sls._FIR_horizon-1)
 
         # adjacency matrix for available information 
         infoAdj = np.eye(sls._system_model._Nx) > 0
@@ -46,19 +45,16 @@ class SLSCons_dLocalized (SLSConstraint):
                 infoAdj = np.dot(infoAdj,commsAdj)
 
             support_x = np.logical_and(infoAdj, localityR)
-            XSupport.append(support_x)
-
             support_u = np.dot(absB2T,support_x) > 0
-            USupport.append(support_u)
 
-        # shutdown those not in the support
-        for t in range(1,sls._FIR_horizon-1):
-            for ix,iy in np.ndindex(XSupport[t].shape):
-                if XSupport[t][ix,iy] == False:
-                    constraints += [ Phi_x[t][ix,iy] == 0 ]
-        for t in range(sls._FIR_horizon):
-            for ix,iy in np.ndindex(USupport[t].shape):
-                if USupport[t][ix,iy] == False:
+            # shutdown those not in the support
+            if t in x_range_test:
+                for ix,iy in np.ndindex(support_x.shape):
+                    if support_x[ix,iy] == False:
+                        constraints += [ Phi_x[t][ix,iy] == 0 ]
+    
+            for ix,iy in np.ndindex(support_u.shape):
+                if support_u[ix,iy] == False:
                     constraints += [ Phi_u[t][ix,iy] == 0 ]
 
         return objective_value, constraints
