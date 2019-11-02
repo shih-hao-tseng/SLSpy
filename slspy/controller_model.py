@@ -112,7 +112,26 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
 
 
     def getControl(self, y):
-        # TODO suppose D22 = 0?
         self.errorMessage('Output-feedback controller is not yet implemented.')
 
+        return None
+    
+class SLS_Output_Feedback_D22_Zero_FIR_Controller (SLS_Output_Feedback_FIR_Controller):
+    '''
+    Output feedback SLS controller for the system with D22 = 0
+    '''
+    def getControl(self, y):
+        '''
+        z beta = tild_Phi_xx beta + tild_Phi_xy y
+             u = tild_Phi_ux beta + tild_Phi_uy y
+        where
+            tild_Phi_xx = z (I - z Phi_xx)
+            tild_Phi_ux = z Phi_ux
+            tild_Phi_xy = -z Phi_xy
+            tild_Phi_uy = Phi_uy
+        '''
+
+        # TODO
+
+        self.errorMessage('Output-feedback controller is not yet implemented.')
         return None

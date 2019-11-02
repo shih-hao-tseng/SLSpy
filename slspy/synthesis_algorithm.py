@@ -130,10 +130,18 @@ class SLS (SynthesisAlgorithm):
             # output-feedback
             Ny = self._system_model._Ny
 
-            controller = SLS_Output_Feedback_FIR_Controller (
-                Nx=Nx, Nu=Nu, Ny=Ny,
-                FIR_horizon=self._FIR_horizon
-            )
+            D22_is_not_zero = np.any(self._system_model._D22)
+
+            if D22_is_not_zero:
+                controller = SLS_Output_Feedback_FIR_Controller (
+                    Nx=Nx, Nu=Nu, Ny=Ny,
+                    FIR_horizon=self._FIR_horizon
+                )
+            else:
+                controller = SLS_Output_Feedback_D22_Zero_FIR_Controller (
+                    Nx=Nx, Nu=Nu, Ny=Ny,
+                    FIR_horizon=self._FIR_horizon
+                )
 
             # declare variables
             # don't use Phi_xx = [], which breaks the link between Phi_x and Phi_xx
@@ -176,11 +184,11 @@ class SLS (SynthesisAlgorithm):
             ]
 
         if not use_state_feedback_version:
-            # output-feedback constraints for D22 == 0
-            if not np.any(self._system_model._D22):
+            if D22_is_not_zero:
                 self.errorMessage('Only support output-feedback case with D22 is 0 for now.')
                 return None
 
+            # output-feedback constraints for D22 == 0
             constraints += [
                 self._Phi_xy[0] == self._system_model._B2 * self._Phi_uy[0]
             ]
