@@ -86,7 +86,12 @@ class SLSCons_ApproxdLocalized (SLSCons_dLocalized):
 
         Nx = sls._system_model._Nx
         constraints =  [ Phi_x[0] == np.eye(Nx) ]
-        constraints += [ Phi_x[sls._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
+        # original code was like below, but should it be like now?
+        # constraints += [ Phi_x[sls._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
+        constraints += [
+            (sls._system_model._A  * Phi_x[sls._FIR_horizon-1] +
+             sls._system_model._B2 * Phi_u[sls._FIR_horizon-1]) == np.zeros([Nx, Nx])
+        ]
 
         SLSCons_dLocalized.addConstraints(self,
             sls=sls,

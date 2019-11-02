@@ -161,10 +161,15 @@ class SLS (SynthesisAlgorithm):
         # the below constraints work for output-feedback case as well because
         # self._Phi_x = self._Phi_xx and self._Phi_u = self._Phi_ux
         constraints =  [ self._Phi_x[0] == np.eye(Nx) ]
-        constraints += [ self._Phi_x[self._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
+        # original code was like below, but it's official form should be like what it is now
+        # constraints += [ Phi_x[sls._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
+        constraints += [ 
+            (self._system_model._A  * self._Phi_x[self._FIR_horizon-1] +
+             self._system_model._B2 * self._Phi_u[self._FIR_horizon-1] ) == np.zeros([Nx, Nx]) 
+        ]
         for tau in range(self._FIR_horizon-1):
             constraints += [
-                 self._Phi_x[tau+1] == (
+                self._Phi_x[tau+1] == (
                     self._system_model._A  * self._Phi_x[tau] +
                     self._system_model._B2 * self._Phi_u[tau]
                 )
@@ -177,10 +182,19 @@ class SLS (SynthesisAlgorithm):
                 return None
 
             constraints += [ 
-                self._Phi_xy[0] - self._system_model._B2 * self._Phi_uy[0] == np.zeros([Nx,Ny])
+                self._Phi_xy[0] == self._system_model._B2 * self._Phi_uy[0]
+            ]
+            constraints += [ 
+                (self._system_model._A  * self._Phi_xy[tau] +
+                 self._system_model._B2 * self._Phi_uy[tau]) == np.zeros([Nx, Ny]) 
             ]
             for tau in range(self._FIR_horizon-1):
-                pass
+                constraints += [ 
+                    self._Phi_xy[tau+1] == (
+                        self._system_model._A  * self._Phi_xy[tau] +
+                        self._system_model._B2 * self._Phi_uy[tau]
+                    )
+                ]
 
             # TODO : constraints
             self.errorMessage('Output-feedback control constraints are not yet finished.')
@@ -221,7 +235,6 @@ class SLS (SynthesisAlgorithm):
                     controller._Phi_ux.append(self._Phi_ux[tau].value)
                     controller._Phi_xy.append(self._Phi_xy[tau].value)
                     controller._Phi_uy.append(self._Phi_uy[tau].value)
-                pass
 
         controller.initialize()
         return controller
