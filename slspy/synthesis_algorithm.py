@@ -185,19 +185,41 @@ class SLS (SynthesisAlgorithm):
                 self._Phi_xy[0] == self._system_model._B2 * self._Phi_uy[0]
             ]
             constraints += [ 
-                (self._system_model._A  * self._Phi_xy[tau] +
-                 self._system_model._B2 * self._Phi_uy[tau]) == np.zeros([Nx, Ny]) 
+                (self._system_model._A  * self._Phi_xy[self._FIR_horizon-1] +
+                 self._system_model._B2 * self._Phi_uy[self._FIR_horizon  ]) == np.zeros([Nx, Ny]) 
+            ]
+            constraints += [ 
+                (self._Phi_xx[self._FIR_horizon-1] * self._system_model._A  +
+                 self._Phi_xy[self._FIR_horizon-1] * self._system_model._C2 ) == np.zeros([Nx, Nx]) 
+            ]
+            constraints += [ 
+                self._Phi_ux[0] == self._Phi_uy[0] * self._system_model._C2
+            ]
+            constraints += [ 
+                (self._Phi_ux[self._FIR_horizon-1] * self._system_model._A  +
+                 self._Phi_uy[self._FIR_horizon  ] * self._system_model._C2 ) == np.zeros([Nu, Nx]) 
             ]
             for tau in range(self._FIR_horizon-1):
                 constraints += [ 
                     self._Phi_xy[tau+1] == (
                         self._system_model._A  * self._Phi_xy[tau] +
-                        self._system_model._B2 * self._Phi_uy[tau]
+                        self._system_model._B2 * self._Phi_uy[tau+1]
                     )
                 ]
 
-            # TODO : constraints
-            self.errorMessage('Output-feedback control constraints are not yet finished.')
+                constraints += [
+                    self._Phi_xx[tau+1] == (
+                        self._Phi_xx[tau] * self._system_model._A  +
+                        self._Phi_xy[tau] * self._system_model._C2
+                    )
+                ]
+
+                constraints += [
+                    self._Phi_ux[tau+1] == (
+                        self._Phi_ux[tau] * self._system_model._A  +
+                        self._Phi_uy[tau+1] * self._system_model._C2
+                    )
+                ]
 
         # the constraints might also introduce additional terms at the objective
         for cons in self._constraints:
