@@ -35,8 +35,8 @@ class SLS_FIR_Controller (ControllerModel):
 
         self._FIR_horizon = FIR_horizon
 
-        self._Phi_x = []
-        self._Phi_u = []
+        self._Phi_x = []  # = [ Phi_x[1], Phi_x[2], ... Phi_x[FIR_horizon] ]
+        self._Phi_u = []  # = [ Phi_u[1], Phi_u[2], ... Phi_u[FIR_horizon] ]
         self._delta = []
         self._hat_x = np.zeros([Nx,1])
 
@@ -48,14 +48,14 @@ class SLS_FIR_Controller (ControllerModel):
         return np.zeros([self._Nu,1])
 
     @staticmethod
-    def _convolve(A,B,lower_bound,upper_bound,offset):
-        # perform sum_{tau >= lower_bound}^{upper_bound-1} A[tau]B[tau-offset]
+    def _convolve(A,B,lb,ub,offset):
+        # perform sum_{tau >= lb}^{ub-1} A[tau]B[tau-offset]
         if (len(A) == 0) or (len(B) == 0):
             return np.empty([1,1])
 
         conv = np.zeros([A[0].shape[0],B[0].shape[1]])
 
-        for tau in range(lower_bound,upper_bound):
+        for tau in range(lb,ub):
             if (tau < len(A)) and (tau-offset < len(B)) and (tau-offset >= 0):
                 conv += np.dot(A[tau],B[tau-offset])
 
@@ -94,8 +94,8 @@ class SLS_State_Feedback_FIR_Controller (SLS_FIR_Controller):
 
     def getControl(self, y):
         self._FIFO_insert(self._delta, y - self._hat_x, self._FIR_horizon)
-        u           = self._convolve(A=self._Phi_u, B=self._delta, lower_bound=0, upper_bound=self._FIR_horizon,offset=0)
-        self._hat_x = self._convolve(A=self._Phi_x, B=self._delta, lower_bound=1, upper_bound=self._FIR_horizon,offset=1)
+        u           = self._convolve(A=self._Phi_u, B=self._delta, lb=0, ub=self._FIR_horizon, offset=0)
+        self._hat_x = self._convolve(A=self._Phi_x, B=self._delta, lb=1, ub=self._FIR_horizon, offset=1)
 
         return u
 
@@ -108,32 +108,50 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
         self._Ny = Ny # dimension of measurement
         self._D22 = D22
 
-        self._Phi_xx = []
-        self._Phi_ux = []
-        self._Phi_xy = []
-        self._Phi_uy = []
+        self._Phi_xx = []  # = [ Phi_xx[1], Phi_xx[2], ... Phi_xx[FIR_horizon] ]
+        self._Phi_ux = []  # = [ Phi_ux[1], Phi_ux[2], ... Phi_uy[FIR_horizon] ]
+        self._Phi_xy = []  # = [ Phi_xy[1], Phi_xy[2], ... Phi_xy[FIR_horizon] ]
+        self._Phi_uy = []  # = [ Phi_uy[0], Phi_uy[1], Phi_uy[2], ... Phi_uy[FIR_horizon] ]
 
     def initialize (self):
         self._beta = []
         self._bar_y = []
+        self.calculateTildePhi()
 
     def getControl(self, y):
         '''
-        z beta = tild_Phi_xx beta + tild_Phi_xy bar_y
-             u = tild_Phi_ux beta + tild_Phi_uy bar_y
+        z beta = tilde_Phi_xx beta + tilde_Phi_xy bar_y
+             u = tilde_Phi_ux beta + tilde_Phi_uy bar_y
         where
-            tild_Phi_xx = z (I - z Phi_xx)
-            tild_Phi_ux = z Phi_ux
-            tild_Phi_xy = -z Phi_xy
-            tild_Phi_uy = Phi_uy
+            tilde_Phi_xx = z (I - z Phi_xx)
+            tilde_Phi_ux = z Phi_ux
+            tilde_Phi_xy = -z Phi_xy
+            tilde_Phi_uy = Phi_uy
 
             bar_y = y - D22 u
         '''
 
-        # TODO
-        #u = ...     
-        # self._FIFO_insert(self._bar_y, y - np.dot(self._D22,u), self._FIR_horizon)
+        # TODO how do we resolve the dependency between bar_y and u when D22 != 0?
+        # the below two 'u's are the same, and self._bar_y should have bar_y[t] (now the code does not match the math)
+        u      = (self._convolve(A=self._tilde_Phi_ux, B=self._beta,  lb=0, ub=self._FIR_horizon, offset=0) +
+                  self._convolve(A=self._tilde_Phi_uy, B=self._bar_y, lb=0, ub=self._FIR_horizon, offset=0))
+        self._FIFO_insert(self._bar_y, y - np.dot(self._D22,u), self._FIR_horizon)
+        z_beta = (self._convolve(A=self._tilde_Phi_xx, B=self._beta,  lb=0, ub=self._FIR_horizon, offset=0) +
+                  self._convolve(A=self._tilde_Phi_xy, B=self._bar_y, lb=0, ub=self._FIR_horizon, offset=0))
 
+        self._FIFO_insert(self._beta, z_beta, self._FIR_horizon)
 
-        self.errorMessage('Output-feedback controller is not yet implemented.')
-        return None
+        return u
+    
+    def calculateTildePhi(self):
+        # since Phi_xx[1] = I, z (I-z Phi_xx) = -Phi_xx[2] - z^{-1} Phi_xx[3] ...
+        
+        self._tilde_Phi_xx = []
+        self._tilde_Phi_ux = self._Phi_ux
+        self._tilde_Phi_xy = []
+        self._tilde_Phi_uy = self._Phi_uy
+        
+        for i in range (self._FIR_horizon):
+            self._tilde_Phi_xy.append(-self._Phi_xy[i])
+            if i > 0:
+                self._tilde_Phi_xx.append(-self._Phi_xx[i])
