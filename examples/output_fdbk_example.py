@@ -1,13 +1,4 @@
-from slspy.system_model import LTISystem
-from slspy.controller_model import *
-from slspy.simulator import Simulator
-from slspy.synthesis_algorithm import SLS
-from slspy.sls_objective import *
-from slspy.sls_constraint import *
-from slspy.noise_model import *
-from slspy.plant_generator import *
-from slspy.visualization_tool import *
-import numpy as np
+from slspy import *
 
 def output_fdbk_example():
     sys = LTISystem (

@@ -1,12 +1,7 @@
-from slspy.system_model import LTISystem
-from slspy.simulator import Simulator
+from slspy import *
+# import the bases of controller model and synthesis algorithm
+from slspy.controller_model import ControllerModel
 from slspy.synthesis_algorithm import SynthesisAlgorithm
-from slspy.controller_model import ControllerModel, OpenLoopController
-from slspy.sls_objective import *
-from slspy.sls_constraint import *
-from slspy.noise_model import *
-from slspy.plant_generator import *
-from slspy.visualization_tool import *
 import numpy as np
 
 # define a new controller model

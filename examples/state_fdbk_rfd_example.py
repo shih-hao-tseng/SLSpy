@@ -1,11 +1,4 @@
-from slspy.system_model import LTISystem
-from slspy.simulator import Simulator
-from slspy.synthesis_algorithm import SLS
-from slspy.sls_objective import *
-from slspy.sls_constraint import *
-from slspy.noise_model import *
-from slspy.plant_generator import *
-from slspy.visualization_tool import *
+from slspy import *
 import numpy as np
 
 def state_fdbk_rfd_example():
