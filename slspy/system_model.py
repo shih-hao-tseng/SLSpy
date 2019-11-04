@@ -7,15 +7,15 @@ class SystemModel (ObjBase):
     The base class for discrete-time system models.
     A controller synthesizer takes a system model and synthesizes a controller.
     '''
-    def __init__ (self):
+    def __init__ (self, ignore_output=False, state_feedback=True, noise_model=None):
         self._x = np.empty([0])  # state
         self._y = np.empty([0])  # measurement
         self._z = np.empty([0])  # regularized output
 
-        self._ignore_output = False
-        self._state_feedback = True
+        self._ignore_output = ignore_output
+        self._state_feedback = state_feedback
 
-        self._noise_model = None
+        self._noise_model = noise_model
 
         self._x0 = None
 
@@ -54,10 +54,10 @@ class SystemModel (ObjBase):
 
 class LTISystem (SystemModel):
     '''
-    Contains all matrices of an LTI system as per (3.1)
+    Contains all matrices of an LTI system
     '''
-    def __init__(self,Nx=0,Nw=0,Nu=0,Ny=0,Nz=0):
-        SystemModel.__init__(self)
+    def __init__(self, Nx=0, Nw=0, Nu=0, Ny=0, Nz=0, **kwargs):
+        SystemModel.__init__(self, **kwargs)
 
         if not isinstance(Nx,int):
             Nx = 0

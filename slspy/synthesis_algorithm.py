@@ -113,6 +113,9 @@ class SLS (SynthesisAlgorithm):
 
         use_state_feedback_version = self._state_feedback or self._system_model._state_feedback
 
+        print(self._state_feedback )
+        print(self._system_model._state_feedback)
+
         if use_state_feedback_version:
             controller = SLS_State_Feedback_FIR_Controller (
                 Nx=Nx, Nu=Nu,

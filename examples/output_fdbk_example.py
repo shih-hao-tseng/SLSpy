@@ -8,9 +8,10 @@ from slspy.plant_generator import *
 from slspy.visualization_tool import *
 import numpy as np
 
-def state_fdbk_example():
+def output_fdbk_example():
     sys = LTISystem (
-        Nx = 10, Nw = 10
+        Nx = 10, Nw = 10,
+        state_feedback = False
     )
 
     # generate sys._A, sys._B2
@@ -35,20 +36,24 @@ def state_fdbk_example():
 
     sys.useNoiseModel (noise_model = noise)
 
-
-    ## (1) basic sls (centralized controller)
     # use SLS controller synthesis algorithm
+    # notice that the system should also be output-feedback (state_feedback = False)
+    # to actually trigger the output-feedback SLS
     synthesizer = SLS (
         system_model = sys,
-        FIR_horizon = 20
+        FIR_horizon = 20,
+        state_feedback = False # use output-feedback synthesizer
     )
+
     # set SLS objective
     synthesizer <= SLSObj_H2()
 
     # synthesize controller (the generated controller is actually initialized)
     # and use the synthesized controller in simulation
+    controller = synthesizer.synthesizeControllerModel ()
+    print(controller.__class__.__name__)
     simulator.setController (
-        controller = synthesizer.synthesizeControllerModel ()
+        controller = controller
     )
 
     noise.startAtTime(0)
@@ -59,48 +64,5 @@ def state_fdbk_example():
     Bu_history = matrix_list_multiplication(sys._B2,u_history)
     plot_heat_map(x_history, Bu_history, 'Centralized')
 
-
-    ## (2) d-localized sls
-    dlocalized = SLSCons_dLocalized (
-        actDelay = 1,
-        cSpeed = 2,
-        d = 3
-    )
-    synthesizer <= dlocalized
-
-    simulator.setController (
-        controller = synthesizer.synthesizeControllerModel ()
-    )
-
-    noise.startAtTime(0)
-
-    x_history, y_history, z_history, u_history = simulator.run ()
-
-    Bu_history = matrix_list_multiplication(sys._B2,u_history)
-    plot_heat_map(x_history, Bu_history, 'Localized')
-
-
-    ## (3) approximate d-localized sls
-    approx_dlocalized = SLSCons_ApproxdLocalized (
-        base = dlocalized,
-        robCoeff = 10e3
-    )
-    approx_dlocalized._cSpeed = 1
-
-    # set the constriant
-    synthesizer <= approx_dlocalized
-
-    controller = synthesizer.synthesizeControllerModel ()
-    simulator.setController (controller=controller)
-
-    # reuse the predefined initialization
-    noise.startAtTime(0)
-
-    x_history, y_history, z_history, u_history = simulator.run ()
-
-    Bu_history = matrix_list_multiplication(sys._B2,u_history)
-    plot_heat_map(x_history, Bu_history, 'Approximately Localized')
-
-
 if __name__ == '__main__':
-    state_fdbk_example()
+    output_fdbk_example()
