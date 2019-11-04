@@ -66,10 +66,10 @@ class SLS (SynthesisAlgorithm):
         self._constraints = []
 
     def addObjOrCons (self, obj_or_cons):
-        if isinstance(obj_or_cons, SLSObjective):
-            self._objectives.append(obj_or_cons)
         if isinstance(obj_or_cons, SLSConstraint):
             self._constraints.append(obj_or_cons)
+        elif isinstance(obj_or_cons, SLSObjective):
+            self._objectives.append(obj_or_cons)
         return self
 
     def setObjOrCons (self, obj_or_cons):
@@ -219,9 +219,12 @@ class SLS (SynthesisAlgorithm):
 
         # the constraints might also introduce additional terms at the objective
         for cons in self._constraints:
-            objective_value, constraints = cons.addConstraints (
+            objective_value = cons.addObjectiveValue (
                 sls = self,
-                objective_value = objective_value,
+                objective_value = objective_value
+            )
+            constraints = cons.addConstraints (
+                sls = self,
                 constraints = constraints
             )
 

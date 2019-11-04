@@ -1,12 +1,14 @@
+
+from sls_objective import SLSObjective
 import cvxpy as cp
 import numpy as np
 
-class SLSConstraint:
+class SLSConstraint(SLSObjective):
     '''
     The base class for SLS constriant
     '''
-    def addConstraints(self, sls, objective_value, constraints):
-        return objective_value, constraints
+    def addConstraints(self, sls, constraints):
+        return constraints
 
 class SLSCons_dLocalized (SLSConstraint):
     def __init__(self,
@@ -22,7 +24,7 @@ class SLSCons_dLocalized (SLSConstraint):
             self._cSpeed = cSpeed
             self._d = d
     
-    def addConstraints(self, sls, objective_value, constraints):
+    def addConstraints(self, sls, constraints):
         # localized constraints
         # get localized supports
         Phi_x = sls._Phi_x
@@ -57,7 +59,7 @@ class SLSCons_dLocalized (SLSConstraint):
                 if support_u[ix,iy] == False:
                     constraints += [ Phi_u[t][ix,iy] == 0 ]
 
-        return objective_value, constraints
+        return constraints
 
 class SLSCons_ApproxdLocalized (SLSCons_dLocalized):
     def __init__(self,
@@ -72,12 +74,22 @@ class SLSCons_ApproxdLocalized (SLSCons_dLocalized):
         else:
             self._robCoeff = robCoeff
 
+        self._Delta = []
         self._stability_margin = -1
 
     def getStabilityMargin (self):
         return self._stability_margin
 
-    def addConstraints(self, sls, objective_value, constraints):
+    def addObjectiveValue(self, sls, objective_value):
+        Nx = sls._system_model._Nx
+        self._Delta = cp.Variable(shape=(Nx,Nx*sls._FIR_horizon))
+
+        self._stability_margin = cp.norm(self._Delta, 'inf')  # < 1 means we can guarantee stability
+        objective_value += self._robCoeff * self._stability_margin
+
+        return objective_value
+
+    def addConstraints(self, sls, constraints):
         # reset constraints
         Phi_x = sls._Phi_x
         Phi_u = sls._Phi_u
@@ -93,16 +105,13 @@ class SLSCons_ApproxdLocalized (SLSCons_dLocalized):
 
         SLSCons_dLocalized.addConstraints(self,
             sls=sls,
-            objective_value=objective_value,
             constraints=constraints
         )
-
-        Delta = cp.Variable(shape=(Nx,Nx*sls._FIR_horizon))
 
         pos = 0
         for t in range(sls._FIR_horizon-1):
             constraints += [
-                Delta[:,pos:pos+Nx] == (
+                self._Delta[:,pos:pos+Nx] == (
                     Phi_x[t+1]
                     - sls._system_model._A  * Phi_x[t]
                     - sls._system_model._B2 * Phi_u[t]
@@ -110,7 +119,4 @@ class SLSCons_ApproxdLocalized (SLSCons_dLocalized):
             ]
             pos += Nx
 
-        self._stability_margin = cp.norm(Delta, 'inf')  # < 1 means we can guarantee stability
-        objective_value += self._robCoeff * self._stability_margin
-
-        return objective_value, constraints
+        return constraints
