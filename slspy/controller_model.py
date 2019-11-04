@@ -126,7 +126,6 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
             tilde_Phi_xx = z (I - z Phi_xx)
             tilde_Phi_ux = z Phi_ux
             tilde_Phi_xy = -z Phi_xy
-                  Phi_uy = Phi_uy
 
             bar_y = y - D22 u
         '''
