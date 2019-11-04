@@ -104,7 +104,7 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
     Output feedback SLS controller with finite impulse response
     '''
     def __init__ (self, Nx=0, Nu=0, Ny=0, D22=None, FIR_horizon=1):
-        SLS_FIR_Controller.__init__(Nx=Nx, Nu=Nu, FIR_horizon=FIR_horizon)
+        SLS_FIR_Controller.__init__(self, Nx=Nx, Nu=Nu, FIR_horizon=FIR_horizon)
         self._Ny = Ny # dimension of measurement
         self._D22 = D22
 

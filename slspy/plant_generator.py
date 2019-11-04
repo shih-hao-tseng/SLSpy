@@ -8,10 +8,19 @@ Some helper functions to generate the LTI system plant matrices
 
 def generate_BCD_and_zero_initialization (system_model=None):
     # This function simply serves as an abbreviation
-    # The user has to ensure the correctness 
-    system_model._B1  = np.eye (system_model._Nx)
-    system_model._C1  = np.concatenate ((np.eye(system_model._Nx), np.zeros([system_model._Nu, system_model._Nx])), axis = 0)
+    # The user has to ensure the correctness
+    system_model._Nw = system_model._Nx
+    system_model._Nz = system_model._Nx + system_model._Nu
+
+    system_model._B1  = np.eye (system_model._Nx, system_model._Nw)
+    system_model._C1  = np.eye (system_model._Nz, system_model._Nx)
     system_model._D12 = np.concatenate ((np.zeros([system_model._Nx, system_model._Nu]), np.eye(system_model._Nu)), axis = 0)
+
+    if not system_model._state_feedback:
+        # assign the matrices for y as well
+        system_model._C2  = np.eye(system_model._Ny, system_model._Nx)
+        system_model._D22 = np.eye(system_model._Ny, system_model._Nu)
+
     system_model.initialize (x0 = np.zeros([system_model._Nx, 1]))
 
 def generate_doubly_stochastic_chain (system_model=None, rho=0, actuator_density=1, alpha=0):
