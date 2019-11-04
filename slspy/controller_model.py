@@ -135,12 +135,13 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
         # we also need to enforce bar_y[t] = y - D_22 u[t]
         # so we have to solve for u[t] and bar_y[t] together
         # derivation:
-        #   u[t] = u' + tilde_Phi_uy[0] (y - D22 u[t])
-        #        = (I + tilde_Phi_uy[0] D22)^{-1} (u' + tilde_Phi_uy[0] y)
+        #   u[t] = u' + tilde_Phi_uy[0] (y[t] - D22 u[t])
+        #        = (I + tilde_Phi_uy[0] D22)^{-1} (u' + tilde_Phi_uy[0] y[t])
+        #        = u_multiplier * (u' + tilde_Phi_uy[0] y[t])
 
         u_prime = (
-            self._convolve(A=self._tilde_Phi_ux, B=self._beta,  lb=0, ub=self._FIR_horizon, offset=0) +
-            self._convolve(A=self._tilde_Phi_uy, B=self._bar_y, lb=1, ub=self._FIR_horizon, offset=1)
+            self._convolve(A=self._tilde_Phi_ux, B=self._beta,  lb=0, ub=self._FIR_horizon,   offset=0) +
+            self._convolve(A=self._tilde_Phi_uy, B=self._bar_y, lb=1, ub=self._FIR_horizon+1, offset=1)
         )
         u = np.dot(self._u_multiplier, u_prime + np.dot(self._tilde_Phi_uy[0],y))
         self._FIFO_insert(self._bar_y, y - np.dot(self._D22,u), self._FIR_horizon)
