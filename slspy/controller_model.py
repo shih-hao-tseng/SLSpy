@@ -116,7 +116,7 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
     def initialize (self):
         self._beta = []
         self._bar_y = []
-        self.calculateTildePhi()
+        self.precaculation()
 
     def getControl(self, y):
         '''
@@ -131,10 +131,18 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
             bar_y = y - D22 u
         '''
 
-        # TODO how do we resolve the dependency between bar_y and u when D22 != 0?
-        # the below two 'u's are the same, and self._bar_y should have bar_y[t] (now the code does not match the math)
-        u      = (self._convolve(A=self._tilde_Phi_ux, B=self._beta,  lb=0, ub=self._FIR_horizon, offset=0) +
-                  self._convolve(A=self._tilde_Phi_uy, B=self._bar_y, lb=0, ub=self._FIR_horizon, offset=0))
+        # decouple u[t] = u' + tilde_Phi_uy[0] bar_y[t]
+        # we also need to enforce bar_y[t] = y - D_22 u[t]
+        # so we have to solve for u[t] and bar_y[t] together
+        # derivation:
+        #   u[t] = u' + tilde_Phi_uy[0] (y - D22 u[t])
+        #        = (I + tilde_Phi_uy[0] D22)^{-1} (u' + tilde_Phi_uy[0] y)
+
+        u_prime = (
+            self._convolve(A=self._tilde_Phi_ux, B=self._beta,  lb=0, ub=self._FIR_horizon, offset=0) +
+            self._convolve(A=self._tilde_Phi_uy, B=self._bar_y, lb=1, ub=self._FIR_horizon, offset=1)
+        )
+        u = np.dot(self._u_multiplier, u_prime + np.dot(self._tilde_Phi_uy[0],y))
         self._FIFO_insert(self._bar_y, y - np.dot(self._D22,u), self._FIR_horizon)
         z_beta = (self._convolve(A=self._tilde_Phi_xx, B=self._beta,  lb=0, ub=self._FIR_horizon, offset=0) +
                   self._convolve(A=self._tilde_Phi_xy, B=self._bar_y, lb=0, ub=self._FIR_horizon, offset=0))
@@ -143,7 +151,7 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
 
         return u
     
-    def calculateTildePhi(self):
+    def precaculation(self):
         # since Phi_xx[1] = I, z (I-z Phi_xx) = -Phi_xx[2] - z^{-1} Phi_xx[3] ...
         
         self._tilde_Phi_xx = []
@@ -155,3 +163,5 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
             self._tilde_Phi_xy.append(-self._Phi_xy[i])
             if i > 0:
                 self._tilde_Phi_xx.append(-self._Phi_xx[i])
+        
+        self._u_multiplier = np.linalg.inv( np.eye(self._D22.shape[1]) + np.dot(self._tilde_Phi_uy[0], self._D22) )
