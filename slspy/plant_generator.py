@@ -19,7 +19,7 @@ def generate_BCD_and_zero_initialization (system_model=None):
     if not system_model._state_feedback:
         # assign the matrices for y as well
         system_model._C2  = np.eye(system_model._Ny, system_model._Nx)
-        system_model._D22 = np.eye(system_model._Ny, system_model._Nu)
+        #system_model._D22 = np.eye(system_model._Ny, system_model._Nu)
 
     system_model.initialize (x0 = np.zeros([system_model._Nx, 1]))
 

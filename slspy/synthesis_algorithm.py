@@ -212,7 +212,7 @@ class SLS (SynthesisAlgorithm):
 
                 constraints += [
                     self._Phi_ux[tau+1] == (
-                        self._Phi_ux[tau] * self._system_model._A  +
+                        self._Phi_ux[tau]   * self._system_model._A  +
                         self._Phi_uy[tau+1] * self._system_model._C2
                     )
                 ]
