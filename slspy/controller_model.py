@@ -121,29 +121,29 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
     def getControl(self, y):
         '''
         z beta = tilde_Phi_xx beta + tilde_Phi_xy bar_y
-             u = tilde_Phi_ux beta + tilde_Phi_uy bar_y
+             u = tilde_Phi_ux beta +       Phi_uy bar_y
         where
             tilde_Phi_xx = z (I - z Phi_xx)
             tilde_Phi_ux = z Phi_ux
             tilde_Phi_xy = -z Phi_xy
-            tilde_Phi_uy = Phi_uy
+                  Phi_uy = Phi_uy
 
             bar_y = y - D22 u
         '''
 
-        # decouple u[t] = u' + tilde_Phi_uy[0] bar_y[t]
+        # decouple u[t] = u' + Phi_uy[0] bar_y[t]
         # we also need to enforce bar_y[t] = y - D_22 u[t]
         # so we have to solve for u[t] and bar_y[t] together
         # derivation:
-        #   u[t] = u' + tilde_Phi_uy[0] (y[t] - D22 u[t])
-        #        = (I + tilde_Phi_uy[0] D22)^{-1} (u' + tilde_Phi_uy[0] y[t])
-        #        = u_multiplier * (u' + tilde_Phi_uy[0] y[t])
+        #   u[t] = u' + Phi_uy[0] (y[t] - D22 u[t])
+        #        = (I + Phi_uy[0] D22)^{-1} (u' + Phi_uy[0] y[t])
+        #        = u_multiplier * (u' + Phi_uy[0] y[t])
 
         u_prime = (
             self._convolve(A=self._tilde_Phi_ux, B=self._beta,  lb=0, ub=self._FIR_horizon,   offset=0) +
-            self._convolve(A=self._tilde_Phi_uy, B=self._bar_y, lb=1, ub=self._FIR_horizon+1, offset=1)
+            self._convolve(A=self._Phi_uy,       B=self._bar_y, lb=1, ub=self._FIR_horizon+1, offset=1)
         )
-        u = np.dot(self._u_multiplier, u_prime + np.dot(self._tilde_Phi_uy[0], y))
+        u = np.dot(self._u_multiplier, u_prime + np.dot(self._Phi_uy[0], y))
         self._FIFO_insert(self._bar_y, y - np.dot(self._D22,u), self._FIR_horizon+1)
 
         z_beta = (self._convolve(A=self._tilde_Phi_xx, B=self._beta,  lb=0, ub=self._FIR_horizon, offset=0) +
@@ -158,11 +158,10 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
         self._tilde_Phi_xx = []
         self._tilde_Phi_ux = self._Phi_ux
         self._tilde_Phi_xy = []
-        self._tilde_Phi_uy = self._Phi_uy
         
         for i in range (self._FIR_horizon):
             self._tilde_Phi_xy.append(-self._Phi_xy[i])
             if i > 0:
                 self._tilde_Phi_xx.append(-self._Phi_xx[i])
         
-        self._u_multiplier = np.linalg.inv( np.eye(self._D22.shape[1]) + np.dot(self._tilde_Phi_uy[0], self._D22) )
+        self._u_multiplier = np.linalg.inv( np.eye(self._D22.shape[1]) + np.dot(self._Phi_uy[0], self._D22) )
