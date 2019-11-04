@@ -52,6 +52,9 @@ def output_fdbk_example():
     # synthesize controller (the generated controller is actually initialized)
     # and use the synthesized controller in simulation
     controller = synthesizer.synthesizeControllerModel ()
+    simulator.setController (
+        controller = controller
+    )
 
     noise.startAtTime(0)
 
