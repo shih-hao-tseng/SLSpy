@@ -29,9 +29,9 @@ def state_fdbk_example():
     )
 
     # generate noise
-    noise = FixedNoiseVector (Nw = sys._Nx, horizon = sim_horizon)
+    noise = FixedNoiseVector (Nw = sys._Nw, horizon = sim_horizon)
     noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
-    noise._w[0][sys._Nx/2] = 10
+    noise._w[0][sys._Nw/2] = 10
 
     sys.useNoiseModel (noise_model = noise)
 

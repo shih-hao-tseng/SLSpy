@@ -43,9 +43,9 @@ def robust_simulations():
         horizon = sim_horizon
     )
     # generate noise
-    noise = FixedNoiseVector (Nw = sys._Nx, horizon = sim_horizon)
+    noise = FixedNoiseVector (Nw = sys._Nw, horizon = sim_horizon)
     noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
-    noise._w[0][sys._Nx/2] = 10
+    noise._w[0][sys._Nw/2] = 10
     sys.useNoiseModel (noise_model = noise)
 
     cSpeeds = [2, 1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4]
