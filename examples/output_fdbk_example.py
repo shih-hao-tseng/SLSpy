@@ -1,4 +1,5 @@
 from slspy.system_model import LTISystem
+from slspy.controller_model import *
 from slspy.simulator import Simulator
 from slspy.synthesis_algorithm import SLS
 from slspy.sls_objective import *
@@ -51,10 +52,6 @@ def output_fdbk_example():
     # synthesize controller (the generated controller is actually initialized)
     # and use the synthesized controller in simulation
     controller = synthesizer.synthesizeControllerModel ()
-    print(controller.__class__.__name__)
-    simulator.setController (
-        controller = controller
-    )
 
     noise.startAtTime(0)
 
