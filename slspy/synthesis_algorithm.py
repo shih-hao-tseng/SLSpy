@@ -108,8 +108,12 @@ class SLS (SynthesisAlgorithm):
             self.errorMessage('System model check fails.')
             return None
 
+        # variables used by both the state-feedback and output-feedback versions
         Nx = self._system_model._Nx
         Nu = self._system_model._Nu
+
+        self._Phi_xx = self._Phi_x = []
+        self._Phi_ux = self._Phi_u = []
 
         use_state_feedback_version = self._state_feedback or self._system_model._state_feedback
 
@@ -120,9 +124,6 @@ class SLS (SynthesisAlgorithm):
             )
 
             # declare variables
-            # don't use Phi_x = [], which breaks the link between Phi_x and Phi_xx
-            del self._Phi_x[:]
-            del self._Phi_u[:]
             for tau in range(self._FIR_horizon):
                 self._Phi_x.append(cp.Variable(shape=(Nx,Nx)))
                 self._Phi_u.append(cp.Variable(shape=(Nu,Nx)))
@@ -136,11 +137,8 @@ class SLS (SynthesisAlgorithm):
             )
 
             # declare variables
-            # don't use Phi_xx = [], which breaks the link between Phi_x and Phi_xx
-            del self._Phi_xx[:]
-            del self._Phi_ux[:]
-            del self._Phi_xy[:]
-            del self._Phi_uy[:]
+            self._Phi_xy = []
+            self._Phi_uy = []
             for tau in range(self._FIR_horizon):
                 self._Phi_xx.append(cp.Variable(shape=(Nx,Nx)))
                 self._Phi_ux.append(cp.Variable(shape=(Nu,Nx)))
