@@ -51,10 +51,9 @@ class SLS_FIR_Controller (ControllerModel):
     def _convolve(A,B,lb,ub,offset):
         # perform sum_{tau >= lb}^{ub-1} A[tau]B[tau-offset]
         if (len(A) == 0) or (len(B) == 0):
-            return np.empty([1,1])
+            return 0
 
-        conv = np.zeros([A[0].shape[0],B[0].shape[1]])
-
+        conv = 0
         for tau in range(lb,ub):
             if (tau < len(A)) and (tau-offset < len(B)) and (tau-offset >= 0):
                 conv += np.dot(A[tau],B[tau-offset])
@@ -143,6 +142,7 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
             self._convolve(A=self._Phi_uy,       B=self._bar_y, lb=1, ub=self._FIR_horizon+1, offset=1)
         )
         u = np.dot(self._u_multiplier, u_prime + np.dot(self._Phi_uy[0], y))
+
         self._FIFO_insert(self._bar_y, y - np.dot(self._D22,u), self._FIR_horizon+1)
 
         z_beta = (self._convolve(A=self._tilde_Phi_xx, B=self._beta,  lb=0, ub=self._FIR_horizon, offset=0) +
