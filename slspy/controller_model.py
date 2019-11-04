@@ -152,11 +152,11 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
         return u
     
     def precaculation(self):
-        # since Phi_xx[1] = I, z (I-z Phi_xx) = -Phi_xx[2] - z^{-1} Phi_xx[3] ...
+        # since Phi_xx[1] = I, we have z (I-z Phi_xx) = -Phi_xx[2] - z^{-1} Phi_xx[3] ...
         
-        self._tilde_Phi_xx = []
-        self._tilde_Phi_ux = self._Phi_ux
-        self._tilde_Phi_xy = []
+        self._tilde_Phi_xx = []            # = [ tilde_Phi_xx[0], tilde_Phi_xx[1], ... ]
+        self._tilde_Phi_ux = self._Phi_ux  # = [ tilde_Phi_ux[0], tilde_Phi_ux[1], ... ]
+        self._tilde_Phi_xy = []            # = [ tilde_Phi_xy[0], tilde_Phi_xy[1], ... ]
         
         for i in range (self._FIR_horizon):
             self._tilde_Phi_xy.append(-self._Phi_xy[i])
