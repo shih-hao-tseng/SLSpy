@@ -111,9 +111,16 @@ class LTISystem (SystemModel):
         # initializing output and measurements by treating w and u to be zeros.
         # one might change this part for some other initialization strategies
         if not self._ignore_output:
-            self._z = np.dot (self._C1, self._x)
+            if self._C1 is None:
+                self.errorMessage('C1 is not defined when the system output (z) is not ignored. Initialization fails.')
+            else:
+                self._z = np.dot (self._C1, self._x)
+
         if not self._state_feedback:
-            self._y = np.dot (self._C2, self._x)
+            if self._C2 is None:
+                self.errorMessage('C2 is not defined for an output-feedback system. Initialization fails.')
+            else:
+                self._y = np.dot (self._C2, self._x)
 
     def sanityCheck (self):
         # check the system parameters are coherent
