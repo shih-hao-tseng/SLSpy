@@ -143,8 +143,8 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
             self._convolve(A=self._tilde_Phi_ux, B=self._beta,  lb=0, ub=self._FIR_horizon,   offset=0) +
             self._convolve(A=self._tilde_Phi_uy, B=self._bar_y, lb=1, ub=self._FIR_horizon+1, offset=1)
         )
-        u = np.dot(self._u_multiplier, u_prime + np.dot(self._tilde_Phi_uy[0],y))
-        self._FIFO_insert(self._bar_y, y - np.dot(self._D22,u), self._FIR_horizon)
+        u = np.dot(self._u_multiplier, u_prime + np.dot(self._tilde_Phi_uy[0], y))
+        self._FIFO_insert(self._bar_y, y - np.dot(self._D22,u), self._FIR_horizon+1)
         z_beta = (self._convolve(A=self._tilde_Phi_xx, B=self._beta,  lb=0, ub=self._FIR_horizon, offset=0) +
                   self._convolve(A=self._tilde_Phi_xy, B=self._bar_y, lb=0, ub=self._FIR_horizon, offset=0))
 
