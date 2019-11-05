@@ -57,3 +57,4 @@ def output_fdbk_example():
 
 if __name__ == '__main__':
     output_fdbk_example()
+    keep_showing_figures()

@@ -7,6 +7,9 @@ def matrix_list_multiplication (matrix_A=None, list_B=[]):
         AB.append(np.dot(matrix_A,list_B[t]))
     return AB
 
+def keep_showing_figures ():
+    show()
+
 def plot_heat_map (x=None, Bu=None, myTitle='title'):
     '''
     Plots log-based heat map for x, u
@@ -68,7 +71,7 @@ def plot_heat_map (x=None, Bu=None, myTitle='title'):
         title('log10(|u|)')
         xlabel('Time')
 
-    show()
+    show(block=False)
 
 def plot_line_chart(list_x=[], list_y=[], title='title', xlabel='xlabel', ylabel='ylabel',line_format='o-'):
     figure()
@@ -76,7 +79,7 @@ def plot_line_chart(list_x=[], list_y=[], title='title', xlabel='xlabel', ylabel
     gca().invert_xaxis()
     xlabel(xlabel)
     ylabel(ylabel)
-    show()
+    show(block=False)
 
 def plot_time_trajectory(x=None, Bu=None, xDes=None):
     '''
@@ -167,7 +170,7 @@ def plot_time_trajectory(x=None, Bu=None, xDes=None):
     legend('error')
     xlabel('time step')
 
-    show()
+    show(block=False)
 
 def plot_vertex(node, nodeCoords, colour):
     '''
@@ -224,7 +227,7 @@ def plot_graph(adjMtx, nodeCoords, colour):
 
     axis([xlowerlim,xupperlim,ylowerlim,yupperlim])
 
-    show()
+    show(block=False)
 
 def plot_graph_animation(adjMtx, nodeCoords, slsParams, x, Bu, waitTime, logScale):
     '''

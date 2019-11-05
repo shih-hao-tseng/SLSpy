@@ -136,3 +136,4 @@ def state_fdbk_rfd_example():
 
 if __name__ == '__main__':
     state_fdbk_rfd_example()
+    keep_showing_figures()

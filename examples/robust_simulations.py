@@ -81,3 +81,4 @@ def robust_simulations():
 
 if __name__ == '__main__':
     robust_simulations()
+    keep_showing_figures()

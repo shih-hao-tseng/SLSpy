@@ -96,3 +96,4 @@ def state_fdbk_example():
 
 if __name__ == '__main__':
     state_fdbk_example()
+    keep_showing_figures()

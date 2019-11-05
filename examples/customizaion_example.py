@@ -97,3 +97,4 @@ def customization_example():
 
 if __name__ == '__main__':
     customization_example()
+    keep_showing_figures()
