@@ -93,13 +93,12 @@ class SLSCons_Robust (SLSConstraint):
             self._Delta.append(cp.Variable(shape=(Nx,Nx)))
 
         constraints =  [ hat_Phi_x[0] == np.eye(Nx) + self._Delta[0] ]
-        constraints += [ hat_Phi_x[sls._FIR_horizon-1] == np.zeros([Nx,Nx]) ]
-        #constraints += [
-        #    (sls._system_model._A  * hat_Phi_x[sls._FIR_horizon-1] +
-        #     sls._system_model._B2 * hat_Phi_u[sls._FIR_horizon-1] +
-        #     self._Delta[sls._FIR_horizon]
-        #    ) == np.zeros([Nx,Nx])
-        #]
+        constraints += [
+            (sls._system_model._A  * hat_Phi_x[sls._FIR_horizon-1] +
+             sls._system_model._B2 * hat_Phi_u[sls._FIR_horizon-1] +
+             self._Delta[sls._FIR_horizon]
+            ) == np.zeros([Nx,Nx])
+        ]
 
         for t in range(sls._FIR_horizon-1):
             constraints += [
@@ -136,7 +135,7 @@ class SLSCons_ApproxdLocalized (SLSCons_dLocalized, SLSCons_Robust):
         return SLSCons_Robust.addObjectiveValue(self, sls, objective_value)
 
     def addConstraints(self, sls, constraints):
-        SLSCons_Robust.addConstraints(self, sls, constraints)
-        SLSCons_dLocalized.addConstraints(self, sls, constraints)
+        constraints = SLSCons_Robust.addConstraints(self, sls, constraints)
+        constraints = SLSCons_dLocalized.addConstraints(self, sls, constraints)
 
         return constraints

@@ -54,7 +54,7 @@ class SLS (SynthesisAlgorithm):
         if isinstance(obj_or_cons_or_system,SystemModel):
             return self.setSystemModel(system_model=obj_or_cons_or_system)
         else:
-            return self.setObjOrCons(obj_or_cons_or_system)
+            return self.setObjOrCons(obj_or_cons=obj_or_cons_or_system)
 
     def resetObjAndCons (self):
         self.resetObjectives ()
@@ -75,12 +75,12 @@ class SLS (SynthesisAlgorithm):
         return self
 
     def setObjOrCons (self, obj_or_cons):
-        if isinstance(obj_or_cons, SLSObjective):
-            self._objectives = []
-            self._objectives.append(obj_or_cons)
         if isinstance(obj_or_cons, SLSConstraint):
             self._constraints = []
             self._constraints.append(obj_or_cons)
+        elif isinstance(obj_or_cons, SLSObjective):
+            self._objectives = []
+            self._objectives.append(obj_or_cons)
         return self
 
     def getOptimalObjectiveValue (self):
