@@ -53,9 +53,6 @@ def robust_simulations():
         robustStabs.append(approx_dlocalized.getStabilityMargin())
 
         if cSpeed in cPrints:
-            # initialize
-            noise.startAtTime(0)
-
             # run the simulation
             simulator.setController (controller=controller)
             x_history, y_history, z_history, u_history = simulator.run ()

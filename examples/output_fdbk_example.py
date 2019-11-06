@@ -47,8 +47,6 @@ def output_fdbk_example():
         controller = controller
     )
 
-    noise.startAtTime(0)
-
     # run the simulation
     x_history, y_history, z_history, u_history = simulator.run ()
 

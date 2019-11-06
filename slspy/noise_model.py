@@ -9,6 +9,10 @@ class NoiseModel (ObjBase):
     def __init__ (self, Nw=0):
         self._Nw = Nw  # dimension of the noise (disturbance)
 
+    def initialize (self):
+        # auto-initialization for each simulation
+        pass
+
     def getNoise (self,**kwargs):
         # the noise can depend on some parameters such as state or control
         return 0
@@ -45,14 +49,18 @@ class FixedNoiseVector(NoiseModel):
     '''
     Fixed noise vector
     '''
-    def __init__ (self, Nw=0, horizon=0):
+    def __init__ (self, Nw=0, horizon=0, t0=0):
         NoiseModel.__init__(self,Nw=Nw)
         self._horizon = horizon
         self._t = 0
+        self._t0 = 0
         self._w = []
 
+    def initialize (self):
+        self.startAtTime(t=self._t0)
+
     def startAtTime(self, t=0):
-        self._t = t
+        self._t = self._t0 = t
 
     def generateNoiseFromNoiseModelInstance (self, noise_model=None):
         if not isinstance (noise_model, NoiseModel):

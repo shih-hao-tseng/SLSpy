@@ -24,6 +24,7 @@ def state_fdbk_example():
     noise = FixedNoiseVector (Nw = sys._Nw, horizon = sim_horizon)
     noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
     noise._w[0][sys._Nw/2] = 10
+    #noise.startAtTime(0)
 
     sys.useNoiseModel (noise_model = noise)
 
@@ -42,8 +43,6 @@ def state_fdbk_example():
     simulator.setController (
         controller = synthesizer.synthesizeControllerModel ()
     )
-
-    noise.startAtTime(0)
 
     # run the simulation
     x_history, y_history, z_history, u_history = simulator.run ()
@@ -64,8 +63,6 @@ def state_fdbk_example():
         controller = synthesizer.synthesizeControllerModel ()
     )
 
-    noise.startAtTime(0)
-
     x_history, y_history, z_history, u_history = simulator.run ()
 
     Bu_history = matrix_list_multiplication(sys._B2,u_history)
@@ -84,9 +81,6 @@ def state_fdbk_example():
 
     controller = synthesizer.synthesizeControllerModel ()
     simulator.setController (controller=controller)
-
-    # reuse the predefined initialization
-    noise.startAtTime(0)
 
     x_history, y_history, z_history, u_history = simulator.run ()
 

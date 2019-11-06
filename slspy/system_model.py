@@ -7,7 +7,12 @@ class SystemModel (ObjBase):
     The base class for discrete-time system models.
     A controller synthesizer takes a system model and synthesizes a controller.
     '''
-    def __init__ (self, ignore_output=False, state_feedback=True, noise_model=None):
+    def __init__ (self,
+        ignore_output=False,
+        state_feedback=True,
+        noise_model=None,
+        auto_noise_initialization=True
+    ):
         self._x = np.empty([0])  # state
         self._y = np.empty([0])  # measurement
         self._z = np.empty([0])  # regularized output
@@ -16,12 +21,13 @@ class SystemModel (ObjBase):
         self._state_feedback = state_feedback
 
         self._noise_model = noise_model
-
+        self._auto_noise_initialization = auto_noise_initialization
         self._x0 = None
 
-    def initialize (self, x0):
-        # set the initial state
-        pass
+    def initialize (self, x0=None):
+        if self._auto_noise_initialization:
+            if self._noise_model is not None:
+                self._noise_model.initialize()
 
     def systemProgress (self, **kwargs):
         # this function takes the input and progress to next time 
@@ -94,6 +100,8 @@ class LTISystem (SystemModel):
         self._noise_model = GuassianNoise (Nw=Nw)
     
     def initialize (self, x0=None):
+        SystemModel.initialize(self)
+
         if x0 is None:
             # use the previous x0
             if self._x0 is None:

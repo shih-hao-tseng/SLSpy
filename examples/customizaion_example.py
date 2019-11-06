@@ -79,10 +79,6 @@ def customization_example():
         controller = controller
     )
 
-    # before the simulation, initialize the noise to start from time 0
-    # this is a method for FixedNoiseVector only
-    noise.startAtTime(0)
-
     # run the simulation and get the histories of
     #   x_history: the state
     #   y_history: the measurement
