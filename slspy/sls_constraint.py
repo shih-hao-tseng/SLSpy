@@ -78,7 +78,7 @@ class SLSCons_ApproxdLocalized (SLSCons_dLocalized):
         self._stability_margin = -1
 
     def getStabilityMargin (self):
-        return self._stability_margin
+        return self._stability_margin.value
 
     def addObjectiveValue(self, sls, objective_value):
         Nx = sls._system_model._Nx

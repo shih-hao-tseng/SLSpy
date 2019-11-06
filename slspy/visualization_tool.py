@@ -1,4 +1,5 @@
 from matplotlib.pyplot import *
+import matplotlib.pyplot as plt
 import numpy as np
 
 def matrix_list_multiplication (matrix_A=None, list_B=[]):
@@ -77,8 +78,8 @@ def plot_line_chart(list_x=[], list_y=[], title='title', xlabel='xlabel', ylabel
     figure()
     plot(list_x,list_y,line_format)
     gca().invert_xaxis()
-    xlabel(xlabel)
-    ylabel(ylabel)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
     show(block=False)
 
 def plot_time_trajectory(x=None, Bu=None, xDes=None):
