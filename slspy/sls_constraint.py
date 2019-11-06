@@ -61,7 +61,63 @@ class SLSCons_dLocalized (SLSConstraint):
 
         return constraints
 
-class SLSCons_ApproxdLocalized (SLSCons_dLocalized):
+class SLSCons_Robust (SLSConstraint):
+    def __init__(self,
+        gamma_coefficient=0
+    ):
+        self._gamma_coefficient = gamma_coefficient
+
+        self._gamma = None
+        self._Delta = []
+        self._stability_margin = -1
+
+    def getStabilityMargin (self):
+        return self._stability_margin
+
+    def addObjectiveValue(self, sls, objective_value):
+        self._gamma = cp.Variable(1)
+        self._stability_margin = self._gamma.value
+
+        objective_value += self._gamma_coefficient * self._gamma
+
+        return objective_value
+
+    def addConstraints(self, sls, constraints):
+        # reset constraints
+        hat_Phi_x = sls._Phi_x
+        hat_Phi_u = sls._Phi_u
+
+        Nx = sls._system_model._Nx
+        self._Delta = []
+        for t in range(sls._FIR_horizon+1):
+            self._Delta.append(cp.Variable(shape=(Nx,Nx)))
+
+        constraints =  [ hat_Phi_x[0] == np.eye(Nx) + self._Delta[0] ]
+        constraints += [ hat_Phi_x[sls._FIR_horizon-1] == np.zeros([Nx,Nx]) ]
+        #constraints += [
+        #    (sls._system_model._A  * hat_Phi_x[sls._FIR_horizon-1] +
+        #     sls._system_model._B2 * hat_Phi_u[sls._FIR_horizon-1] +
+        #     self._Delta[sls._FIR_horizon]
+        #    ) == np.zeros([Nx,Nx])
+        #]
+
+        for t in range(sls._FIR_horizon-1):
+            constraints += [
+                self._Delta[t+1] == (
+                    hat_Phi_x[t+1]
+                    - sls._system_model._A  * hat_Phi_x[t]
+                    - sls._system_model._B2 * hat_Phi_u[t]
+                )
+            ]
+
+        # epsilon_1 robustness
+        constraints += [
+            cp.norm(cp.bmat([self._Delta]),'inf') <= self._gamma
+        ]
+
+        return constraints
+
+class SLSCons_ApproxdLocalized (SLSCons_dLocalized, SLSCons_Robust):
     def __init__(self,
         robCoeff=0,
         **kwargs
@@ -74,57 +130,13 @@ class SLSCons_ApproxdLocalized (SLSCons_dLocalized):
         else:
             self._robCoeff = robCoeff
 
-        self._Delta = []
-        self._stability_margin = -1
-
-    def getStabilityMargin (self):
-        return self._stability_margin.value
+        SLSCons_Robust.__init__(self,gamma_coefficient=robCoeff)
 
     def addObjectiveValue(self, sls, objective_value):
-        Nx = sls._system_model._Nx
-        self._Delta = cp.Variable(shape=(Nx,Nx*sls._FIR_horizon))
-
-        self._stability_margin = cp.norm(self._Delta, 'inf')  # < 1 means we can guarantee stability
-        objective_value += self._robCoeff * self._stability_margin
-
-        return objective_value
+        return SLSCons_Robust.addObjectiveValue(self, sls, objective_value)
 
     def addConstraints(self, sls, constraints):
-        # reset constraints
-        Phi_x = sls._Phi_x
-        Phi_u = sls._Phi_u
-
-        Nx = sls._system_model._Nx
-        constraints =  [ Phi_x[0] == np.eye(Nx) ]
-        # original code was like below, but should it be like now?
-        # constraints += [ Phi_x[sls._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
-        constraints += [
-            (sls._system_model._A  * Phi_x[sls._FIR_horizon-1] +
-             sls._system_model._B2 * Phi_u[sls._FIR_horizon-1]) == np.zeros([Nx, Nx])
-        ]
-
-        SLSCons_dLocalized.addConstraints(self,
-            sls=sls,
-            constraints=constraints
-        )
-
-        pos = 0
-        for t in range(sls._FIR_horizon-1):
-            constraints += [
-                self._Delta[:,pos:pos+Nx] == (
-                    Phi_x[t+1]
-                    - sls._system_model._A  * Phi_x[t]
-                    - sls._system_model._B2 * Phi_u[t]
-                )
-            ]
-            pos += Nx
+        SLSCons_Robust.addConstraints(self, sls, constraints)
+        SLSCons_dLocalized.addConstraints(self, sls, constraints)
 
         return constraints
-
-class SLSCons_Robust (SLSConstraint):
-    def __init__(self,
-        robCoeff=0
-    ):
-        self._robCoeff = _robCoeff
-    
-    
