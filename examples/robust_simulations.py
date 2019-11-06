@@ -19,15 +19,21 @@ def robust_simulations():
         system_model = sys,
         FIR_horizon = 10
     )
-    # add objective
-    synthesizer += SLSObj_H2 ()
+    # set objective
+    synthesizer <= SLSObj_H2 ()
+
     # add constraints
-    approx_dlocalized = SLSCons_ApproxdLocalized (
-        actDelay = 1,
-        d = 6,
-        robCoeff = 10e3
+    # robustness constraint should be added before dlocalized as it modifies the SLS constriants
+    robust = SLSCons_Robust (
+        gamma_coefficient = 10e3
     )
-    synthesizer += approx_dlocalized
+    synthesizer <= robust
+
+    dlocalized = SLSCons_dLocalized (
+        actDelay = 1,
+        d = 6
+    )
+    synthesizer += dlocalized
 
     sim_horizon = 25
     simulator = Simulator (
@@ -46,11 +52,11 @@ def robust_simulations():
     clnorms     = []
     robustStabs = []
     for cSpeed in cSpeeds:
-        approx_dlocalized._cSpeed = cSpeed
+        dlocalized._cSpeed = cSpeed
         controller = synthesizer.synthesizeControllerModel()
 
         clnorms.append(synthesizer.getOptimalObjectiveValue())
-        robustStabs.append(approx_dlocalized.getStabilityMargin())
+        robustStabs.append(robust.getStabilityMargin())
 
         if cSpeed in cPrints:
             # run the simulation
