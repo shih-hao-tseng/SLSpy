@@ -81,9 +81,10 @@ class SLSCons_ApproxdLocalized (SLSCons_dLocalized):
         return self._stability_margin.value
 
     def addObjectiveValue(self, sls, objective_value):
-        self._gamma = cp.Variable (1)
+        Nx = sls._system_model._Nx
+        self._Delta = cp.Variable(shape=(Nx,Nx*sls._FIR_horizon))
 
-        self._stability_margin = self._gamma  # < 1 means we can guarantee stability
+        self._stability_margin = cp.norm(self._Delta, 'inf')  # < 1 means we can guarantee stability
         objective_value += self._robCoeff * self._stability_margin
 
         return objective_value
@@ -94,21 +95,12 @@ class SLSCons_ApproxdLocalized (SLSCons_dLocalized):
         Phi_u = sls._Phi_u
 
         Nx = sls._system_model._Nx
-        self._Delta = []
-        for t in range (sls._FIR_horizon+1):
-            self._Delta.append(cp.Variable(shape=(Nx,Nx)))
-
-cp.norm(self._Delta, 'inf')
-
-        constraints =  [ Phi_x[0] == np.eye(Nx) + self._Delta[0] ]
-        constraints += []
+        constraints =  [ Phi_x[0] == np.eye(Nx) ]
         # original code was like below, but should it be like now?
         # constraints += [ Phi_x[sls._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
         constraints += [
             (sls._system_model._A  * Phi_x[sls._FIR_horizon-1] +
-             sls._system_model._B2 * Phi_u[sls._FIR_horizon-1] + 
-             self._Delta[sls._FIR_horizon]
-            ) == np.zeros([Nx, Nx])
+             sls._system_model._B2 * Phi_u[sls._FIR_horizon-1]) == np.zeros([Nx, Nx])
         ]
 
         SLSCons_dLocalized.addConstraints(self,
@@ -128,3 +120,11 @@ cp.norm(self._Delta, 'inf')
             pos += Nx
 
         return constraints
+
+class SLSCons_Robust (SLSConstraint):
+    def __init__(self,
+        robCoeff=0
+    ):
+        self._robCoeff = _robCoeff
+    
+    

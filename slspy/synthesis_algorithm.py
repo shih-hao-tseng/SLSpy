@@ -43,6 +43,8 @@ class SLS (SynthesisAlgorithm):
         self._Phi_u = self._Phi_ux = []
         self._Phi_xy = []
         self._Phi_uy = []
+
+        self._sls_problem = None
    
     # overload plus and less than or equal operators as syntactic sugars
     def __add__(self, obj_or_cons):
@@ -83,6 +85,9 @@ class SLS (SynthesisAlgorithm):
 
     def getOptimalObjectiveValue (self):
         return self._optimal_objective_value.copy()
+
+    def getSLSProblem (self):
+        return self._sls_problem
 
     def sanityCheck (self):
         # we can extend the algorithm to work for non-state-feedback SLS
@@ -230,6 +235,8 @@ class SLS (SynthesisAlgorithm):
         sls_problem = cp.Problem(cp.Minimize(objective_value),constraints)
         sls_problem.solve()
 
+        self._sls_problem = None
+
         if sls_problem.status is "infeasible":
             self.warningMessage('SLS problem infeasible')
             return None
@@ -237,6 +244,8 @@ class SLS (SynthesisAlgorithm):
             self.warningMessage('SLS problem unbounded')
             return None
         else:
+            # save the solved problem for the users to examine if needed
+            self._sls_problem = sls_problem
             self._optimal_objective_value = sls_problem.value
             if use_state_feedback_version:
                 controller._Phi_x = []
