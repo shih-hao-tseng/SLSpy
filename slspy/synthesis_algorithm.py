@@ -2,7 +2,7 @@ from .base import ObjBase
 from .system_model import *
 from .controller_model import *
 from .sls_objective import SLSObjective
-from .sls_constraint import SLSConstraint
+from .sls_constraint import SLSConstraint, SLSCons_SLS
 import cvxpy as cp
 
 class SynthesisAlgorithm (ObjBase):
@@ -45,6 +45,7 @@ class SLS (SynthesisAlgorithm):
         self._Phi_uy = []
 
         self._sls_problem = None
+        self._sls_constraints = SLSCons_SLS ()
    
     # overload plus and less than or equal operators as syntactic sugars
     def __add__(self, obj_or_cons):
@@ -160,65 +161,9 @@ class SLS (SynthesisAlgorithm):
                 objective_value = objective_value
             )
 
-        # sls constraints
-        # the below constraints work for output-feedback case as well because
-        # self._Phi_x = self._Phi_xx and self._Phi_u = self._Phi_ux
-        constraints =  [ self._Phi_x[0] == np.eye(Nx) ]
-        # original code was like below, but it's official form should be like what it is now
-        # constraints += [ Phi_x[sls._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
-        constraints += [ 
-            (self._system_model._A  * self._Phi_x[self._FIR_horizon-1] +
-             self._system_model._B2 * self._Phi_u[self._FIR_horizon-1] ) == np.zeros([Nx, Nx]) 
-        ]
-        for tau in range(self._FIR_horizon-1):
-            constraints += [
-                self._Phi_x[tau+1] == (
-                    self._system_model._A  * self._Phi_x[tau] +
-                    self._system_model._B2 * self._Phi_u[tau]
-                )
-            ]
-
-        if not use_state_feedback_version:
-            # output-feedback constraints
-            constraints += [
-                self._Phi_xy[0] == self._system_model._B2 * self._Phi_uy[0]
-            ]
-            constraints += [ 
-                (self._system_model._A  * self._Phi_xy[self._FIR_horizon-1] +
-                 self._system_model._B2 * self._Phi_uy[self._FIR_horizon  ]) == np.zeros([Nx, Ny])
-            ]
-            constraints += [ 
-                (self._Phi_xx[self._FIR_horizon-1] * self._system_model._A  +
-                 self._Phi_xy[self._FIR_horizon-1] * self._system_model._C2 ) == np.zeros([Nx, Nx])
-            ]
-            constraints += [
-                self._Phi_ux[0] == self._Phi_uy[0] * self._system_model._C2
-            ]
-            constraints += [
-                (self._Phi_ux[self._FIR_horizon-1] * self._system_model._A  +
-                 self._Phi_uy[self._FIR_horizon  ] * self._system_model._C2 ) == np.zeros([Nu, Nx])
-            ]
-            for tau in range(self._FIR_horizon-1):
-                constraints += [ 
-                    self._Phi_xy[tau+1] == (
-                        self._system_model._A  * self._Phi_xy[tau] +
-                        self._system_model._B2 * self._Phi_uy[tau+1]
-                    )
-                ]
-
-                constraints += [
-                    self._Phi_xx[tau+1] == (
-                        self._Phi_xx[tau] * self._system_model._A  +
-                        self._Phi_xy[tau] * self._system_model._C2
-                    )
-                ]
-
-                constraints += [
-                    self._Phi_ux[tau+1] == (
-                        self._Phi_ux[tau]   * self._system_model._A  +
-                        self._Phi_uy[tau+1] * self._system_model._C2
-                    )
-                ]
+        # add SLS main constraints
+        self._sls_constraints._state_feedback = use_state_feedback_version
+        constraints = self._sls_constraints.addConstraints (sls = self)
 
         # the constraints might also introduce additional terms at the objective
         for cons in self._constraints:

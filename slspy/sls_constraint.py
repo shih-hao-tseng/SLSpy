@@ -10,6 +10,78 @@ class SLSConstraint(SLSObjective):
     def addConstraints(self, sls, constraints):
         return constraints
 
+class SLSCons_SLS (SLSConstraint):
+    '''
+    The descrete-time SLS constrains
+    '''
+    def __init__(self, state_feedback=False):
+        self._state_feedback = state_feedback
+
+    def addConstraints(self, sls, constraints=[]):
+        Nx = sls._system_model._Nx
+        Nu = sls._system_model._Nu
+
+        # sls constraints
+        # the below constraints work for output-feedback case as well because
+        # sls._Phi_x = sls._Phi_xx and sls._Phi_u = sls._Phi_ux
+        constraints += [ sls._Phi_x[0] == np.eye(Nx) ]
+        # original code was like below, but it's official form should be like what it is now
+        # constraints += [ Phi_x[sls._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
+        constraints += [ 
+            (sls._system_model._A  * sls._Phi_x[sls._FIR_horizon-1] +
+             sls._system_model._B2 * sls._Phi_u[sls._FIR_horizon-1] ) == np.zeros([Nx, Nx]) 
+        ]
+        for tau in range(sls._FIR_horizon-1):
+            constraints += [
+                sls._Phi_x[tau+1] == (
+                    sls._system_model._A  * sls._Phi_x[tau] +
+                    sls._system_model._B2 * sls._Phi_u[tau]
+                )
+            ]
+
+        if not self._state_feedback:
+            # output-feedback constraints
+            constraints += [
+                sls._Phi_xy[0] == sls._system_model._B2 * sls._Phi_uy[0]
+            ]
+            constraints += [ 
+                (sls._system_model._A  * sls._Phi_xy[sls._FIR_horizon-1] +
+                 sls._system_model._B2 * sls._Phi_uy[sls._FIR_horizon  ]) == np.zeros([Nx, Ny])
+            ]
+            constraints += [ 
+                (sls._Phi_xx[sls._FIR_horizon-1] * sls._system_model._A  +
+                 sls._Phi_xy[sls._FIR_horizon-1] * sls._system_model._C2 ) == np.zeros([Nx, Nx])
+            ]
+            constraints += [
+                sls._Phi_ux[0] == sls._Phi_uy[0] * sls._system_model._C2
+            ]
+            constraints += [
+                (sls._Phi_ux[sls._FIR_horizon-1] * sls._system_model._A  +
+                 sls._Phi_uy[sls._FIR_horizon  ] * sls._system_model._C2 ) == np.zeros([Nu, Nx])
+            ]
+            for tau in range(sls._FIR_horizon-1):
+                constraints += [ 
+                    sls._Phi_xy[tau+1] == (
+                        sls._system_model._A  * sls._Phi_xy[tau] +
+                        sls._system_model._B2 * sls._Phi_uy[tau+1]
+                    )
+                ]
+
+                constraints += [
+                    sls._Phi_xx[tau+1] == (
+                        sls._Phi_xx[tau] * sls._system_model._A  +
+                        sls._Phi_xy[tau] * sls._system_model._C2
+                    )
+                ]
+
+                constraints += [
+                    sls._Phi_ux[tau+1] == (
+                        sls._Phi_ux[tau]   * sls._system_model._A  +
+                        sls._Phi_uy[tau+1] * sls._system_model._C2
+                    )
+                ]
+        return constraints
+
 class SLSCons_dLocalized (SLSConstraint):
     def __init__(self,
         base=None,
