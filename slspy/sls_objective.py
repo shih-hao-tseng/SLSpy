@@ -7,10 +7,10 @@ class SLSObjective:
     '''
     def __init__ (self):
         # to save the objective value
-        self._objective_value = 0
+        self._objective_expression = 0
 
     def getObjectiveValue(self):
-        return self._objective_value
+        return self._objective_expression.value
 
     def addObjectiveValue(self, sls, objective_value):
         return objective_value
@@ -25,11 +25,11 @@ class SLSObj_H2(SLSObjective):
         Phi_x = sls._Phi_x
         Phi_u = sls._Phi_u
 
-        self._objective_value = 0
+        self._objective_expression = 0
         for tau in range(len(Phi_x)):
-            self._objective_value += cp.sum_squares(C1*Phi_x[tau] + D12*Phi_u[tau])
+            self._objective_expression += cp.sum_squares(C1*Phi_x[tau] + D12*Phi_u[tau])
 
-        return objective_value + self._objective_value
+        return objective_value + self._objective_expression
 
 class SLSObj_HInf(SLSObjective):
     '''
@@ -60,9 +60,9 @@ class SLSObj_HInf(SLSObjective):
             matrix.append(row)
 
         block_diagonal_matrix = cp.bmat(matrix)
-        self._objective_value = cp.sigma_max(block_diagonal_matrix)
+        self._objective_expression = cp.sigma_max(block_diagonal_matrix)
 
-        return objective_value + self._objective_value
+        return objective_value + self._objective_expression
 
 class SLSObj_L1(SLSObjective):
     '''
@@ -93,9 +93,9 @@ class SLSObj_L1(SLSObjective):
             matrix.append(row)
 
         block_diagonal_matrix = cp.bmat(matrix)
-        self._objective_value = cp.norm(block_diagonal_matrix,'inf')
+        self._objective_expression = cp.norm(block_diagonal_matrix,'inf')
 
-        return objective_value + self._objective_value
+        return objective_value + self._objective_expression
 
 class SLSObj_RFD(SLSObjective):
     '''
@@ -122,9 +122,9 @@ class SLSObj_RFD(SLSObjective):
 
             actPenalty += cp.norm(cp.bmat(Phi_u_i),2)
 
-        self._objective_value = self._rfdCoeff * actPenalty
+        self._objective_expression = self._rfdCoeff * actPenalty
 
-        return objective_value + self._objective_value
+        return objective_value + self._objective_expression
 
     def getActsRFD (self):
         tol = 1e-4

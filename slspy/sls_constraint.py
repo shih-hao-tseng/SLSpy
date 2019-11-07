@@ -170,9 +170,9 @@ class SLSCons_Robust (SLSConstraint):
             gamma_coefficient * gamma
         to the objective
         '''
-        self._objective_value = self._gamma_coefficient * self._gamma
+        self._objective_expression = self._gamma_coefficient * self._gamma
 
-        return objective_value + self._objective_value
+        return objective_value + self._objective_expression
 
     def addConstraints(self, sls, constraints):
         '''

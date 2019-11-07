@@ -20,7 +20,8 @@ def robust_simulations():
         FIR_horizon = 10
     )
     # set objective
-    synthesizer <= SLSObj_H2 ()
+    obj_H2 = SLSObj_H2 ()
+    synthesizer <= obj_H2
 
     # add constraints
     # robustness constraint should be added before dlocalized as it modifies the SLS constriants
@@ -55,7 +56,7 @@ def robust_simulations():
         dlocalized._cSpeed = cSpeed
         controller = synthesizer.synthesizeControllerModel()
 
-        clnorms.append(synthesizer.getOptimalObjectiveValue())
+        clnorms.append(obj_H2.getObjectiveValue())
         robustStabs.append(robust.getStabilityMargin())
 
         if cSpeed in cPrints:
