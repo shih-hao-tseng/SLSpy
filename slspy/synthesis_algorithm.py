@@ -40,7 +40,7 @@ class SLS (SynthesisAlgorithm):
         
         self.resetObjAndCons()
 
-        self._sls_problem = None
+        self._sls_problem = cp.Problem(cp.Minimize(0))
         self._sls_constraints = SLSCons_SLS ()
 
     def setSystemModel(self,system_model):
@@ -188,29 +188,21 @@ class SLS (SynthesisAlgorithm):
             )
 
         # obtain results and put into controller
-        if self._sls_problem is None:
-            sls_problem = cp.Problem(cp.Minimize(objective_value),constraints)
-        else:
-            sls_problem = self._sls_problem
-            sls_problem._objective = cp.Minimize(objective_value)
-            sls_problem._constraints = constraints
-            sls_problem.args = [sls_problem._objective, sls_problem._constraints]
-            sls_problem._cached_chain_key = None
+        self._sls_problem._objective = cp.Minimize(objective_value)
+        self._sls_problem._constraints = constraints
+        self._sls_problem._cached_chain_key = None
 
-        sls_problem.solve()
+        self._sls_problem.solve()
 
-        self._sls_problem = None
-
-        if sls_problem.status is "infeasible":
+        if self._sls_problem.status is "infeasible":
             self.warningMessage('SLS problem infeasible')
             return None
-        elif sls_problem.status is "unbounded":
+        elif self._sls_problem.status is "unbounded":
             self.warningMessage('SLS problem unbounded')
             return None
         else:
             # save the solved problem for the users to examine if needed
-            self._sls_problem = sls_problem
-            self._optimal_objective_value = sls_problem.value
+            self._optimal_objective_value = self._sls_problem.value
             if self._use_state_feedback_version:
                 controller._Phi_x = []
                 controller._Phi_u = []
