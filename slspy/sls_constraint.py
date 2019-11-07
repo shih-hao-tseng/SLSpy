@@ -18,6 +18,17 @@ class SLSCons_SLS (SLSConstraint):
         self._state_feedback = state_feedback
 
     def addConstraints(self, sls, constraints=[]):
+        '''
+        state-feedback constraints:
+        [ zI-A, -B2 ][ Phi_x ] = I
+                     [ Phi_u ]
+
+        output-feedback constriants:
+        [ zI-A, -B2 ][ Phi_xx Phi_xy ] = [ I 0 ]
+                     [ Phi_ux Phi_uy ]
+        [ Phi_xx Phi_xy ][ zI-A ] = [ I ]
+        [ Phi_ux Phi_uy ][ -C2  ]   [ 0 ]
+        '''
         Nx = sls._system_model._Nx
         Nu = sls._system_model._Nu
 
@@ -25,8 +36,6 @@ class SLSCons_SLS (SLSConstraint):
         # the below constraints work for output-feedback case as well because
         # sls._Phi_x = sls._Phi_xx and sls._Phi_u = sls._Phi_ux
         constraints += [ sls._Phi_x[0] == np.eye(Nx) ]
-        # original code was like below, but it's official form should be like what it is now
-        # constraints += [ Phi_x[sls._FIR_horizon-1] == np.zeros([Nx, Nx]) ]
         constraints += [ 
             (sls._system_model._A  * sls._Phi_x[sls._FIR_horizon-1] +
              sls._system_model._B2 * sls._Phi_u[sls._FIR_horizon-1] ) == np.zeros([Nx, Nx]) 
@@ -87,6 +96,11 @@ class SLSCons_dLocalized (SLSConstraint):
         base=None,
         actDelay=0, cSpeed=1, d=1
     ):
+        '''
+        actDelay: actuation delay
+        cSpeed: communication speed
+        d: for d-localized
+        '''
         if isinstance(base,SLSCons_dLocalized):
             self._actDelay = base._actDelay
             self._cSpeed = base._cSpeed
@@ -134,6 +148,9 @@ class SLSCons_dLocalized (SLSConstraint):
         return constraints
 
 class SLSCons_Robust (SLSConstraint):
+    '''
+    Robust SLS (state-feedback) constraints
+    '''
     def __init__(self,
         gamma_coefficient=0
     ):
@@ -147,6 +164,11 @@ class SLSCons_Robust (SLSConstraint):
         return self._stability_margin
 
     def addObjectiveValue(self, sls, objective_value):
+        '''
+        introduce one more term: 
+            gamma_coefficient * gamma
+        to the objective
+        '''
         self._gamma = cp.Variable(1)
         self._stability_margin = self._gamma.value
 
@@ -155,6 +177,11 @@ class SLSCons_Robust (SLSConstraint):
         return objective_value
 
     def addConstraints(self, sls, constraints):
+        '''
+        [ zI-A, -B2 ][ Phi_x ] = I + Delta
+                     [ Phi_u ]
+        || Delta ||_{Epsilon_1} <= gamma
+        '''
         # reset constraints
         hat_Phi_x = sls._Phi_x
         hat_Phi_u = sls._Phi_u
@@ -181,7 +208,7 @@ class SLSCons_Robust (SLSConstraint):
                 )
             ]
 
-        # epsilon_1 robustness
+        # Epsilon_1 robustness
         constraints += [
             cp.norm(cp.bmat([self._Delta]),'inf') <= self._gamma
         ]
