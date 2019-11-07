@@ -158,12 +158,11 @@ class SLSCons_Robust (SLSConstraint):
     ):
         self._gamma_coefficient = gamma_coefficient
 
-        self._gamma = None
         self._Delta = []
-        self._stability_margin = -1
+        self._gamma = cp.Variable(1)
 
     def getStabilityMargin (self):
-        return self._stability_margin
+        return self._gamma.value
 
     def addObjectiveValue(self, sls, objective_value):
         '''
@@ -171,9 +170,6 @@ class SLSCons_Robust (SLSConstraint):
             gamma_coefficient * gamma
         to the objective
         '''
-        self._gamma = cp.Variable(1)
-        self._stability_margin = self._gamma.value
-
         objective_value += self._gamma_coefficient * self._gamma
 
         return objective_value
@@ -189,8 +185,14 @@ class SLSCons_Robust (SLSConstraint):
         hat_Phi_u = sls._Phi_u
 
         Nx = sls._system_model._Nx
-        self._Delta = []
-        for t in range(sls._FIR_horizon+1):
+
+        # recycle delta for better performance
+        len_delta = len(self._Delta)
+        if len_delta > 0:
+            if (self._Delta[0].shape[0] != Nx) or (self._Delta[0].shape[1] != Nx):
+                self._Delta = []
+                len_delta = 0
+        for t in range(len_delta, sls._FIR_horizon+1):
             self._Delta.append(cp.Variable(shape=(Nx,Nx)))
 
         constraints =  [ hat_Phi_x[0] == np.eye(Nx) + self._Delta[0] ]
