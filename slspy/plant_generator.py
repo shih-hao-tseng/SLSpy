@@ -5,10 +5,48 @@ import numpy as np
 '''
 Some helper functions to generate the LTI system plant matrices
 '''
+def generate_matrices_from_ABCD (system_model=None, A=None, B=None, C=None, D=None):
+    '''
+    Given A, B, C, and D, partition them into the corresponding matrices
+    '''
+    # This function simply serves as an abbreviation
+    # The user has to ensure that system_model is LTISystem, 
+    # and the dimensions of the provided matrices are correct
+    Nx = system_model._Nx
+    Ny = system_model._Ny
+    Nz = system_model._Nz
+    Nu = system_model._Nu
+    Nw = system_model._Nw
+
+    system_model._A = A
+    if B is None:
+        system_model._B1 = None
+        system_model._B2 = None
+    else:
+        system_model._B1 = B[:,0:Nw]
+        system_model._B2 = B[:,Nw:Nw+Nu]
+
+    if C is None:
+        system_model._C1 = None
+        system_model._C2 = None
+    else:
+        system_model._C1 = C[0:Nz,:]
+        system_model._C2 = C[Nz:Nz+Ny,:]
+    
+    if D is None:
+        system_model._D11 = None
+        system_model._D12 = None
+        system_model._D21 = None
+        system_model._D22 = None
+    else:
+        system_model._D11 = D[0:Nz,0:Nw]
+        system_model._D12 = D[0:Nz,Nw:Nw+Nu]
+        system_model._D21 = D[Nz:Nz+Ny,0:Nw]
+        system_model._D22 = D[Nz:Nz+Ny,Nw:Nw+Nu]
 
 def generate_BCD_and_zero_initialization (system_model=None):
     # This function simply serves as an abbreviation
-    # The user has to ensure the correctness
+    # The user has to ensure that system_model is LTISystem
     system_model._Nw = system_model._Nx
     system_model._Nz = system_model._Nx + system_model._Nu
 
