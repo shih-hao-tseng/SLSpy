@@ -188,15 +188,18 @@ class SLS (SynthesisAlgorithm):
             )
 
         # obtain results and put into controller
-        #if self._sls_problem is None:
-        sls_problem = cp.Problem(cp.Minimize(objective_value),constraints)
-        #else:
-        #    sls_problem = self._sls_problem
-        #    sls_problem._objective = cp.Minimize(objective_value)
-        #    sls_problem._constraints = constraints
-        #    sls_problem.args = [sls_problem._objective, sls_problem._constraints]
+        if self._sls_problem is None:
+            sls_problem = cp.Problem(cp.Minimize(objective_value),constraints)
+        else:
+            sls_problem = self._sls_problem
+            sls_problem._objective = cp.Minimize(objective_value)
+            sls_problem._constraints = constraints
+            sls_problem.args = [sls_problem._objective, sls_problem._constraints]
+            sls_problem._cached_chain_key = None
 
         sls_problem.solve()
+
+        self._sls_problem = None
 
         if sls_problem.status is "infeasible":
             self.warningMessage('SLS problem infeasible')
