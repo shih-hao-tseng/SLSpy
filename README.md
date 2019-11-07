@@ -3,7 +3,7 @@
 ## Synopsis
 *SLSpy* provides a Python-based framework to simulate model-based control systems, especially for system level synthesis (SLS) methods. The simulation workflow follows the descriptions in the paper
 
-Shih-Hao Tseng and James Anderson, ``Deployment Architectures for Cyber-Physical Control Systems,'' 2019.
+Shih-Hao Tseng and James Anderson, ``[Deployment Architectures for Cyber-Physical Control Systems](https://arxiv.org/abs/1911.01510),'' 2019.
 
 ## System Requirement
 * Python 2.7 or higher
@@ -29,3 +29,7 @@ first, then reinstall scs package by
 or
 
 `pip install --no-cache-dir -I scs`
+
+## SLSpy Wiki
+A simple wiki page with basic explanation can be found at 
+http://slswiki.cms.caltech.edu/index.php/SLSpy
