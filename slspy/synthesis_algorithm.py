@@ -33,20 +33,49 @@ class SLS (SynthesisAlgorithm):
         FIR_horizon=1,
         state_feedback=True
     ):
-        self.setSystemModel(system_model=system_model)
         self._FIR_horizon = FIR_horizon
         self._state_feedback = state_feedback
+
+        self.setSystemModel(system_model=system_model)
         
         self.resetObjAndCons()
+
+        self._sls_problem = None
+        self._sls_constraints = SLSCons_SLS ()
+
+    def setSystemModel(self,system_model):
+        if isinstance(system_model,SystemModel):
+            self._system_model = system_model
+        
+        self.initializePhi()
+
+        return self
+
+    def initializePhi (self):
+        self._use_state_feedback_version = self._state_feedback or self._system_model._state_feedback
+
+        Nx = self._system_model._Nx
+        Nu = self._system_model._Nu
 
         self._Phi_x = self._Phi_xx = []
         self._Phi_u = self._Phi_ux = []
         self._Phi_xy = []
         self._Phi_uy = []
+        if self._use_state_feedback_version:
+            for tau in range(self._FIR_horizon):
+                self._Phi_x.append(cp.Variable(shape=(Nx,Nx)))
+                self._Phi_u.append(cp.Variable(shape=(Nu,Nx)))
+        else:
+            Ny = self._system_model._Ny
 
-        self._sls_problem = None
-        self._sls_constraints = SLSCons_SLS ()
-   
+            for tau in range(self._FIR_horizon):
+                self._Phi_xx.append(cp.Variable(shape=(Nx,Nx)))
+                self._Phi_ux.append(cp.Variable(shape=(Nu,Nx)))
+                self._Phi_xy.append(cp.Variable(shape=(Nx,Ny)))
+                self._Phi_uy.append(cp.Variable(shape=(Nu,Ny)))
+            # Phi_uy is in RH_{\inf} instead of z^{-1} RH_{\inf}
+            self._Phi_uy.append(cp.Variable(shape=(Nu,Ny)))
+
     # overload plus and less than or equal operators as syntactic sugars
     def __add__(self, obj_or_cons):
         return self.addObjOrCons(obj_or_cons)
@@ -118,21 +147,14 @@ class SLS (SynthesisAlgorithm):
         Nx = self._system_model._Nx
         Nu = self._system_model._Nu
 
-        self._Phi_xx = self._Phi_x = []
-        self._Phi_ux = self._Phi_u = []
+        if self._use_state_feedback_version != (self._state_feedback or self._system_model._state_feedback):
+            initializePhi ()
 
-        use_state_feedback_version = self._state_feedback or self._system_model._state_feedback
-
-        if use_state_feedback_version:
+        if self._use_state_feedback_version:
             controller = SLS_State_Feedback_FIR_Controller (
                 Nx=Nx, Nu=Nu,
                 FIR_horizon=self._FIR_horizon
             )
-
-            # declare variables
-            for tau in range(self._FIR_horizon):
-                self._Phi_x.append(cp.Variable(shape=(Nx,Nx)))
-                self._Phi_u.append(cp.Variable(shape=(Nu,Nx)))
         else:
             # output-feedback
             Ny = self._system_model._Ny
@@ -141,17 +163,6 @@ class SLS (SynthesisAlgorithm):
                 Nx=Nx, Nu=Nu, Ny=Ny, D22=self._system_model._D22,
                 FIR_horizon=self._FIR_horizon
             )
-
-            # declare variables
-            self._Phi_xy = []
-            self._Phi_uy = []
-            for tau in range(self._FIR_horizon):
-                self._Phi_xx.append(cp.Variable(shape=(Nx,Nx)))
-                self._Phi_ux.append(cp.Variable(shape=(Nu,Nx)))
-                self._Phi_xy.append(cp.Variable(shape=(Nx,Ny)))
-                self._Phi_uy.append(cp.Variable(shape=(Nu,Ny)))
-            # Phi_uy is in RH_{\inf} instead of z^{-1} RH_{\inf}
-            self._Phi_uy.append(cp.Variable(shape=(Nu,Ny)))
 
         # objective
         objective_value = 0
@@ -162,7 +173,7 @@ class SLS (SynthesisAlgorithm):
             )
 
         # add SLS main constraints
-        self._sls_constraints._state_feedback = use_state_feedback_version
+        self._sls_constraints._state_feedback = self._use_state_feedback_version
         constraints = self._sls_constraints.addConstraints (sls = self)
 
         # the constraints might also introduce additional terms at the objective
@@ -177,10 +188,15 @@ class SLS (SynthesisAlgorithm):
             )
 
         # obtain results and put into controller
+        #if self._sls_problem is None:
         sls_problem = cp.Problem(cp.Minimize(objective_value),constraints)
-        sls_problem.solve()
+        #else:
+        #    sls_problem = self._sls_problem
+        #    sls_problem._objective = cp.Minimize(objective_value)
+        #    sls_problem._constraints = constraints
+        #    sls_problem.args = [sls_problem._objective, sls_problem._constraints]
 
-        self._sls_problem = None
+        sls_problem.solve()
 
         if sls_problem.status is "infeasible":
             self.warningMessage('SLS problem infeasible')
@@ -192,7 +208,7 @@ class SLS (SynthesisAlgorithm):
             # save the solved problem for the users to examine if needed
             self._sls_problem = sls_problem
             self._optimal_objective_value = sls_problem.value
-            if use_state_feedback_version:
+            if self._use_state_feedback_version:
                 controller._Phi_x = []
                 controller._Phi_u = []
                 for tau in range(self._FIR_horizon):

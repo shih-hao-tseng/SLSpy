@@ -40,6 +40,8 @@ class SLSCons_SLS (SLSConstraint):
             ]
 
         if not self._state_feedback:
+            Ny = sls._system_model._Ny
+
             # output-feedback constraints
             constraints += [
                 sls._Phi_xy[0] == sls._system_model._B2 * sls._Phi_uy[0]
