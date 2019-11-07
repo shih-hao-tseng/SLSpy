@@ -5,6 +5,13 @@ class SLSObjective:
     '''
     The base class for SLS objectives
     '''
+    def __init__ (self):
+        # to save the objective value
+        self._objective_value = 0
+
+    def getObjectiveValue(self):
+        return self._objective_value
+
     def addObjectiveValue(self, sls, objective_value):
         return objective_value
 
@@ -17,11 +24,12 @@ class SLSObj_H2(SLSObjective):
         D12 = sls._system_model._D12
         Phi_x = sls._Phi_x
         Phi_u = sls._Phi_u
-        
-        for tau in range(len(Phi_x)):
-            objective_value += cp.sum_squares(C1*Phi_x[tau] + D12*Phi_u[tau])
 
-        return objective_value
+        self._objective_value = 0
+        for tau in range(len(Phi_x)):
+            self._objective_value += cp.sum_squares(C1*Phi_x[tau] + D12*Phi_u[tau])
+
+        return objective_value + self._objective_value
 
 class SLSObj_HInf(SLSObjective):
     '''
@@ -52,8 +60,9 @@ class SLSObj_HInf(SLSObjective):
             matrix.append(row)
 
         block_diagonal_matrix = cp.bmat(matrix)
+        self._objective_value = cp.sigma_max(block_diagonal_matrix)
 
-        return objective_value + cp.sigma_max(block_diagonal_matrix)
+        return objective_value + self._objective_value
 
 class SLSObj_L1(SLSObjective):
     '''
@@ -84,8 +93,9 @@ class SLSObj_L1(SLSObjective):
             matrix.append(row)
 
         block_diagonal_matrix = cp.bmat(matrix)
+        self._objective_value = cp.norm(block_diagonal_matrix,'inf')
 
-        return objective_value + cp.norm(block_diagonal_matrix,'inf')
+        return objective_value + self._objective_value
 
 class SLSObj_RFD(SLSObjective):
     '''
@@ -112,7 +122,9 @@ class SLSObj_RFD(SLSObjective):
 
             actPenalty += cp.norm(cp.bmat(Phi_u_i),2)
 
-        return objective_value + self._rfdCoeff * actPenalty 
+        self._objective_value = self._rfdCoeff * actPenalty
+
+        return objective_value + self._objective_value
 
     def getActsRFD (self):
         tol = 1e-4
