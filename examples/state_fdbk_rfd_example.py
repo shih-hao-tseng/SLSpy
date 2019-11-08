@@ -21,7 +21,7 @@ def state_fdbk_rfd_example():
     # objective function
     obj_H2 = SLSObj_H2 ()
 
-    rfdCoeffs = [1000]#[0.01, 0.1, 1, 10, 100, 1000]
+    rfdCoeffs = [0.01, 0.1, 1, 10, 100, 1000]
 
     ## (1) basic sls (centralized controller) with rfd
     num_acts = []
@@ -39,6 +39,7 @@ def state_fdbk_rfd_example():
         synthesizer.synthesizeControllerModel ()
 
         new_act_ids = obj_rfd.getActsRFD()
+
         num_acts.append(len(new_act_ids))
         
         # check performance with rfd-designed system
@@ -48,7 +49,7 @@ def state_fdbk_rfd_example():
         synthesizer <= sysAfterRFD <= obj_H2
         synthesizer.synthesizeControllerModel ()
         
-        clnorms.append(obj_H2.getObjectiveValue())
+        clnorms.append(synthesizer.getOptimalObjectiveValue())
 
     plot_line_chart(
         list_x=num_acts,
@@ -59,80 +60,80 @@ def state_fdbk_rfd_example():
         ylabel='Close loop norm'
     )
 
-#    ## (2) d-localized sls with rfd
-#    num_acts = []
-#    clnorms = []
-#
-#    dlocalized = SLSCons_dLocalized (
-#        actDelay = 1,
-#        cSpeed = 2,
-#        d = 3
-#    )
-#    synthesizer <= dlocalized
-#
-#    for rfdCoeff in rfdCoeffs:
-#        synthesizer <= sys <= obj_H2
-#        obj_rfd._rfdCoeff = rfdCoeff
-#        synthesizer += obj_rfd
-#        synthesizer.synthesizeControllerModel ()
-#
-#        new_act_ids = obj_rfd.getActsRFD()
-#        num_acts.append(len(new_act_ids))
-#        
-#        # check performance with rfd-designed system
-#        sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
-#
-#        # only H2
-#        synthesizer <= sysAfterRFD <= obj_H2
-#        synthesizer.synthesizeControllerModel ()
-#        
-#        clnorms.append(obj_H2.getObjectiveValue())
-#
-#    plot_line_chart(
-#        list_x=num_acts,
-#        list_y=clnorms,
-#        line_format='*-',
-#        title='d-localized RFD tradeoff curve',
-#        xlabel='Number of actuators',
-#        ylabel='Close loop norm'
-#    )
-#
-#    ## (3) approximate d-localized sls with rfd
-#    num_acts = []
-#    clnorms = []
-#
-#    approx_dlocalized = SLSCons_ApproxdLocalized (
-#        base = dlocalized,
-#        robCoeff = 10e4
-#    )
-#    synthesizer <= approx_dlocalized
-#
-#    for rfdCoeff in rfdCoeffs:
-#        synthesizer <= sys <= obj_H2
-#        obj_rfd._rfdCoeff = rfdCoeff
-#        synthesizer += obj_rfd
-#        synthesizer.synthesizeControllerModel ()
-#
-#        new_act_ids = obj_rfd.getActsRFD()
-#        num_acts.append(len(new_act_ids))
-#        
-#        # check performance with rfd-designed system
-#        sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
-#
-#        # only H2
-#        synthesizer <= sysAfterRFD <= obj_H2
-#        synthesizer.synthesizeControllerModel ()
-#        
-#        clnorms.append(obj_H2.getObjectiveValue())
-#
-#    plot_line_chart(
-#        list_x=num_acts,
-#        list_y=clnorms,
-#        line_format='*-',
-#        title='Approx d-localized RFD tradeoff curve',
-#        xlabel='Number of actuators',
-#        ylabel='Close loop norm'
-#    )
+    ## (2) d-localized sls with rfd
+    num_acts = []
+    clnorms = []
+
+    dlocalized = SLSCons_dLocalized (
+        actDelay = 1,
+        cSpeed = 2,
+        d = 3
+    )
+    synthesizer <= dlocalized
+
+    for rfdCoeff in rfdCoeffs:
+        synthesizer <= sys <= obj_H2
+        obj_rfd._rfdCoeff = rfdCoeff
+        synthesizer += obj_rfd
+        synthesizer.synthesizeControllerModel ()
+
+        new_act_ids = obj_rfd.getActsRFD()
+        num_acts.append(len(new_act_ids))
+        
+        # check performance with rfd-designed system
+        sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
+
+        # only H2
+        synthesizer <= sysAfterRFD <= obj_H2
+        synthesizer.synthesizeControllerModel ()
+        
+        clnorms.append(synthesizer.getOptimalObjectiveValue())
+
+    plot_line_chart(
+        list_x=num_acts,
+        list_y=clnorms,
+        line_format='*-',
+        title='d-localized RFD tradeoff curve',
+        xlabel='Number of actuators',
+        ylabel='Close loop norm'
+    )
+
+    ## (3) approximate d-localized sls with rfd
+    num_acts = []
+    clnorms = []
+
+    approx_dlocalized = SLSCons_ApproxdLocalized (
+        base = dlocalized,
+        robCoeff = 10e4
+    )
+    synthesizer <= approx_dlocalized
+
+    for rfdCoeff in rfdCoeffs:
+        synthesizer <= sys <= obj_H2
+        obj_rfd._rfdCoeff = rfdCoeff
+        synthesizer += obj_rfd
+        synthesizer.synthesizeControllerModel ()
+
+        new_act_ids = obj_rfd.getActsRFD()
+        num_acts.append(len(new_act_ids))
+        
+        # check performance with rfd-designed system
+        sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
+
+        # only H2
+        synthesizer <= sysAfterRFD <= obj_H2
+        synthesizer.synthesizeControllerModel ()
+        
+        clnorms.append(synthesizer.getOptimalObjectiveValue())
+
+    plot_line_chart(
+        list_x=num_acts,
+        list_y=clnorms,
+        line_format='*-',
+        title='Approx d-localized RFD tradeoff curve',
+        xlabel='Number of actuators',
+        ylabel='Close loop norm'
+    )
 
 if __name__ == '__main__':
     state_fdbk_rfd_example()

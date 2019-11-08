@@ -10,7 +10,10 @@ class SLSObjective:
         self._objective_expression = 0
 
     def getObjectiveValue(self):
-        return self._objective_expression.value
+        if isinstance(self._objective_expression, int):
+            return self._objective_expression
+        else:
+            return self._objective_expression.value
 
     def addObjectiveValue(self, sls, objective_value):
         return objective_value
@@ -107,24 +110,21 @@ class SLSObj_RFD(SLSObjective):
         self._reference_system = None
 
     def addObjectiveValue(self, sls, objective_value):
-        actPenalty = 0
-        
         # for higher performance, don't keep generating variables
         if self._reference_system is not sls._system_model:
             # for a new system
             self._reference_system = sls._system_model
             self._acts_rfd = []
             for i in range (sls._system_model._Nu):
-                u = sls._Phi_u[0][i,:]
-                self._acts_rfd.append(cp.norm(u,2))
+                self._acts_rfd.append(cp.norm(sls._Phi_u[0][i,:],2))
 
+        actPenalty = 0
         for i in range (sls._system_model._Nu):
             Phi_u_i = []
-
             for t in range (sls._FIR_horizon):
                 Phi_u_i.append(sls._Phi_u[t][i,:])
 
-            actPenalty += cp.norm(cp.bmat(Phi_u_i),2)
+            actPenalty += cp.norm(cp.bmat([Phi_u_i]),2)
 
         self._objective_expression = self._rfdCoeff * actPenalty
 
