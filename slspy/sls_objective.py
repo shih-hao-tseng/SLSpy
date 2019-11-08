@@ -103,21 +103,25 @@ class SLSObj_RFD(SLSObjective):
     '''
     def __init__ (self,rfdCoeff=0):
         self._rfdCoeff = rfdCoeff
-        self._acts_rfd = []
+        self._acts_rfd = None
+        self._reference_system = None
 
     def addObjectiveValue(self, sls, objective_value):
         actPenalty = 0
-        self._acts_rfd = []
+        
+        # for higher performance, don't keep generating variables
+        if self._reference_system is not sls._system_model:
+            # for a new system
+            self._reference_system = sls._system_model
+            self._acts_rfd = []
+            for i in range (sls._system_model._Nu):
+                u = sls._Phi_u[0][i,:]
+                self._acts_rfd.append(cp.norm(u,2))
 
         for i in range (sls._system_model._Nu):
             Phi_u_i = []
 
-            # for higher performance, with the assumption that horizon > 0
-            u = sls._Phi_u[0][i,:]
-            Phi_u_i.append(u)
-            self._acts_rfd.append(cp.norm(u,2))
-
-            for t in range (1,sls._FIR_horizon):
+            for t in range (sls._FIR_horizon):
                 Phi_u_i.append(sls._Phi_u[t][i,:])
 
             actPenalty += cp.norm(cp.bmat(Phi_u_i),2)
@@ -129,6 +133,9 @@ class SLSObj_RFD(SLSObjective):
     def getActsRFD (self):
         tol = 1e-4
         
+        if self._acts_rfd is None:
+            return []
+
         acts = []
         for i in range(len(self._acts_rfd)):
             if self._acts_rfd[i].value > tol:

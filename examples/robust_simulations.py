@@ -47,7 +47,7 @@ def robust_simulations():
     noise._w[0][sys._Nw/2] = 10
     sys.useNoiseModel (noise_model = noise)
 
-    cSpeeds = [2, 1, 0.4]#[2, 1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4]
+    cSpeeds = [2, 1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4]
     cPrints = [2, 1, 0.4]  # which comm speeds to simulate & plot
 
     clnorms     = []
@@ -72,7 +72,8 @@ def robust_simulations():
         list_y=clnorms,
         title='%d Node Chain' % sys._Nx,
         xlabel='Comm Speed',
-        ylabel='Localized H_2-Norm Cost'
+        ylabel='Localized H_2-Norm Cost',
+        invert_x=True
     )
 
     plot_line_chart(
@@ -80,7 +81,8 @@ def robust_simulations():
         list_y=robustStabs,
         title='%d Node Chain' % sys._Nx,
         xlabel='Comm Speed',
-        ylabel='Stability Margin'
+        ylabel='Stability Margin',
+        invert_x=True
     )
 
 if __name__ == '__main__':
