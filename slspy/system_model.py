@@ -269,6 +269,7 @@ class LTISystem (SystemModel):
         sys._B2  = self._B2 [:, new_act_ids]
         sys._D12 = self._D12[:, new_act_ids]
         sys._Nu  = len(new_act_ids)
+        return sys
     
     def __copy(self):
         sys = LTISystem()

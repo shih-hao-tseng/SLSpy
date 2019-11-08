@@ -35,12 +35,13 @@ class SLS (SynthesisAlgorithm):
     ):
         self._FIR_horizon = FIR_horizon
         self._state_feedback = state_feedback
+        self._system_model = None
 
         self.setSystemModel(system_model=system_model)
         
         self.resetObjAndCons()
 
-        self._sls_problem = None #cp.Problem(cp.Minimize(0))
+        self._sls_problem = cp.Problem(cp.Minimize(0))
         self._sls_constraints = SLSCons_SLS ()
 
     def setSystemModel(self,system_model):
@@ -52,15 +53,19 @@ class SLS (SynthesisAlgorithm):
         return self
 
     def initializePhi (self):
+        self._Phi_x = self._Phi_xx = []
+        self._Phi_u = self._Phi_ux = []
+        self._Phi_xy = []
+        self._Phi_uy = []
+
+        if self._system_model is None:
+            return
+
         self._use_state_feedback_version = self._state_feedback or self._system_model._state_feedback
 
         Nx = self._system_model._Nx
         Nu = self._system_model._Nu
 
-        self._Phi_x = self._Phi_xx = []
-        self._Phi_u = self._Phi_ux = []
-        self._Phi_xy = []
-        self._Phi_uy = []
         if self._use_state_feedback_version:
             for tau in range(self._FIR_horizon):
                 self._Phi_x.append(cp.Variable(shape=(Nx,Nx)))
@@ -188,10 +193,10 @@ class SLS (SynthesisAlgorithm):
             )
 
         # obtain results and put into controller
-        self._sls_problem = cp.Problem (cp.Minimize(objective_value), constraints)
-        #self._sls_problem._objective = cp.Minimize(objective_value)
-        #self._sls_problem._constraints = constraints
-        #self._sls_problem._cached_chain_key = None
+        #self._sls_problem = cp.Problem (cp.Minimize(objective_value), constraints)
+        self._sls_problem._objective = cp.Minimize(objective_value)
+        self._sls_problem._constraints = constraints
+        self._sls_problem._cached_chain_key = None
 
         self._sls_problem.solve()
 

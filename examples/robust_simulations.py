@@ -47,7 +47,7 @@ def robust_simulations():
     noise._w[0][sys._Nw/2] = 10
     sys.useNoiseModel (noise_model = noise)
 
-    cSpeeds = [2, 1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4]
+    cSpeeds = [2, 1, 0.4]#[2, 1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4]
     cPrints = [2, 1, 0.4]  # which comm speeds to simulate & plot
 
     clnorms     = []
