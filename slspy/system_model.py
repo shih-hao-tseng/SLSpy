@@ -274,16 +274,16 @@ class LTISystem (SystemModel):
     def __copy(self):
         sys = LTISystem()
         # state
-        sys._A  = self._A 
+        sys._A  = self._A
         sys._B1 = self._B1
 
         # reg output
-        sys._C1  = self._C1 
+        sys._C1  = self._C1
         sys._D11 = self._D11
         sys._D12 = self._D12
 
         # measurement
-        sys._C2  = self._C2 
+        sys._C2  = self._C2
         sys._D22 = self._D22
 
         # vector dimensions

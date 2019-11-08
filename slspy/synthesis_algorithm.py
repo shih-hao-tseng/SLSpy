@@ -193,10 +193,10 @@ class SLS (SynthesisAlgorithm):
             )
 
         # obtain results and put into controller
-        #self._sls_problem = cp.Problem (cp.Minimize(objective_value), constraints)
-        self._sls_problem._objective = cp.Minimize(objective_value)
-        self._sls_problem._constraints = constraints
-        self._sls_problem._cached_chain_key = None
+        self._sls_problem = cp.Problem (cp.Minimize(objective_value), constraints)
+        #self._sls_problem._objective = cp.Minimize(objective_value)
+        #self._sls_problem._constraints = constraints
+        #self._sls_problem._cached_chain_key = None
 
         self._sls_problem.solve()
 
