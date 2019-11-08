@@ -122,8 +122,9 @@ def generate_random_chain (system_model=None, rho=1, actuator_density=1):
     system_model._Nu = Nu
 
     system_model._A = np.eye(Nx)
+
     if Nx > 1:
-        system_model._A[0:-1,1:] += np.diag(np.random.randn(Nx-1)) # TODO
+        system_model._A[0:-1,1:] += np.diag(np.random.randn(Nx-1))
         system_model._A[1:,0:-1] += np.diag(np.random.randn(Nx-1))
 
     eigenvalues, eigenvectors = np.linalg.eig(system_model._A)

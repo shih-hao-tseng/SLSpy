@@ -119,7 +119,7 @@ class SLS (SynthesisAlgorithm):
         return self
 
     def getOptimalObjectiveValue (self):
-        return self._optimal_objective_value.copy()
+        return self._optimal_objective_value
 
     def getSLSProblem (self):
         return self._sls_problem
