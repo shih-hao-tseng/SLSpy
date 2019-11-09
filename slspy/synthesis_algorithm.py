@@ -41,7 +41,7 @@ class SLS (SynthesisAlgorithm):
         
         self.resetObjAndCons()
 
-        self._sls_problem = cp.Problem(cp.Minimize(0))
+        self._sls_problem = None #cp.Problem(cp.Minimize(0))
         self._sls_constraints = SLSCons_SLS ()
 
     def setSystemModel(self,system_model):
@@ -194,9 +194,6 @@ class SLS (SynthesisAlgorithm):
 
         # obtain results and put into controller
         self._sls_problem = cp.Problem (cp.Minimize(objective_value), constraints)
-        #self._sls_problem._objective = cp.Minimize(objective_value)
-        #self._sls_problem._constraints = constraints
-        #self._sls_problem._cached_chain_key = None
         self._sls_problem.solve()
 
         if self._sls_problem.status is "infeasible":

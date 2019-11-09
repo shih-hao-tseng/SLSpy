@@ -21,7 +21,6 @@ def state_fdbk_rfd_example():
     # objective function
     obj_H2 = SLSObj_H2 ()
 
-    # the ECOS solver has trouble dealing with 1000...
     rfdCoeffs = [0.01, 0.1, 1, 10, 100, 1000]
 
     ## (1) basic sls (centralized controller) with rfd
@@ -40,9 +39,8 @@ def state_fdbk_rfd_example():
         synthesizer.synthesizeControllerModel ()
 
         new_act_ids = obj_rfd.getActsRFD()
-
         num_acts.append(len(new_act_ids))
-        
+
         # check performance with rfd-designed system
         sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
 
