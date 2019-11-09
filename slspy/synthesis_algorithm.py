@@ -197,7 +197,6 @@ class SLS (SynthesisAlgorithm):
         #self._sls_problem._objective = cp.Minimize(objective_value)
         #self._sls_problem._constraints = constraints
         #self._sls_problem._cached_chain_key = None
-
         self._sls_problem.solve()
 
         if self._sls_problem.status is "infeasible":
