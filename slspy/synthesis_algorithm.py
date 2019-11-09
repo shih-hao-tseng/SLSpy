@@ -153,7 +153,7 @@ class SLS (SynthesisAlgorithm):
         Nu = self._system_model._Nu
 
         if self._use_state_feedback_version != (self._state_feedback or self._system_model._state_feedback):
-            initializePhi ()
+            self.initializePhi ()
 
         if self._use_state_feedback_version:
             controller = SLS_State_Feedback_FIR_Controller (
@@ -197,11 +197,7 @@ class SLS (SynthesisAlgorithm):
         #self._sls_problem._objective = cp.Minimize(objective_value)
         #self._sls_problem._constraints = constraints
         #self._sls_problem._cached_chain_key = None
-        try:
-            self._sls_problem.solve()
-        except:
-            self.errorMessage('Solver error, try to run more iterations.')
-            self._sls_problem.solve(max_iters=100000)
+        self._sls_problem.solve()
 
         if self._sls_problem.status is "infeasible":
             self.warningMessage('SLS problem infeasible')

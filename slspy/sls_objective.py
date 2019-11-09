@@ -106,21 +106,14 @@ class SLSObj_RFD(SLSObjective):
     '''
     def __init__ (self,rfdCoeff=0):
         self._rfdCoeff = rfdCoeff
-        self._acts_rfd = None
-        self._reference_system = None
+        self._acts_rfd = []
 
     def addObjectiveValue(self, sls, objective_value):
-        # for higher performance, don't keep generating variables
-        if self._reference_system is not sls._system_model:
-            # for a new system
-            self._reference_system = sls._system_model
-            self._acts_rfd = []
-            for i in range (sls._system_model._Nu):
-                self._acts_rfd.append(cp.norm(sls._Phi_u[0][i,:],2))
-
         actPenalty = 0
+        self._acts_rfd = []
         for i in range (sls._system_model._Nu):
             Phi_u_i = []
+            self._acts_rfd.append(cp.norm(sls._Phi_u[0][i,:],2))
             for t in range (sls._FIR_horizon):
                 Phi_u_i.append(sls._Phi_u[t][i,:])
 
@@ -132,9 +125,6 @@ class SLSObj_RFD(SLSObjective):
 
     def getActsRFD (self):
         tol = 1e-4
-        
-        if self._acts_rfd is None:
-            return []
 
         acts = []
         for i in range(len(self._acts_rfd)):

@@ -8,4 +8,4 @@ from .noise_model import *
 from .plant_generator import *
 from .visualization_tool import *
 
-VERSION="beta-19.11.9"
+VERSION="beta-19.11.10"
