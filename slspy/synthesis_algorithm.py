@@ -13,7 +13,7 @@ class SynthesisAlgorithm (ObjBase):
         self.setSystemModel(system_model=system_model)
 
     # overload the less than or equal operator as a syntactic sugar
-    def __le__ (self, sytem):
+    def __lshift__ (self, sytem):
         return self.setSystemModel(system_model=system)
 
     def setSystemModel(self,system_model):
@@ -85,7 +85,7 @@ class SLS (SynthesisAlgorithm):
     def __add__(self, obj_or_cons):
         return self.addObjOrCons(obj_or_cons)
 
-    def __le__ (self, obj_or_cons_or_system):
+    def __lshift__ (self, obj_or_cons_or_system):
         if isinstance(obj_or_cons_or_system,SystemModel):
             return self.setSystemModel(system_model=obj_or_cons_or_system)
         else:
@@ -197,7 +197,11 @@ class SLS (SynthesisAlgorithm):
         #self._sls_problem._objective = cp.Minimize(objective_value)
         #self._sls_problem._constraints = constraints
         #self._sls_problem._cached_chain_key = None
-        self._sls_problem.solve()
+        try:
+            self._sls_problem.solve()
+        except:
+            self.errorMessage('Solver error, try to run more iterations.')
+            self._sls_problem.solve(max_iters=100000)
 
         if self._sls_problem.status is "infeasible":
             self.warningMessage('SLS problem infeasible')

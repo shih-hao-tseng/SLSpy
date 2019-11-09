@@ -36,7 +36,7 @@ def state_fdbk_example():
         FIR_horizon = 20
     )
     # set SLS objective
-    synthesizer <= SLSObj_H2()
+    synthesizer << SLSObj_H2()
 
     # synthesize controller (the generated controller is actually initialized)
     # and use the synthesized controller in simulation
@@ -57,7 +57,7 @@ def state_fdbk_example():
         cSpeed = 2,
         d = 3
     )
-    synthesizer <= dlocalized
+    synthesizer << dlocalized
 
     simulator.setController (
         controller = synthesizer.synthesizeControllerModel ()
@@ -77,7 +77,7 @@ def state_fdbk_example():
     approx_dlocalized._cSpeed = 1
 
     # set the constriant
-    synthesizer <= approx_dlocalized
+    synthesizer << approx_dlocalized
 
     controller = synthesizer.synthesizeControllerModel ()
     simulator.setController (controller=controller)

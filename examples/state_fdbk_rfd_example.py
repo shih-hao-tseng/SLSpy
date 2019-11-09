@@ -33,7 +33,7 @@ def state_fdbk_rfd_example():
     for rfdCoeff in rfdCoeffs:
         # equivalent to synthesizer.setSystemModel(sys)
         # then add obj_H2
-        synthesizer <= sys <= obj_H2
+        synthesizer << sys << obj_H2
         obj_rfd._rfdCoeff = rfdCoeff
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
@@ -46,7 +46,7 @@ def state_fdbk_rfd_example():
         sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
 
         # only H2
-        synthesizer <= sysAfterRFD <= obj_H2
+        synthesizer << sysAfterRFD << obj_H2
         synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())
@@ -69,10 +69,10 @@ def state_fdbk_rfd_example():
         cSpeed = 2,
         d = 3
     )
-    synthesizer <= dlocalized
+    synthesizer << dlocalized
 
     for rfdCoeff in rfdCoeffs:
-        synthesizer <= sys <= obj_H2
+        synthesizer << sys << obj_H2
         obj_rfd._rfdCoeff = rfdCoeff
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
@@ -84,7 +84,7 @@ def state_fdbk_rfd_example():
         sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
 
         # only H2
-        synthesizer <= sysAfterRFD <= obj_H2
+        synthesizer << sysAfterRFD << obj_H2
         synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())
@@ -106,10 +106,10 @@ def state_fdbk_rfd_example():
         base = dlocalized,
         robCoeff = 10e4
     )
-    synthesizer <= approx_dlocalized
+    synthesizer << approx_dlocalized
 
     for rfdCoeff in rfdCoeffs:
-        synthesizer <= sys <= obj_H2
+        synthesizer << sys << obj_H2
         obj_rfd._rfdCoeff = rfdCoeff
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
@@ -121,7 +121,7 @@ def state_fdbk_rfd_example():
         sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
 
         # only H2
-        synthesizer <= sysAfterRFD <= obj_H2
+        synthesizer << sysAfterRFD << obj_H2
         synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())
