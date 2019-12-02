@@ -1,5 +1,5 @@
 
-from sls_objective import SLSObjective
+from .sls_objective import SLSObjective
 import cvxpy as cp
 import numpy as np
 
