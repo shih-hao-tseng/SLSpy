@@ -25,12 +25,31 @@ class SLSObj_H2(SLSObjective):
     def addObjectiveValue(self, sls, objective_value):
         C1  = sls._system_model._C1
         D12 = sls._system_model._D12
-        Phi_x = sls._Phi_x
-        Phi_u = sls._Phi_u
 
         self._objective_expression = 0
-        for tau in range(len(Phi_x)):
-            self._objective_expression += cp.sum_squares(C1*Phi_x[tau] + D12*Phi_u[tau])
+        if sls._state_feedback:
+            # state-feedback
+            Phi_x = sls._Phi_x
+            Phi_u = sls._Phi_u
+            for tau in range(len(Phi_x)):
+                self._objective_expression += cp.sum_squares(C1*Phi_x[tau] + D12*Phi_u[tau])
+        else:
+            # output-feedback
+            B1  = sls._system_model._B1
+            D21 = sls._system_model._D21
+            D11 = sls._system_model._D11
+            Phi_xx = sls._Phi_xx
+            Phi_ux = sls._Phi_ux
+            Phi_xy = sls._Phi_xy
+            Phi_uy = sls._Phi_uy
+            for tau in range(len(Phi_xx)):
+                self._objective_expression += cp.sum_squares(
+                    C1 *Phi_xx[tau]*B1 +
+                    D12*Phi_ux[tau]*B1 +
+                    C1 *Phi_xy[tau]*D21 + 
+                    D12*Phi_uy[tau]*D21 +
+                    D11
+                )
 
         return objective_value + self._objective_expression
 
@@ -38,6 +57,7 @@ class SLSObj_HInf(SLSObjective):
     '''
     return max singular value of [C1,D12][R;M]
     '''
+    # not yet support output feedback
     def addObjectiveValue(self, sls, objective_value):
         C1  = sls._system_model._C1
         D12 = sls._system_model._D12
@@ -71,6 +91,7 @@ class SLSObj_L1(SLSObjective):
     '''
     return max row sum of [C1,D12][R;M]
     '''
+    # not yet support output feedback
     def addObjectiveValue(self, sls, objective_value):
         C1  = sls._system_model._C1
         D12 = sls._system_model._D12
@@ -104,6 +125,7 @@ class SLSObj_RFD(SLSObjective):
     '''
     regularization for design (RFD) objective
     '''
+    # not yet support output feedback
     def __init__ (self,rfdCoeff=0):
         self._rfdCoeff = rfdCoeff
         self._acts_rfd = []
