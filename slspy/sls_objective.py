@@ -20,7 +20,11 @@ class SLSObjective:
 
 class SLSObj_H2(SLSObjective):
     '''
-    return || [C1, D12][Phi_x; Phi_u] ||_H2^2
+    return 
+        || [C1, D12][Phi_x; Phi_u] ||_H2^2
+        for state-feedback SLS
+        || [C1, D12][Phi_xx, Phi_xy; Phi_ux, Phi_uy][B1; D21] + D11 ||_H2^2
+        for output-feedback SLS
     '''
     def addObjectiveValue(self, sls, objective_value):
         C1  = sls._system_model._C1
