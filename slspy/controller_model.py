@@ -35,8 +35,8 @@ class SLS_FIR_Controller (ControllerModel):
 
         self._FIR_horizon = FIR_horizon
 
-        self._Phi_x = []  # = [ Phi_x[1], Phi_x[2], ... Phi_x[FIR_horizon] ]
-        self._Phi_u = []  # = [ Phi_u[1], Phi_u[2], ... Phi_u[FIR_horizon] ]
+        self._Phi_x = []  # = [ 0, Phi_x[1], Phi_x[2], ... Phi_x[FIR_horizon] ]
+        self._Phi_u = []  # = [ 0, Phi_u[1], Phi_u[2], ... Phi_u[FIR_horizon] ]
         self._delta = []
         self._hat_x = np.zeros([Nx,1])
 
@@ -49,7 +49,7 @@ class SLS_FIR_Controller (ControllerModel):
 
     @staticmethod
     def _convolve(A,B,lb,ub,offset):
-        # perform sum_{tau >= lb}^{ub-1} A[tau]B[tau-offset]
+        # perform sum_{tau = lb}^{ub-1} A[tau]B[tau-offset]
         if (len(A) == 0) or (len(B) == 0):
             return 0
 
@@ -92,9 +92,10 @@ class SLS_State_Feedback_FIR_Controller (SLS_FIR_Controller):
             self._delta.append(delta)
 
     def getControl(self, y):
-        self._FIFO_insert(self._delta, y - self._hat_x, self._FIR_horizon)
-        u           = self._convolve(A=self._Phi_u, B=self._delta, lb=0, ub=self._FIR_horizon, offset=0)
-        self._hat_x = self._convolve(A=self._Phi_x, B=self._delta, lb=1, ub=self._FIR_horizon, offset=1)
+        #TODO: check
+        self._FIFO_insert(self._delta, y - self._hat_x, self._FIR_horizon+1)
+        u           = self._convolve(A=self._Phi_u, B=self._delta, lb=1, ub=self._FIR_horizon+1, offset=1)
+        self._hat_x = self._convolve(A=self._Phi_x, B=self._delta, lb=2, ub=self._FIR_horizon+1, offset=2)
 
         return u
 
@@ -107,9 +108,9 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
         self._Ny = Ny # dimension of measurement
         self._D22 = D22
 
-        self._Phi_xx = []  # = [ Phi_xx[1], Phi_xx[2], ... Phi_xx[FIR_horizon] ]
-        self._Phi_ux = []  # = [ Phi_ux[1], Phi_ux[2], ... Phi_uy[FIR_horizon] ]
-        self._Phi_xy = []  # = [ Phi_xy[1], Phi_xy[2], ... Phi_xy[FIR_horizon] ]
+        self._Phi_xx = []  # = [ 0,         Phi_xx[1], Phi_xx[2], ... Phi_xx[FIR_horizon] ]
+        self._Phi_ux = []  # = [ 0,         Phi_ux[1], Phi_ux[2], ... Phi_uy[FIR_horizon] ]
+        self._Phi_xy = []  # = [ 0,         Phi_xy[1], Phi_xy[2], ... Phi_xy[FIR_horizon] ]
         self._Phi_uy = []  # = [ Phi_uy[0], Phi_uy[1], Phi_uy[2], ... Phi_uy[FIR_horizon] ]
 
     def initialize (self):
@@ -154,13 +155,14 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
     def precaculation(self):
         # since Phi_xx[1] = I, we have z (I-z Phi_xx) = -Phi_xx[2] - z^{-1} Phi_xx[3] ...
         
-        self._tilde_Phi_xx = []            # = [ tilde_Phi_xx[0], tilde_Phi_xx[1], ... ]
-        self._tilde_Phi_ux = self._Phi_ux  # = [ tilde_Phi_ux[0], tilde_Phi_ux[1], ... ]
-        self._tilde_Phi_xy = []            # = [ tilde_Phi_xy[0], tilde_Phi_xy[1], ... ]
+        self._tilde_Phi_xx = [] # = [ tilde_Phi_xx[0], tilde_Phi_xx[1], ... ]
+        self._tilde_Phi_ux = [] # = [ tilde_Phi_ux[0], tilde_Phi_ux[1], ... ]
+        self._tilde_Phi_xy = [] # = [ tilde_Phi_xy[0], tilde_Phi_xy[1], ... ]
         
         for i in range (self._FIR_horizon):
-            self._tilde_Phi_xy.append(-self._Phi_xy[i])
+            self._tilde_Phi_ux.append( self._Phi_ux[i+1])
+            self._tilde_Phi_xy.append(-self._Phi_xy[i+1])
             if i > 0:
-                self._tilde_Phi_xx.append(-self._Phi_xx[i])
+                self._tilde_Phi_xx.append(-self._Phi_xx[i+1])
         
         self._u_multiplier = np.linalg.inv( np.eye(self._D22.shape[1]) + np.dot(self._Phi_uy[0], self._D22) )

@@ -35,12 +35,15 @@ class SLSCons_SLS (SLSConstraint):
         # sls constraints
         # the below constraints work for output-feedback case as well because
         # sls._Phi_x = sls._Phi_xx and sls._Phi_u = sls._Phi_ux
-        constraints += [ sls._Phi_x[0] == np.eye(Nx) ]
+        # Phi_x, Phi_u are in z^{-1} RH_{\inf}. Therefore, Phi_x[0] = 0, Phi_u = 0
+        constraints += [ sls._Phi_x[0] == np.zeros([Nx,Nx]) ]
+        constraints += [ sls._Phi_u[0] == np.zeros([Nu,Nx]) ]
+        constraints += [ sls._Phi_x[1] == np.eye(Nx) ]
         constraints += [ 
-            (sls._system_model._A  * sls._Phi_x[sls._FIR_horizon-1] +
-             sls._system_model._B2 * sls._Phi_u[sls._FIR_horizon-1] ) == np.zeros([Nx, Nx]) 
+            (sls._system_model._A  * sls._Phi_x[sls._FIR_horizon] +
+             sls._system_model._B2 * sls._Phi_u[sls._FIR_horizon] ) == np.zeros([Nx, Nx]) 
         ]
-        for tau in range(sls._FIR_horizon-1):
+        for tau in range(1,sls._FIR_horizon):
             constraints += [
                 sls._Phi_x[tau+1] == (
                     sls._system_model._A  * sls._Phi_x[tau] +
@@ -51,30 +54,34 @@ class SLSCons_SLS (SLSConstraint):
         if not self._state_feedback:
             Ny = sls._system_model._Ny
 
+            # Phi_xx, Phi_ux, and Phi_xy are in z^{-1} RH_{\inf}.
+            # Phi_uy is in RH_{\inf} instead of z^{-1} RH_{\inf}.
+            constraints += [ sls._Phi_xy[0] == np.zeros([Nx,Ny]) ]
+
             # output-feedback constraints
             constraints += [
-                sls._Phi_xy[0] == sls._system_model._B2 * sls._Phi_uy[0]
+                sls._Phi_xy[1] == sls._system_model._B2 * sls._Phi_uy[0]
             ]
             constraints += [ 
-                (sls._system_model._A  * sls._Phi_xy[sls._FIR_horizon-1] +
-                 sls._system_model._B2 * sls._Phi_uy[sls._FIR_horizon  ]) == np.zeros([Nx, Ny])
+                (sls._system_model._A  * sls._Phi_xy[sls._FIR_horizon] +
+                 sls._system_model._B2 * sls._Phi_uy[sls._FIR_horizon]) == np.zeros([Nx, Ny])
             ]
             constraints += [ 
-                (sls._Phi_xx[sls._FIR_horizon-1] * sls._system_model._A  +
-                 sls._Phi_xy[sls._FIR_horizon-1] * sls._system_model._C2 ) == np.zeros([Nx, Nx])
+                (sls._Phi_xx[sls._FIR_horizon] * sls._system_model._A  +
+                 sls._Phi_xy[sls._FIR_horizon] * sls._system_model._C2 ) == np.zeros([Nx, Nx])
             ]
             constraints += [
-                sls._Phi_ux[0] == sls._Phi_uy[0] * sls._system_model._C2
+                sls._Phi_ux[1] == sls._Phi_uy[0] * sls._system_model._C2
             ]
             constraints += [
-                (sls._Phi_ux[sls._FIR_horizon-1] * sls._system_model._A  +
-                 sls._Phi_uy[sls._FIR_horizon  ] * sls._system_model._C2 ) == np.zeros([Nu, Nx])
+                (sls._Phi_ux[sls._FIR_horizon] * sls._system_model._A  +
+                 sls._Phi_uy[sls._FIR_horizon] * sls._system_model._C2 ) == np.zeros([Nu, Nx])
             ]
-            for tau in range(sls._FIR_horizon-1):
+            for tau in range(1,sls._FIR_horizon):
                 constraints += [ 
                     sls._Phi_xy[tau+1] == (
                         sls._system_model._A  * sls._Phi_xy[tau] +
-                        sls._system_model._B2 * sls._Phi_uy[tau+1]
+                        sls._system_model._B2 * sls._Phi_uy[tau]
                     )
                 ]
 
@@ -87,8 +94,8 @@ class SLSCons_SLS (SLSConstraint):
 
                 constraints += [
                     sls._Phi_ux[tau+1] == (
-                        sls._Phi_ux[tau]   * sls._system_model._A  +
-                        sls._Phi_uy[tau+1] * sls._system_model._C2
+                        sls._Phi_ux[tau] * sls._system_model._A  +
+                        sls._Phi_uy[tau] * sls._system_model._C2
                     )
                 ]
         return constraints
@@ -175,6 +182,7 @@ class SLSCons_Robust (SLSConstraint):
         return objective_value + self._objective_expression
 
     def addConstraints(self, sls, constraints):
+        #TODO: check
         '''
         [ zI-A, -B2 ][ Phi_x ] = I + Delta
                      [ Phi_u ]

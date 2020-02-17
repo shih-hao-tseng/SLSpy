@@ -67,19 +67,17 @@ class SLS (SynthesisAlgorithm):
         Nu = self._system_model._Nu
 
         if self._use_state_feedback_version:
-            for tau in range(self._FIR_horizon):
+            for tau in range(self._FIR_horizon+1):
                 self._Phi_x.append(cp.Variable(shape=(Nx,Nx)))
                 self._Phi_u.append(cp.Variable(shape=(Nu,Nx)))
         else:
             Ny = self._system_model._Ny
 
-            for tau in range(self._FIR_horizon):
+            for tau in range(self._FIR_horizon+1):
                 self._Phi_xx.append(cp.Variable(shape=(Nx,Nx)))
                 self._Phi_ux.append(cp.Variable(shape=(Nu,Nx)))
                 self._Phi_xy.append(cp.Variable(shape=(Nx,Ny)))
                 self._Phi_uy.append(cp.Variable(shape=(Nu,Ny)))
-            # Phi_uy is in RH_{\inf} instead of z^{-1} RH_{\inf}
-            self._Phi_uy.append(cp.Variable(shape=(Nu,Ny)))
 
     # overload plus and less than or equal operators as syntactic sugars
     def __add__(self, obj_or_cons):
@@ -208,7 +206,7 @@ class SLS (SynthesisAlgorithm):
             if self._use_state_feedback_version:
                 controller._Phi_x = []
                 controller._Phi_u = []
-                for tau in range(self._FIR_horizon):
+                for tau in range(self._FIR_horizon+1):
                     controller._Phi_x.append(self._Phi_x[tau].value)
                     controller._Phi_u.append(self._Phi_u[tau].value)
             else:
@@ -216,7 +214,7 @@ class SLS (SynthesisAlgorithm):
                 controller._Phi_ux = []
                 controller._Phi_xy = []
                 controller._Phi_uy = []
-                for tau in range(self._FIR_horizon):
+                for tau in range(self._FIR_horizon+1):
                     controller._Phi_xx.append(self._Phi_xx[tau].value)
                     controller._Phi_ux.append(self._Phi_ux[tau].value)
                     controller._Phi_xy.append(self._Phi_xy[tau].value)
