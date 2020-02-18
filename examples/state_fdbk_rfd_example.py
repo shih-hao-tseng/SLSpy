@@ -21,7 +21,7 @@ def state_fdbk_rfd_example():
     # objective function
     obj_H2 = SLSObj_H2 ()
 
-    rfdCoeffs = [0.01]#, 0.1]#, 1, 10, 100, 1000]
+    rfdCoeffs = [0.01, 0.1, 1, 10, 100, 1000]
 
     ## (1) basic sls (centralized controller) with rfd
     num_acts = []
