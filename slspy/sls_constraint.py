@@ -130,7 +130,7 @@ class SLSCons_dLocalized (SLSConstraint):
 
         # performance helpers
         absB2T = np.absolute(sls._system_model._B2).T
-        x_range_test = range(1,sls._FIR_horizon-1)
+        x_range_test = range(2,sls._FIR_horizon)
 
         # adjacency matrix for available information 
         infoAdj = np.eye(sls._system_model._Nx) > 0
@@ -182,7 +182,6 @@ class SLSCons_Robust (SLSConstraint):
         return objective_value + self._objective_expression
 
     def addConstraints(self, sls, constraints):
-        #TODO: check
         '''
         [ zI-A, -B2 ][ Phi_x ] = I + Delta
                      [ Phi_u ]
@@ -205,16 +204,16 @@ class SLSCons_Robust (SLSConstraint):
 
         constraints =  [ hat_Phi_x[0] == np.eye(Nx) + self._Delta[0] ]
         constraints += [
-            (sls._system_model._A  * hat_Phi_x[sls._FIR_horizon-1] +
-             sls._system_model._B2 * hat_Phi_u[sls._FIR_horizon-1] +
+            (sls._system_model._A  * hat_Phi_x[sls._FIR_horizon] +
+             sls._system_model._B2 * hat_Phi_u[sls._FIR_horizon] +
              self._Delta[sls._FIR_horizon]
             ) == np.zeros([Nx,Nx])
         ]
 
-        for t in range(sls._FIR_horizon-1):
+        for t in range(1,sls._FIR_horizon):
             constraints += [
-                self._Delta[t+1] == (
-                    hat_Phi_x[t+1]
+                self._Delta[t] == (
+                    hat_Phi_x[t]
                     - sls._system_model._A  * hat_Phi_x[t]
                     - sls._system_model._B2 * hat_Phi_u[t]
                 )
