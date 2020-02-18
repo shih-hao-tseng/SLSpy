@@ -130,12 +130,11 @@ class SLSCons_dLocalized (SLSConstraint):
 
         # performance helpers
         absB2T = np.absolute(sls._system_model._B2).T
-        x_range_test = range(2,sls._FIR_horizon)
 
         # adjacency matrix for available information 
         infoAdj = np.eye(sls._system_model._Nx) > 0
         transmission_time = -self._cSpeed*self._actDelay
-        for t in range(sls._FIR_horizon):
+        for t in range(1,sls._FIR_horizon+1):
             transmission_time += self._cSpeed
             while transmission_time >= 1:
                 transmission_time -= 1
@@ -145,7 +144,7 @@ class SLSCons_dLocalized (SLSConstraint):
             support_u = np.dot(absB2T,support_x) > 0
 
             # shutdown those not in the support
-            if t in x_range_test:
+            if (t > 1) and (t < sls._FIR_horizon):
                 for ix,iy in np.ndindex(support_x.shape):
                     if support_x[ix,iy] == False:
                         constraints += [ Phi_x[t][ix,iy] == 0 ]
@@ -165,7 +164,8 @@ class SLSCons_Robust (SLSConstraint):
     ):
         self._gamma_coefficient = gamma_coefficient
 
-        self._Delta = []
+        # this matches the index and avoids the confusion
+        self._Delta = [None]
         self._gamma = cp.Variable(1)
 
     def getStabilityMargin (self):
@@ -195,14 +195,14 @@ class SLSCons_Robust (SLSConstraint):
 
         # recycle delta for better performance
         len_delta = len(self._Delta)
-        if len_delta > 0:
-            if (self._Delta[0].shape[0] != Nx) or (self._Delta[0].shape[1] != Nx):
-                self._Delta = []
-                len_delta = 0
+        if len_delta > 1:
+            if (self._Delta[1].shape[0] != Nx) or (self._Delta[1].shape[1] != Nx):
+                self._Delta = [None]
+                len_delta = 1
         for t in range(len_delta, sls._FIR_horizon+1):
             self._Delta.append(cp.Variable(shape=(Nx,Nx)))
 
-        constraints =  [ hat_Phi_x[0] == np.eye(Nx) + self._Delta[0] ]
+        constraints =  [ hat_Phi_x[1] == np.eye(Nx) + self._Delta[1] ]
         constraints += [
             (sls._system_model._A  * hat_Phi_x[sls._FIR_horizon] +
              sls._system_model._B2 * hat_Phi_u[sls._FIR_horizon] +
@@ -212,8 +212,8 @@ class SLSCons_Robust (SLSConstraint):
 
         for t in range(1,sls._FIR_horizon):
             constraints += [
-                self._Delta[t] == (
-                    hat_Phi_x[t]
+                self._Delta[t+1] == (
+                    hat_Phi_x[t+1]
                     - sls._system_model._A  * hat_Phi_x[t]
                     - sls._system_model._B2 * hat_Phi_u[t]
                 )
@@ -221,7 +221,7 @@ class SLSCons_Robust (SLSConstraint):
 
         # Epsilon_1 robustness
         constraints += [
-            cp.norm(cp.bmat([self._Delta]),'inf') <= self._gamma
+            cp.norm(cp.bmat([self._Delta[1:-1]]),'inf') <= self._gamma
         ]
 
         return constraints

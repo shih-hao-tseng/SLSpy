@@ -21,7 +21,7 @@ def state_fdbk_rfd_example():
     # objective function
     obj_H2 = SLSObj_H2 ()
 
-    rfdCoeffs = [0.01, 0.1, 1, 10, 100, 1000]
+    rfdCoeffs = [0.01]#, 0.1]#, 1, 10, 100, 1000]
 
     ## (1) basic sls (centralized controller) with rfd
     num_acts = []
@@ -100,31 +100,31 @@ def state_fdbk_rfd_example():
     ## (3) approximate d-localized sls with rfd
     num_acts = []
     clnorms = []
-
+    
     approx_dlocalized = SLSCons_ApproxdLocalized (
         base = dlocalized,
         robCoeff = 10e4
     )
     synthesizer << approx_dlocalized
-
+    
     for rfdCoeff in rfdCoeffs:
         synthesizer << sys << obj_H2
         obj_rfd._rfdCoeff = rfdCoeff
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
-
+    
         new_act_ids = obj_rfd.getActsRFD()
         num_acts.append(len(new_act_ids))
         
         # check performance with rfd-designed system
         sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
-
+    
         # only H2
         synthesizer << sysAfterRFD << obj_H2
         synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())
-
+    
     plot_line_chart(
         list_x=num_acts,
         list_y=clnorms,
