@@ -144,10 +144,9 @@ class SLSCons_dLocalized (SLSConstraint):
             support_u = np.dot(absB2T,support_x) > 0
 
             # shutdown those not in the support
-            if (t > 1) and (t < sls._FIR_horizon):
-                for ix,iy in np.ndindex(support_x.shape):
-                    if support_x[ix,iy] == False:
-                        constraints += [ Phi_x[t][ix,iy] == 0 ]
+            for ix,iy in np.ndindex(support_x.shape):
+                if support_x[ix,iy] == False:
+                    constraints += [ Phi_x[t][ix,iy] == 0 ]
     
             for ix,iy in np.ndindex(support_u.shape):
                 if support_u[ix,iy] == False:
