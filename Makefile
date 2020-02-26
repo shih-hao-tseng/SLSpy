@@ -37,6 +37,7 @@ $(info FreeBSD is not yet supported)
 endif
 endif
 endif
+endif
 	
 # install correct pip
 ifeq ($(PYTHON_VERSION),3)
@@ -48,6 +49,7 @@ else
 PIP=pip
 ifeq (, $(shell which pip))
 LIBS+= python-pip
+endif
 endif
 
 setup:
