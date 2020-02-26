@@ -54,9 +54,10 @@ endif
 
 setup:
 	$(PM) install $(LIBS)
+	# install numpy first to avoid weird scs dependency issues
+	$(PIP) install numpy
 	$(PIP) install --no-cache-dir -I scs
-	$(PIP) install cvxpy
-	$(PIP) install matplotlib
+	$(PIP) install cvxpy matplotlib
 
 install:
 	$(PIP) install -e .
