@@ -54,9 +54,8 @@ endif
 
 setup:
 	$(PM) install $(LIBS)
-	$(PIP) install --no-cache-dir -I scs
-	$(PIP) install cvxpy
-	$(PIP) install matplotlib
+	$(PIP) install --no-cache-dir -I scs numpy
+	$(PIP) install cvxpy matplotlib
 
 install:
 	$(PIP) install -e .
