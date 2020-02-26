@@ -59,7 +59,7 @@ setup:
 	$(PIP) install matplotlib
 
 install:
-	pip install -e .
+	$(PIP) install -e .
 
 uninstall:
-	pip uninstall slspy
+	$(PIP) uninstall slspy
