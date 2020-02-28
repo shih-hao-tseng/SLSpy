@@ -37,15 +37,16 @@ def robust_simulations():
     synthesizer += dlocalized
 
     sim_horizon = 25
-    simulator = Simulator (
-        system = sys,
-        horizon = sim_horizon
-    )
     # generate noise
     noise = FixedNoiseVector (Nw = sys._Nw, horizon = sim_horizon)
     noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
     noise._w[0][sys._Nw//2] = 10
-    sys.useNoiseModel (noise_model = noise)
+
+    simulator = Simulator (
+        system = sys,
+        noise = noise,
+        horizon = sim_horizon
+    )
 
     cSpeeds = [2, 1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4]
     cPrints = [2, 1, 0.4]  # which comm speeds to simulate & plot
@@ -62,7 +63,7 @@ def robust_simulations():
         if cSpeed in cPrints:
             # run the simulation
             simulator.setController (controller=controller)
-            x_history, y_history, z_history, u_history = simulator.run ()
+            x_history, _, _, u_history, _ = simulator.run ()
 
             Bu_history = matrix_list_multiplication(sys._B2,u_history)
             plot_heat_map(x_history, Bu_history, 'Comms = %d' % cSpeed)

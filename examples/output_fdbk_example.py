@@ -16,17 +16,16 @@ def output_fdbk_example():
     generate_BCD_and_zero_initialization(sys)
 
     sim_horizon = 25
-    simulator = Simulator (
-        system = sys,
-        horizon = sim_horizon
-    )
-
     # generate noise
     noise = FixedNoiseVector (Nw = sys._Nw, horizon = sim_horizon)
     noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
     noise._w[0][sys._Nw//2] = 10
 
-    sys.useNoiseModel (noise_model = noise)
+    simulator = Simulator (
+        system = sys,
+        noise = noise,
+        horizon = sim_horizon
+    )
 
     # use SLS controller synthesis algorithm
     # notice that the system should also be output-feedback (state_feedback = False)
@@ -48,7 +47,7 @@ def output_fdbk_example():
     )
 
     # run the simulation
-    x_history, y_history, z_history, u_history = simulator.run ()
+    x_history, _, _, u_history, _ = simulator.run ()
 
     Bu_history = matrix_list_multiplication(sys._B2,u_history)
     plot_heat_map(x_history, Bu_history, 'Centralized')

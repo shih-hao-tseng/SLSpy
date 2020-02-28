@@ -1,5 +1,4 @@
 from .base import ObjBase
-from .noise_model import NoiseModel, GuassianNoise
 import numpy as np
 
 class SystemModel (ObjBase):
@@ -9,9 +8,7 @@ class SystemModel (ObjBase):
     '''
     def __init__ (self,
         ignore_output=False,
-        state_feedback=True,
-        noise_model=None,
-        auto_noise_initialization=True
+        state_feedback=True
     ):
         self._x = np.empty([0])  # state
         self._y = np.empty([0])  # measurement
@@ -20,14 +17,7 @@ class SystemModel (ObjBase):
         self._ignore_output = ignore_output
         self._state_feedback = state_feedback
 
-        self._noise_model = noise_model
-        self._auto_noise_initialization = auto_noise_initialization
         self._x0 = None
-
-    def initialize (self, x0=None):
-        if self._auto_noise_initialization:
-            if self._noise_model is not None:
-                self._noise_model.initialize()
 
     def systemProgress (self, **kwargs):
         # this function takes the input and progress to next time 
@@ -53,10 +43,6 @@ class SystemModel (ObjBase):
 
     def stateFeedback (self, state_feedback=True):
         self._state_feedback = state_feedback
-
-    def useNoiseModel (self, noise_model=None):
-        if isinstance (noise_model,NoiseModel):
-            self._noise_model = noise_model
 
 class LTISystem (SystemModel):
     '''
@@ -93,12 +79,11 @@ class LTISystem (SystemModel):
 
         # vector dimensions of
         self._Nx = Nx  # state
+        self._Nw = Nw  # noise
         self._Nu = Nu  # control
         self._Nz = Nz  # output
         self._Ny = Ny  # measurement
 
-        self._noise_model = GuassianNoise (Nw=Nw)
-    
     def initialize (self, x0=None):
         SystemModel.initialize(self)
 
@@ -136,7 +121,7 @@ class LTISystem (SystemModel):
             return self.errorMessage('Zero dimension (missing initialization): x')
 
         Nx = self._Nx
-        Nw = self._noise_model._Nw
+        Nw = self._Nw
         Nu = self._Nu = self._B2.shape[1]
 
         # fill in zero matrices if undefined
@@ -211,12 +196,13 @@ class LTISystem (SystemModel):
 
         return True
 
-    def systemProgress (self, u):
+    def systemProgress (self, u, w=None):
         if u.shape[0] != self._Nu:
             return self.errorMessage('Dimension mismatch: u')
 
-        if self._noise_model is not None:
-            w = self._noise_model.getNoise()
+        if w is not None:
+            if w.shape[0] != self._Nw:
+                return self.errorMessage('Dimension mismatch: w')
 
             if not isinstance(w, np.ndarray):
                 # in case w is a list
@@ -290,7 +276,6 @@ class LTISystem (SystemModel):
         sys._Nx = self._Nx
         sys._Nz = self._Nz
         sys._Ny = self._Ny
-
-        sys._noise_model = self._noise_model
+        sys._Nw = self._Nw
 
         return sys

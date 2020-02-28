@@ -15,19 +15,16 @@ def state_fdbk_example():
     generate_BCD_and_zero_initialization(sys)
 
     sim_horizon = 25
-    simulator = Simulator (
-        system = sys,
-        horizon = sim_horizon
-    )
-
     # generate noise
     noise = FixedNoiseVector (Nw = sys._Nw, horizon = sim_horizon)
     noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
     noise._w[0][sys._Nw//2] = 10
-    #noise.startAtTime(0)
 
-    sys.useNoiseModel (noise_model = noise)
-
+    simulator = Simulator (
+        system = sys,
+        noise = noise,
+        horizon = sim_horizon
+    )
 
     ## (1) basic sls (centralized controller)
     # use SLS controller synthesis algorithm

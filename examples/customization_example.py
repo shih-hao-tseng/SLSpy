@@ -50,15 +50,7 @@ def customization_example():
     # some other matrix assignments
     generate_BCD_and_zero_initialization(sys)
 
-    # we need a simulator to run the simulation
-    # a Simulator takes a SystemModel (system), a ControllerModel (controller) and a simulation horizon (horizon)
-    # to run the simulation
     sim_horizon = 25
-    simulator = Simulator (
-        system = sys,
-        horizon = sim_horizon
-    )
-
     # generate noise for the system model sys
     # which is an impulse at time 0
     # NoiseModel is, again, customizable, and the base class is NoiseModel
@@ -66,7 +58,15 @@ def customization_example():
     noise = FixedNoiseVector (Nw = sys._Nw, horizon = sim_horizon)
     noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
     noise._w[0][sys._Nw//2] = 10
-    sys.useNoiseModel (noise_model = noise)
+
+    # we need a simulator to run the simulation
+    # a Simulator takes a SystemModel (system), a ControllerModel (controller) and a simulation horizon (horizon)
+    # to run the simulation
+    simulator = Simulator (
+        system = sys,
+        noise = noise,
+        horizon = sim_horizon
+    )
 
     # create a synthesizer
     synthesizer = MySynthesisAlgorithm (
@@ -84,7 +84,8 @@ def customization_example():
     #   y_history: the measurement
     #   z_history: the output
     #   u_history: the control
-    x_history, y_history, z_history, u_history = simulator.run ()
+    #   w_history: the noise
+    x_history, _, _, u_history,_ = simulator.run ()
 
     # we are interested in the quantity Bu
     Bu_history = matrix_list_multiplication(sys._B2,u_history)
