@@ -74,8 +74,8 @@ def plot_heat_map (x=None, Bu=None, myTitle='title', outputFileName=None):
 
     if outputFileName is not None:
         # output as csv file
-        np.savetxt(outputFileName+'-x.csv', plt_x.round(2).T, fmt='%.1f')
-        np.savetxt(outputFileName+'-Bu.csv', plt_Bu.round(2).T, fmt='%.1f')
+        np.savetxt(outputFileName+'-x.csv', plt_x.round(2).T, fmt='%.2f')
+        np.savetxt(outputFileName+'-Bu.csv', plt_Bu.round(2).T, fmt='%.2f')
 
     show(block=False)
 
