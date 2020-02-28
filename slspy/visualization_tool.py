@@ -11,7 +11,7 @@ def matrix_list_multiplication (matrix_A=None, list_B=[]):
 def keep_showing_figures ():
     show()
 
-def plot_heat_map (x=None, Bu=None, myTitle='title'):
+def plot_heat_map (x=None, Bu=None, myTitle='title', outputFileName=None):
     '''
     Plots log-based heat map for x, u
     Inputs
@@ -71,6 +71,11 @@ def plot_heat_map (x=None, Bu=None, myTitle='title'):
         colorbar()
         title('log10(|u|)')
         xlabel('Time')
+
+    if outputFileName is not None:
+        # output as csv file
+        np.savetxt(outputFileName+'-x.csv', plt_x.round(2).T, fmt='%.1f')
+        np.savetxt(outputFileName+'-Bu.csv', plt_Bu.round(2).T, fmt='%.1f')
 
     show(block=False)
 
