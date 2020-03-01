@@ -25,8 +25,8 @@ def plot_heat_map (x=None, Bu=None, myTitle='title', outputFileName=None):
     logmin = -4
     logmax = 0
 
-    plt_x  = np.concatenate(x, axis=1)
-    plt_Bu = np.concatenate(Bu,axis=1)
+    plt_x  = np.asarray(np.concatenate(x, axis=1))
+    plt_Bu = np.asarray(np.concatenate(Bu,axis=1))
 
     plt_x  = np.log10(np.absolute(plt_x))
     plt_Bu = np.log10(np.absolute(plt_Bu))
