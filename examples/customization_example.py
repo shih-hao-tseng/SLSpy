@@ -1,7 +1,6 @@
 from slspy import *
 # import the bases of controller model and synthesis algorithm
-from slspy.controller_model import ControllerModel
-from slspy.synthesis_algorithm import SynthesisAlgorithm
+from slspy.core import ControllerModel, SynthesisAlgorithm
 import numpy as np
 
 # define a new controller model

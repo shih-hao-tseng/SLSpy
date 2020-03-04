@@ -28,8 +28,10 @@ def plot_heat_map (x=None, Bu=None, myTitle='title', outputFileName=None):
     plt_x  = np.asarray(np.concatenate(x, axis=1))
     plt_Bu = np.asarray(np.concatenate(Bu,axis=1))
 
+    np.seterr(divide = 'ignore') 
     plt_x  = np.log10(np.absolute(plt_x))
     plt_Bu = np.log10(np.absolute(plt_Bu))
+    np.seterr(divide = 'warn') 
 
     # cut at the min
     plt_x  = np.clip(plt_x,  logmin - 1, logmax + 1)
