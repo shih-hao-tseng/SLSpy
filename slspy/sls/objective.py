@@ -2,7 +2,7 @@ from .components import SLSObjective
 import numpy as np
 import cvxpy as cp
 '''
-To create a new SLS constraint, inherit the following base function and customize the specified methods.
+To create a new SLS objective, inherit the following base function and customize the specified methods.
 
 class SLSObjective:
     def __init__ (self):
