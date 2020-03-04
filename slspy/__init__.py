@@ -6,4 +6,4 @@ from .synthesis_algorithms import *
 from .sls import *
 from .tools import *
 
-VERSION="beta-20.3.1"
+VERSION="beta-20.3.2"
