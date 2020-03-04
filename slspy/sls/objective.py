@@ -17,7 +17,7 @@ class SLSObj_H2(SLSObjective):
     return 
         || [C1, D12][Phi_x; Phi_u] ||_H2^2
         for state-feedback SLS
-        || [C1, D12][Phi_xx, Phi_xy; Phi_ux, Phi_uy][B1; D21] + D11 ||_H2^2
+        || [C1, D12][Phi_xx, Phi_xy; Phi_ux, Phi_uy][B1; D21]||_H2^2
         for output-feedback SLS
     '''
     def addObjectiveValue(self, sls, objective_value):
@@ -35,7 +35,6 @@ class SLSObj_H2(SLSObjective):
             # output-feedback
             B1  = sls._system_model._B1
             D21 = sls._system_model._D21
-            D11 = sls._system_model._D11
             Phi_xx = sls._Phi_xx
             Phi_ux = sls._Phi_ux
             Phi_xy = sls._Phi_xy
@@ -45,12 +44,18 @@ class SLSObj_H2(SLSObjective):
                     C1 *Phi_xx[tau]*B1 +
                     D12*Phi_ux[tau]*B1 +
                     C1 *Phi_xy[tau]*D21 + 
-                    D12*Phi_uy[tau]*D21 +
-                    D11
+                    D12*Phi_uy[tau]*D21
                 )
 
         return objective_value + self._objective_expression
 
+class SLSObj_LQG(SLSObj_H2):
+    '''
+    return || 
+
+    
+    
+    
 class SLSObj_HInf(SLSObjective):
     '''
     return max singular value of [C1,D12][R;M]
