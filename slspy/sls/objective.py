@@ -49,12 +49,69 @@ class SLSObj_H2(SLSObjective):
 
         return objective_value + self._objective_expression
 
-class SLSObj_LQG(SLSObj_H2):
+class SLSObj_LQ(SLSObjective):
     '''
-    return || 
+    This function assumes 
+    1) all disturbance / noise is zero-centered Gaussian
+    2) process disturbance and measurement noise are uncorrelated
+                    
+    Cov_w is the covariance matrix for process disturbance
+    Cov_v is the covariance matrix for measurement noise
+    
+    return
+        || [Q^0.5, R^0.5][Phi_x; Phi_u]Cov_w^0.5 ||_Frob^2
+        i.e. LQR for state-feedback SLS
 
+        || [Q^0.5, R^0.5][Phi_xx, Phi_xy; Phi_ux, Phi_uy][Cov_w^0.5; Cov_v^0.5]||_Frob^2
+        i.e. LQG for output-feedback SLS
+    '''
     
-    
+    def __init__(self, QSqrt=None, RSqrt=None, Cov_wSqrt=None, Cov_vSqrt=None):   
+        self._QSqrt = QSqrt        
+        self._RSqrt = RSqrt
+        self._Cov_wSqrt = Cov_wSqrt
+        self._Cov_vSqrt = Cov_vSqrt
+
+    def addObjectiveValue(self, sls, objective_value):
+        QSqrt = self._QSqrt 
+        RSqrt = self._RSqrt
+        Cov_wSqrt = self._Cov_wSqrt
+        Cov_vSqrt = self._Cov_vSqrt
+        
+        # default values
+        if QSqrt is None:
+            QSqrt = sls._system_model._C1
+        if RSqrt is None:
+            RSqrt = sls._system_model._D12 
+        if Cov_wSqrt is None:
+            Cov_wSqrt = sls._system_model._B1 
+        if Cov_vSqrt is None:
+            Cov_vSqrt = sls._system_model._D21
+
+        self._objective_expression = 0
+        if sls._state_feedback:
+            # state-feedback
+            Phi_x = sls._Phi_x
+            Phi_u = sls._Phi_u
+            for tau in range(len(Phi_x)):
+                self._objective_expression += cp.sum_squares(QSqrt * Phi_x[tau] * Cov_wSqrt + 
+                                                             RSqrt * Phi_u[tau] * Cov_wSqrt)
+        else:
+            # output-feedback
+            Phi_xx = sls._Phi_xx
+            Phi_ux = sls._Phi_ux
+            Phi_xy = sls._Phi_xy
+            Phi_uy = sls._Phi_uy
+
+            for tau in range(len(Phi_xx)):
+                self._objective_expression += cp.sum_squares(
+                    QSqrt * Phi_xx[tau] * Cov_wSqrt +
+                    RSqrt * Phi_ux[tau] * Cov_wSqrt +
+                    QSqrt * Phi_xy[tau] * Cov_vSqrt + 
+                    RSqrt * Phi_uy[tau] * Cov_vSqrt
+                )
+
+        return objective_value + self._objective_expression
     
 class SLSObj_HInf(SLSObjective):
     '''
