@@ -1,22 +1,16 @@
+from .components import SLSObjective
 import numpy as np
 import cvxpy as cp
+'''
+To create a new SLS constraint, inherit the following base function and customize the specified methods.
 
 class SLSObjective:
-    '''
-    The base class for SLS objectives
-    '''
     def __init__ (self):
-        # to save the objective value
-        self._objective_expression = 0
-
     def getObjectiveValue(self):
-        if isinstance(self._objective_expression, int):
-            return self._objective_expression
-        else:
-            return self._objective_expression.value
-
+        return self._objective_expression
     def addObjectiveValue(self, sls, objective_value):
         return objective_value
+'''
 
 class SLSObj_H2(SLSObjective):
     '''

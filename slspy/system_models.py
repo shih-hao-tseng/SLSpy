@@ -1,48 +1,16 @@
-from .base import ObjBase
+from .core import SystemModel
 import numpy as np
+'''
+To create a new system model, inherit the following base function and customize the specified methods.
 
-class SystemModel (ObjBase):
-    '''
-    The base class for discrete-time system models.
-    A controller synthesizer takes a system model and synthesizes a controller.
-    '''
+class SystemModel:
     def __init__ (self,
         ignore_output=False,
         state_feedback=True
     ):
-        self._x = np.empty([0])  # state
-        self._y = np.empty([0])  # measurement
-        self._z = np.empty([0])  # regularized output
-
-        self._ignore_output = ignore_output
-        self._state_feedback = state_feedback
-
-        self._x0 = None
-
     def systemProgress (self, **kwargs):
         # this function takes the input and progress to next time 
-        pass
-
-    def getState(self):
-        return self._x.copy()
-
-    def getMeasurement(self):
-        if self._state_feedback:
-            return self._x.copy()
-        else:
-            return self._y.copy()
-    
-    def getOutput(self):
-        if self._ignore_output:
-            return None
-        else:
-            return self._z.copy()
-
-    def ignoreOutput (self, ignore_output=False):
-        self._ignore_output = ignore_output
-
-    def stateFeedback (self, state_feedback=True):
-        self._state_feedback = state_feedback
+'''
 
 class LTISystem (SystemModel):
     '''

@@ -1,21 +1,15 @@
-from .base import ObjBase
+from .core import NoiseModel
 import numpy as np
+'''
+To create a new noise model, inherit the following base function and customize the specified methods.
 
-class NoiseModel (ObjBase):
-    '''
-    The base class for noise model.
-    NoiseModel is responsible for the right format of noise (dimension, etc.)
-    '''
+class NoiseModel:
     def __init__ (self, Nw=0):
-        self._Nw = Nw  # dimension of the noise (disturbance)
-
     def initialize (self):
-        # auto-initialization for each simulation
-        pass
-
     def getNoise (self,**kwargs):
         # the noise can depend on some parameters such as state or control
-        return 0
+        return w
+'''
 
 class ZeroNoise (NoiseModel):
     '''

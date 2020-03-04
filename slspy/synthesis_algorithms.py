@@ -1,28 +1,14 @@
-from .base import ObjBase
-from .system_model import *
-from .controller_model import *
-from .sls_objective import SLSObjective
-from .sls_constraint import SLSConstraint, SLSCons_SLS
+from .core import *
+from .sls import *
 import cvxpy as cp
+'''
+To create a new synthesis algorithm, inherit the following base function and customize the specified methods.
 
-class SynthesisAlgorithm (ObjBase):
-    '''
-    The base class for synthesis algorithm, which takes a system model and generates a controller model correspondingly.
-    '''
+class SynthesisAlgorithm:
     def __init__(self,system_model=None):
-        self.setSystemModel(system_model=system_model)
-
-    # overload the less than or equal operator as a syntactic sugar
-    def __lshift__ (self, sytem):
-        return self.setSystemModel(system_model=system)
-
-    def setSystemModel(self,system_model):
-        if isinstance(system_model,SystemModel):
-            self._system_model = system_model
-        return self
-    
     def synthesizeControllerModel(self):
-        return None
+        return controller_model
+'''
 
 class SLS (SynthesisAlgorithm):
     '''

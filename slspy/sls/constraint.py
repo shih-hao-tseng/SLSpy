@@ -1,14 +1,14 @@
 
-from .sls_objective import SLSObjective
+from .components import SLSConstraint
 import cvxpy as cp
 import numpy as np
+'''
+To create a new SLS constraint, inherit the following base function and customize the specified methods.
 
-class SLSConstraint(SLSObjective):
-    '''
-    The base class for SLS constriant
-    '''
+class SLSConstraint:
     def addConstraints(self, sls, constraints):
         return constraints
+'''
 
 class SLSCons_SLS (SLSConstraint):
     '''

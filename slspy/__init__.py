@@ -1,11 +1,9 @@
-from .system_model import LTISystem
-from .controller_model import *
-from .simulator import Simulator
-from .synthesis_algorithm import SLS
-from .sls_objective import *
-from .sls_constraint import *
-from .noise_model import *
-from .plant_generator import *
-from .visualization_tool import *
+from .core import *
+from .system_models import *
+from .controller_models import *
+from .noise_models import *
+from .synthesis_algorithms import *
+from .sls import *
+from .tools import *
 
-VERSION="beta-20.2.4"
+VERSION="beta-20.3.1"

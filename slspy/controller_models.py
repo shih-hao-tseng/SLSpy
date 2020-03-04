@@ -1,16 +1,14 @@
-from .base import ObjBase
+from .core import ControllerModel
 import numpy as np
+'''
+To create a new controller model, inherit the following base function and customize the specified methods.
 
-class ControllerModel (ObjBase):
-    '''
-    The base class for discrete-time controller.
-    '''
+class ControllerModel:
     def initialize (self):
         # initialize internal state
-        pass
-
     def getControl(self, y, **kwargs):
-        return None
+        return u
+'''
 
 class OpenLoopController (ControllerModel):
     '''
