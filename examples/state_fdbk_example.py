@@ -42,7 +42,7 @@ def state_fdbk_example():
     )
 
     # run the simulation
-    x_history, y_history, z_history, u_history = simulator.run ()
+    x_history, y_history, z_history, u_history, w_history = simulator.run ()
 
     Bu_history = matrix_list_multiplication(sys._B2,u_history)
     plot_heat_map(x_history, Bu_history, 'Centralized')
@@ -60,7 +60,7 @@ def state_fdbk_example():
         controller = synthesizer.synthesizeControllerModel ()
     )
 
-    x_history, y_history, z_history, u_history = simulator.run ()
+    x_history, y_history, z_history, u_history, w_history = simulator.run ()
 
     Bu_history = matrix_list_multiplication(sys._B2,u_history)
     plot_heat_map(x_history, Bu_history, 'Localized')
@@ -79,7 +79,7 @@ def state_fdbk_example():
     controller = synthesizer.synthesizeControllerModel ()
     simulator.setController (controller=controller)
 
-    x_history, y_history, z_history, u_history = simulator.run ()
+    x_history, y_history, z_history, u_history, w_history = simulator.run ()
 
     Bu_history = matrix_list_multiplication(sys._B2,u_history)
     plot_heat_map(x_history, Bu_history, 'Approximately Localized')

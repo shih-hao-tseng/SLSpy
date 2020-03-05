@@ -38,7 +38,7 @@ class IOPObj_H2(IOPObjective):
         )
 
         for tau in range(1,X_len):
-            matrix = [[W[tau], X[tau]],[Z[tau]], Y[tau]]]
+            matrix = [[W[tau], X[tau]],[Z[tau], Y[tau]]]
             self._objective_expression += cp.sum_squares(
                 cp.bmat(matrix)
             )

@@ -20,10 +20,10 @@ class IOP_FIR_Controller (ControllerModel):
 
         self._FIR_horizon = FIR_horizon
 
-        self._X = []  # = [ 0, X[1], X[2], ... X[FIR_horizon] ]
-        self._W = []  # = [ 0, W[1], W[2], ... W[FIR_horizon] ]
-        self._Y = []  # = [ 0, Y[1], Y[2], ... Y[FIR_horizon] ]
-        self._Z = []  # = [ 0, Z[1], Z[2], ... Z[FIR_horizon] ]
+        self._X = []  # = [ X[0], X[1], X[2], ... X[FIR_horizon-1] ]
+        self._W = []  # = [ W[0], W[1], W[2], ... W[FIR_horizon-1] ]
+        self._Y = []  # = [ Y[0], Y[1], Y[2], ... Y[FIR_horizon-1] ]
+        self._Z = []  # = [ Z[0], Z[1], Z[2], ... Z[FIR_horizon-1] ]
 
     def initialize (self, delta0=None):
         pass

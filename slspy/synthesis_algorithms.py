@@ -7,7 +7,7 @@ from .sls.constraint import SLSCons_SLS
 from .sls.controller_models import *
 
 from .iop.components import *
-from .iop.components import IOPCons_IOP
+from .iop.constraint import IOPCons_IOP
 from .iop.controller_models import *
 
 '''
@@ -144,6 +144,7 @@ class SLS (SynthesisAlgorithm):
         # variables used by both the state-feedback and output-feedback versions
         Nx = self._system_model._Nx
         Nu = self._system_model._Nu
+        total = self._FIR_horizon + 1
 
         if self._use_state_feedback_version != (self._state_feedback or self._system_model._state_feedback):
             self.initializePhi ()
@@ -199,21 +200,21 @@ class SLS (SynthesisAlgorithm):
             # save the solved problem for the users to examine if needed
             self._optimal_objective_value = self._sls_problem.value
             if self._use_state_feedback_version:
-                controller._Phi_x = []
-                controller._Phi_u = []
-                for tau in range(self._FIR_horizon+1):
-                    controller._Phi_x.append(self._Phi_x[tau].value)
-                    controller._Phi_u.append(self._Phi_u[tau].value)
+                controller._Phi_x = [None] * total
+                controller._Phi_u = [None] * total
+                for tau in range(total):
+                    controller._Phi_x[tau] = self._Phi_x[tau].value
+                    controller._Phi_u[tau] = self._Phi_u[tau].value
             else:
-                controller._Phi_xx = []
-                controller._Phi_ux = []
-                controller._Phi_xy = []
-                controller._Phi_uy = []
-                for tau in range(self._FIR_horizon+1):
-                    controller._Phi_xx.append(self._Phi_xx[tau].value)
-                    controller._Phi_ux.append(self._Phi_ux[tau].value)
-                    controller._Phi_xy.append(self._Phi_xy[tau].value)
-                    controller._Phi_uy.append(self._Phi_uy[tau].value)
+                controller._Phi_xx = [None] * total
+                controller._Phi_ux = [None] * total
+                controller._Phi_xy = [None] * total
+                controller._Phi_uy = [None] * total
+                for tau in range(total):
+                    controller._Phi_xx[tau] = self._Phi_xx[tau].value
+                    controller._Phi_ux[tau] = self._Phi_ux[tau].value
+                    controller._Phi_xy[tau] = self._Phi_xy[tau].value
+                    controller._Phi_uy[tau] = self._Phi_uy[tau].value
 
         controller.initialize()
         return controller
@@ -310,6 +311,17 @@ class IOP (SynthesisAlgorithm):
             FIR_horizon=self._FIR_horizon
         )
 
+        # initialize the variables
+        self._X = [None] * self._FIR_horizon
+        self._W = [None] * self._FIR_horizon
+        self._Y = [None] * self._FIR_horizon
+        self._Z = [None] * self._FIR_horizon
+        for tau in range(self._FIR_horizon):
+            self._X[tau] = cp.Variable(shape=(Ny,Ny))
+            self._W[tau] = cp.Variable(shape=(Ny,Nu))
+            self._Y[tau] = cp.Variable(shape=(Nu,Ny))
+            self._Z[tau] = cp.Variable(shape=(Nu,Nu))
+
         # objective
         objective_value = 0
         for obj in self._objectives:
@@ -345,15 +357,15 @@ class IOP (SynthesisAlgorithm):
         else:
             # save the solved problem for the users to examine if needed
             self._optimal_objective_value = self._iop_problem.value
-            controller._X = []
-            controller._W = []
-            controller._Y = []
-            controller._Z = []
-            for tau in range(self._FIR_horizon+1):
-                controller._X.append(self._X[tau].value)
-                controller._W.append(self._W[tau].value)
-                controller._Y.append(self._Y[tau].value)
-                controller._Z.append(self._Z[tau].value)
+            controller._X = [None] * self._FIR_horizon
+            controller._W = [None] * self._FIR_horizon
+            controller._Y = [None] * self._FIR_horizon
+            controller._Z = [None] * self._FIR_horizon
+            for tau in range(self._FIR_horizon):
+                controller._X[tau] = self._X[tau].value
+                controller._W[tau] = self._W[tau].value
+                controller._Y[tau] = self._Y[tau].value
+                controller._Z[tau] = self._Z[tau].value
 
         controller.initialize()
         return controller
