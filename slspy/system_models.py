@@ -12,7 +12,7 @@ class SystemModel:
         # this function takes the input and progress to next time 
 '''
 
-class LTISystem (SystemModel):
+class LTI_System (SystemModel):
     '''
     Contains all matrices of an LTI system
     '''
@@ -226,7 +226,7 @@ class LTISystem (SystemModel):
         return sys
     
     def __copy(self):
-        sys = LTISystem()
+        sys = LTI_System()
         # state
         sys._A  = self._A
         sys._B1 = self._B1

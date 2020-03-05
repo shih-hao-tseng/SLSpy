@@ -35,7 +35,7 @@ def customization_example():
     vector as the control.
     '''
     # we use a simple LTI system with doubly stochastic chain topology
-    sys = LTISystem (
+    sys = LTI_System (
         Nx = 10, Nw = 10
     )
 

@@ -1,7 +1,7 @@
 from slspy import *
 
 def output_fdbk_example():
-    sys = LTISystem (
+    sys = LTI_System (
         Nx = 10, Ny = 10, Nw = 10,
         state_feedback = False
     )

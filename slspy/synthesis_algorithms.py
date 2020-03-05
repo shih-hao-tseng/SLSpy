@@ -124,7 +124,7 @@ class SLS (SynthesisAlgorithm):
 
         if self._system_model is None:
             return self.errorMessage('The system is not yet assigned.')
-        if not isinstance(self._system_model,LTISystem):
+        if not isinstance(self._system_model,LTI_System):
             return self.errorMessage('The system must be LTI.')
         if not isinstance(self._FIR_horizon,int):
             return self.errorMessage('FIR horizon must be integer.')
@@ -150,7 +150,7 @@ class SLS (SynthesisAlgorithm):
             self.initializePhi ()
 
         if self._use_state_feedback_version:
-            controller = SLS_State_Feedback_FIR_Controller (
+            controller = SLS_StateFeedback_FIR_Controller (
                 Nx=Nx, Nu=Nu,
                 FIR_horizon=self._FIR_horizon
             )
@@ -158,7 +158,7 @@ class SLS (SynthesisAlgorithm):
             # output-feedback
             Ny = self._system_model._Ny
 
-            controller = SLS_Output_Feedback_FIR_Controller (
+            controller = SLS_OutputFeedback_FIR_Controller (
                 Nx=Nx, Nu=Nu, Ny=Ny, D22=self._system_model._D22,
                 FIR_horizon=self._FIR_horizon
             )

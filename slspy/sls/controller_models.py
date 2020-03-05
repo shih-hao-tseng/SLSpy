@@ -53,7 +53,7 @@ class SLS_FIR_Controller (ControllerModel):
             FIFO_list.pop(-1)
 
 # we don't combine the state-feedback and non-state-feedback controllers using a switch due to performance
-class SLS_State_Feedback_FIR_Controller (SLS_FIR_Controller):
+class SLS_StateFeedback_FIR_Controller (SLS_FIR_Controller):
     '''
     State feedback SLS controller with finite impulse response
     '''
@@ -83,7 +83,7 @@ class SLS_State_Feedback_FIR_Controller (SLS_FIR_Controller):
 
         return u
 
-class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
+class SLS_OutputFeedback_FIR_Controller (SLS_FIR_Controller):
     '''
     Output feedback SLS controller with finite impulse response
     '''
@@ -100,7 +100,7 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
     def initialize (self):
         self._beta = []
         self._bar_y = []
-        self.precaculation()
+        self.precalculation()
 
     def getControl(self, y):
         '''
@@ -136,7 +136,7 @@ class SLS_Output_Feedback_FIR_Controller (SLS_FIR_Controller):
 
         return u
     
-    def precaculation(self):
+    def precalculation(self):
         # since Phi_xx[1] = I, we have z (I-z Phi_xx) = -Phi_xx[2] - z^{-1} Phi_xx[3] ...
         
         self._tilde_Phi_xx = [] # = [ tilde_Phi_xx[0], tilde_Phi_xx[1], ... ]

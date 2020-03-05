@@ -3,7 +3,7 @@ import numpy as np
 
 def state_fdbk_rfd_example():
     # specify system matrices
-    sys = LTISystem (
+    sys = LTI_System (
         Nx = 10, Nw = 10
     )
 

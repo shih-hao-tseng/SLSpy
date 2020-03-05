@@ -1,4 +1,4 @@
-from ..system_models import LTISystem
+from ..system_models import LTI_System
 from math import floor, ceil
 import numpy as np
 
@@ -10,7 +10,7 @@ def generate_matrices_from_ABCD (system_model=None, A=None, B=None, C=None, D=No
     Given A, B, C, and D, partition them into the corresponding matrices
     '''
     # This function simply serves as an abbreviation
-    # The user has to ensure that system_model is LTISystem, 
+    # The user has to ensure that system_model is LTI_System, 
     # and the dimensions of the provided matrices are correct
     Nx = system_model._Nx
     Ny = system_model._Ny
@@ -46,7 +46,7 @@ def generate_matrices_from_ABCD (system_model=None, A=None, B=None, C=None, D=No
 
 def generate_BCD_and_zero_initialization (system_model=None):
     # This function simply serves as an abbreviation
-    # The user has to ensure that system_model is LTISystem
+    # The user has to ensure that system_model is LTI_System
     system_model._Nw = system_model._Nx
     system_model._Nz = system_model._Nx + system_model._Nu
 
@@ -69,14 +69,14 @@ def generate_doubly_stochastic_chain (system_model=None, rho=0, actuator_density
     x_N(t+1) = rho*[alpha*x_{N-1}(t) + (1-alpha)x_N(t)] + B(N,N)u_N(t)
     Also sets Nu of the system accordingly
     Inputs
-       system_model     : LTISystem containing system matrices
+       system_model     : LTI_System containing system matrices
        rho              : stability of A; choose rho=1 for dbl stochastic A
        actuator_density : actuation density of B, in (0, 1]
                           this is approximate; only exact if things divide exactly
        alpha            : how much state is spread between neighbours
     '''
-    if not isinstance(system_model,LTISystem):
-        # only modify LTISystem plant
+    if not isinstance(system_model,LTI_System):
+        # only modify LTI_System plant
         return
     
     if system_model._Nx == 0:
@@ -105,13 +105,13 @@ def generate_random_chain (system_model=None, rho=1, actuator_density=1):
     (tridiagonal A matrix) and a random actuation (B) matrix
     Also sets Nu of the system accordingly
     Inputs
-       system_model     : LTISystem containing system matrices
+       system_model     : LTI_System containing system matrices
        rho              : normalization value; A is generated s.t. max |eig(A)| = rho
        actuator_density : actuation density of B, in (0, 1]
                           this is approximate; only exact if things divide exactly
     '''
-    if not isinstance(system_model,LTISystem):
-        # only modify LTISystem plant
+    if not isinstance(system_model,LTI_System):
+        # only modify LTI_System plant
         return
 
     if system_model._Nx == 0:

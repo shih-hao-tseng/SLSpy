@@ -2,7 +2,7 @@ from slspy import *
 
 def robust_simulations():
     # specify system matrices
-    sys = LTISystem (
+    sys = LTI_System (
         Nx = 50, Nw = 50
     )
 
