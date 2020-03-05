@@ -1,9 +1,15 @@
+import cvxpy as cp
 from .core import SystemModel,ControllerModel,SynthesisAlgorithm
 from .system_models import LTISystem
-from .controller_models import *
+
 from .sls.components import *
 from .sls.constraint import SLSCons_SLS
-import cvxpy as cp
+from .sls.controller_models import *
+
+from .iop.components import *
+from .iop.components import IOPCons_IOP
+from .iop.controller_models import *
+
 '''
 To create a new synthesis algorithm, inherit the following base function and customize the specified methods.
 
@@ -208,6 +214,146 @@ class SLS (SynthesisAlgorithm):
                     controller._Phi_ux.append(self._Phi_ux[tau].value)
                     controller._Phi_xy.append(self._Phi_xy[tau].value)
                     controller._Phi_uy.append(self._Phi_uy[tau].value)
+
+        controller.initialize()
+        return controller
+
+class IOP (SynthesisAlgorithm):
+    '''
+    Synthesizing the controller using Input-Output Parameterization method, c.f.
+        Furieri et al., ``An Input-Output Parameterization of Stabilizing Controllers: Amidst Youla and System Level Synthesis,'' 2019.
+    This is a finite impulse response implementation of the proposal
+    '''
+    def __init__(self,
+        system_model=None,
+        FIR_horizon=1
+    ):
+        self._FIR_horizon = FIR_horizon
+        self._system_model = None
+        self.setSystemModel(system_model=system_model)
+        
+        self.resetObjAndCons()
+
+        self._iop_problem = None
+        self._iop_constraints = IOPCons_IOP ()
+
+    # overload plus and less than or equal operators as syntactic sugars
+    def __add__(self, obj_or_cons):
+        return self.addObjOrCons(obj_or_cons)
+
+    def __lshift__ (self, obj_or_cons_or_system):
+        if isinstance(obj_or_cons_or_system,SystemModel):
+            return self.setSystemModel(system_model=obj_or_cons_or_system)
+        else:
+            return self.setObjOrCons(obj_or_cons=obj_or_cons_or_system)
+
+    def resetObjAndCons (self):
+        self.resetObjectives ()
+        self.resetConstraints ()
+    
+    def resetObjectives (self):
+        self._objectives = []
+        self._optimal_objective_value = float('inf')
+    
+    def resetConstraints (self):
+        self._constraints = []
+
+    def addObjOrCons (self, obj_or_cons):
+        if isinstance(obj_or_cons, IOPConstraint):
+            self._constraints.append(obj_or_cons)
+        elif isinstance(obj_or_cons, IOPObjective):
+            self._objectives.append(obj_or_cons)
+        return self
+
+    def setObjOrCons (self, obj_or_cons):
+        if isinstance(obj_or_cons, IOPConstraint):
+            self._constraints = []
+            self._constraints.append(obj_or_cons)
+        elif isinstance(obj_or_cons, IOPObjective):
+            self._objectives = []
+            self._objectives.append(obj_or_cons)
+        return self
+
+    def getOptimalObjectiveValue (self):
+        return self._optimal_objective_value
+
+    def getIOPProblem (self):
+        return self._iop_problem
+
+    def sanityCheck (self):
+        # we can extend the algorithm to work for non-state-feedback SLS
+        #if not self._state_feedback:
+        #    return self.errorMessage('Only support state-feedback case for now.')
+
+        if self._system_model is None:
+            return self.errorMessage('The system is not yet assigned.')
+        if not isinstance(self._system_model,LTISystem):
+            return self.errorMessage('The system must be LTI.')
+        if not isinstance(self._FIR_horizon,int):
+            return self.errorMessage('FIR horizon must be integer.')
+        if self._FIR_horizon < 1:
+            return self.errorMessage('FIR horizon must be at least 1.')
+
+        return True
+
+    def synthesizeControllerModel(self):
+        self._optimal_objective_value = float('inf')
+        if not self.sanityCheck():
+            # simple sanity check
+            return None
+
+        Ny = self._system_model._Ny
+        Nu = self._system_model._Nu
+
+        controller = IOP_FIR_Controller (
+            Ny=Ny, Nu=Nu,
+            FIR_horizon=self._FIR_horizon
+        )
+
+        # objective
+        objective_value = 0
+        for obj in self._objectives:
+            objective_value = obj.addObjectiveValue (
+                iop = self,
+                objective_value = objective_value
+            )
+        
+        # add IOP constraints
+        self._iop_constraints.addConstraints (iop = self)
+
+        # the constraints might also introduce additional terms at the objective
+        for cons in self._constraints:
+            objective_value = cons.addObjectiveValue (
+                iop = self,
+                objective_value = objective_value
+            )
+            constraints = cons.addConstraints (
+                iop = self,
+                constraints = constraints
+            )
+
+        # obtain results and put into controller
+        self._iop_problem = cp.Problem (cp.Minimize(objective_value), constraints)
+        self._iop_problem.solve()
+
+        if self._iop_problem.status is "infeasible":
+            self.warningMessage('IOP problem infeasible')
+            return None
+        elif self._iop_problem.status is "unbounded":
+            self.warningMessage('IOP problem unbounded')
+            return None
+        else:
+            # save the solved problem for the users to examine if needed
+            self._optimal_objective_value = self._iop_problem.value
+            controller._X = []
+            controller._W = []
+            controller._Y = []
+            controller._Z = []
+            for tau in range(self._FIR_horizon+1):
+                controller._X.append(self._X[tau].value)
+                controller._W.append(self._W[tau].value)
+                controller._Y.append(self._Y[tau].value)
+                controller._Z.append(self._Z[tau].value)
 
         controller.initialize()
         return controller
