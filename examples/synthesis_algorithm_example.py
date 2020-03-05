@@ -12,7 +12,7 @@ def synthesis_algorithm_example():
 
     synthesizer = IOP (
         system_model = sys,
-        FIR_horizon = 5
+        FIR_horizon = 10
     )
     synthesizer << IOPObj_H2()
 
