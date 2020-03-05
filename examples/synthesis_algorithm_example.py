@@ -4,11 +4,11 @@ import numpy as np
 def synthesis_algorithm_example():
     # specify system matrices
     sys = LTI_FIR_System (
-        Ny = 5, Nu = 5
+        Ny = 10, Nu = 10
     )
 
-    sys._G.append(np.eye(5))
-    sys._G.append(np.eye(5))
+    sys._G.append(np.eye(sys._Ny))
+    sys._G.append(np.eye(sys._Ny))
 
     synthesizer = IOP (
         system_model = sys,
@@ -17,7 +17,7 @@ def synthesis_algorithm_example():
     synthesizer << IOPObj_H2()
 
     sim_horizon = 25
-    noise = FixedNoiseVector (Nw = 5, horizon = sim_horizon)
+    noise = FixedNoiseVector (Nw = sys._Ny, horizon = sim_horizon)
     noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
     noise._w[0][sys._Nw//2] = 10
 
