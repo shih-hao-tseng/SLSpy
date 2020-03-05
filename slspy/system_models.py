@@ -293,14 +293,42 @@ class LTI_FIR_System (SystemModel):
         
         self._x = self._y = self._z = y
 
-def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=0):
+def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
+    '''
+    y = (C2 (zI - A)^{-1} B2 + D22) u + (C2 (zI - A)^{-1} B1 + D21) w
+    so
+        G = C2 (zI - A)^{-1} B2 + D22
+          = D22 + z^{-1} C2 ( 1 - z^{-1} A + z^{-2} A^2 - z^{-3} A^3 ... ) B2
+    '''
     if not isinstance(system,LTI_System):
         error_message('The system must be LTI_System')
         return
 
-    truncated_system = LTI_FIR_System (Ny=system._Ny, Nu=system._Nu)
+    if system._state_feedback:
+        Ny = system._Nx
+    else:
+        Ny = system._Ny
+    Nu = system._Nu
 
-    #TODO
+    truncated_system = LTI_FIR_System (Ny=Ny, Nu=Nu)
 
+    if FIR_horizon <= 0:
+        return truncated_system
+
+    tmp = system._B2
+    mA  = -system._A
+    if system._state_feedback:
+        C2  = np.eye(Ny)
+        D22 = np.zeros([Ny,Nu])
+    else:
+        C2  = system._C2
+        D22 = system._D22
+
+    truncated_system._G = [None] * FIR_horizon
+    truncated_system._G[0] = D22
+
+    for t in range(1,FIR_horizon):
+        truncated_system._G[t] = np.dot(C2,tmp)
+        tmp = np.dot(mA,tmp)
 
     return truncated_system
