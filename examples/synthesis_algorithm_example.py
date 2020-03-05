@@ -12,7 +12,7 @@ def synthesis_algorithm_example():
 
     synthesizer = IOP (
         system_model = sys,
-        FIR_horizon = 15
+        FIR_horizon = 10
     )
     synthesizer << IOPObj_H2()
 
@@ -22,14 +22,14 @@ def synthesis_algorithm_example():
     noise._w[0][sys._Nw//2] = 10
 
     # synthesize controller (the generated controller is actually initialized)
+    controller = synthesizer.synthesizeControllerModel ()
+
     # and use the synthesized controller in simulation
     simulator = Simulator (
         system = sys,
+        controller = controller,
         noise = noise,
         horizon = sim_horizon
-    )
-    simulator.setController (
-        controller = synthesizer.synthesizeControllerModel ()
     )
 
     # run the simulation

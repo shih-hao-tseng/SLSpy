@@ -27,6 +27,7 @@ class IOP_FIR_Controller (ControllerModel):
 
         self._delta = []
         self._hat_y = np.zeros([Ny,1])
+        self._IX = []
 
     @staticmethod
     def _convolve(A,B,ub):
@@ -69,4 +70,4 @@ class IOP_FIR_Controller (ControllerModel):
         u           = self._convolve(A=self._Y,  B=self._delta, ub=self._FIR_horizon)
         self._hat_y = self._convolve(A=self._IX, B=self._delta, ub=self._FIR_horizon)
 
-        return np.zeros([self._Nu,1])
+        return u

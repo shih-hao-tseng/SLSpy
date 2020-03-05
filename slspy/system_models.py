@@ -266,7 +266,7 @@ class LTI_FIR_System (SystemModel):
         self._state_feedback = False
 
         self._zero = np.zeros([Ny,1])
-        self._x = self._y = self._z = self._zero
+        self._x = self._y = self._z = self._zero.copy()
 
     def systemProgress (self, u, w=None, **kwargs):
         Ng = len(self._G)
@@ -285,7 +285,7 @@ class LTI_FIR_System (SystemModel):
             self._w.pop(-1)
             convolution_len = Ng
       
-        y = self._zero
+        y = self._zero.copy()
         for tau in range(convolution_len):
             y += np.dot(self._G[tau],self._u[tau])
             if self._w[tau] is not None:
