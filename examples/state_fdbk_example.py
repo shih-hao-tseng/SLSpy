@@ -1,7 +1,7 @@
 from slspy import *
 
 def state_fdbk_example():
-    sys = LTISystem (
+    sys = LTI_System (
         Nx = 10, Nw = 10
     )
 
@@ -33,7 +33,7 @@ def state_fdbk_example():
         FIR_horizon = 20
     )
     # set SLS objective
-    synthesizer << SLSObj_H2()
+    synthesizer << SLS_Obj_H2()
 
     # synthesize controller (the generated controller is actually initialized)
     # and use the synthesized controller in simulation
@@ -49,7 +49,7 @@ def state_fdbk_example():
 
 
     ## (2) d-localized sls
-    dlocalized = SLSCons_dLocalized (
+    dlocalized = SLS_Cons_dLocalized (
         actDelay = 1,
         cSpeed = 2,
         d = 3
@@ -67,7 +67,7 @@ def state_fdbk_example():
 
 
     ## (3) approximate d-localized sls
-    approx_dlocalized = SLSCons_ApproxdLocalized (
+    approx_dlocalized = SLS_Cons_ApproxdLocalized (
         base = dlocalized,
         robCoeff = 10e3
     )

@@ -1,16 +1,16 @@
 
-from .components import SLSConstraint
+from .components import SLS_Constraint
 import cvxpy as cp
 import numpy as np
 '''
 To create a new SLS constraint, inherit the following base function and customize the specified methods.
 
-class SLSConstraint:
+class SLS_Constraint:
     def addConstraints(self, sls, constraints):
         return constraints
 '''
 
-class SLSCons_SLS (SLSConstraint):
+class SLS_Cons_SLS (SLS_Constraint):
     '''
     The descrete-time SLS constrains
     '''
@@ -100,7 +100,7 @@ class SLSCons_SLS (SLSConstraint):
                 ]
         return constraints
 
-class SLSCons_dLocalized (SLSConstraint):
+class SLS_Cons_dLocalized (SLS_Constraint):
     def __init__(self,
         base=None,
         actDelay=0, cSpeed=1, d=1
@@ -110,7 +110,7 @@ class SLSCons_dLocalized (SLSConstraint):
         cSpeed: communication speed
         d: for d-localized
         '''
-        if isinstance(base,SLSCons_dLocalized):
+        if isinstance(base,SLS_Cons_dLocalized):
             self._actDelay = base._actDelay
             self._cSpeed = base._cSpeed
             self._d = base._d
@@ -154,7 +154,7 @@ class SLSCons_dLocalized (SLSConstraint):
 
         return constraints
 
-class SLSCons_Robust (SLSConstraint):
+class SLS_Cons_Robust (SLS_Constraint):
     '''
     Robust SLS (state-feedback) constraints
     '''
@@ -225,26 +225,26 @@ class SLSCons_Robust (SLSConstraint):
 
         return constraints
 
-class SLSCons_ApproxdLocalized (SLSCons_dLocalized, SLSCons_Robust):
+class SLS_Cons_ApproxdLocalized (SLS_Cons_dLocalized, SLS_Cons_Robust):
     def __init__(self,
         robCoeff=0,
         **kwargs
     ):
-        SLSCons_dLocalized.__init__(self,**kwargs)
+        SLS_Cons_dLocalized.__init__(self,**kwargs)
 
         base = kwargs.get('base')
-        if isinstance(base,SLSCons_ApproxdLocalized):
+        if isinstance(base,SLS_Cons_ApproxdLocalized):
             self._robCoeff = base._robCoeff
         else:
             self._robCoeff = robCoeff
 
-        SLSCons_Robust.__init__(self,gamma_coefficient=robCoeff)
+        SLS_Cons_Robust.__init__(self,gamma_coefficient=robCoeff)
 
     def addObjectiveValue(self, sls, objective_value):
-        return SLSCons_Robust.addObjectiveValue(self, sls, objective_value)
+        return SLS_Cons_Robust.addObjectiveValue(self, sls, objective_value)
 
     def addConstraints(self, sls, constraints):
-        constraints = SLSCons_Robust.addConstraints(self, sls, constraints)
-        constraints = SLSCons_dLocalized.addConstraints(self, sls, constraints)
+        constraints = SLS_Cons_Robust.addConstraints(self, sls, constraints)
+        constraints = SLS_Cons_dLocalized.addConstraints(self, sls, constraints)
 
         return constraints

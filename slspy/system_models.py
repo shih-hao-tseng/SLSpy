@@ -8,11 +8,11 @@ class SystemModel:
         ignore_output=False,
         state_feedback=True
     ):
-    def systemProgress (self, **kwargs):
+    def systemProgress (self, u, w=None, **kwargs):
         # this function takes the input and progress to next time 
 '''
 
-class LTISystem (SystemModel):
+class LTI_System (SystemModel):
     '''
     Contains all matrices of an LTI system
     '''
@@ -226,7 +226,7 @@ class LTISystem (SystemModel):
         return sys
     
     def __copy(self):
-        sys = LTISystem()
+        sys = LTI_System()
         # state
         sys._A  = self._A
         sys._B1 = self._B1
@@ -247,3 +247,48 @@ class LTISystem (SystemModel):
         sys._Nw = self._Nw
 
         return sys
+
+
+class LTI_FIR_System (SystemModel):
+    '''
+    The LTI FIR system with
+        y = G u + w_y
+    '''
+    def __init__ (self, Ny=0, Nu=0):
+        self._Nw = self._Ny = Ny
+        self._Nu = Nu
+
+        self._G = []
+        self._u = []
+        self._w = []
+
+        self._ignore_output = True
+        self._state_feedback = False
+
+        self._zero = np.zeros([Ny,1])
+        self._x = self._y = self._z = self._zero.copy()
+
+    def systemProgress (self, u, w=None, **kwargs):
+        Ng = len(self._G)
+
+        if Ng == 0:
+            self._x = self._y = self._z = self._zero
+            return
+        
+        self._u = [u] + self._u
+        self._w = [w] + self._w
+
+        convolution_len = len(self._u)
+
+        if convolution_len > Ng:
+            self._u.pop(-1)
+            self._w.pop(-1)
+            convolution_len = Ng
+      
+        y = self._zero.copy()
+        for tau in range(convolution_len):
+            y += np.dot(self._G[tau],self._u[tau])
+            if self._w[tau] is not None:
+                y += self._w[tau]
+        
+        self._x = self._y = self._z = y

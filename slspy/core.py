@@ -45,8 +45,8 @@ class SystemModel (ObjBase):
 
         self._x0 = None
 
-    def systemProgress (self, **kwargs):
-        # this function takes the input and progress to next time 
+    def systemProgress (self, u, w=None, **kwargs):
+        # this function takes the input (and the noise) and progress to next time 
         pass
 
     def getState(self):

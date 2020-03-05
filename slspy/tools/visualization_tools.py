@@ -11,7 +11,7 @@ def matrix_list_multiplication (matrix_A=None, list_B=[]):
 def keep_showing_figures ():
     show()
 
-def plot_heat_map (x=None, Bu=None, myTitle='title', outputFileName=None):
+def plot_heat_map (x=None, Bu=None, myTitle='title', outputFileName=None, left_title=None, right_title=None):
     '''
     Plots log-based heat map for x, u
     Inputs
@@ -46,7 +46,10 @@ def plot_heat_map (x=None, Bu=None, myTitle='title', outputFileName=None):
             vmax=logmax
         )
         colorbar()
-        title('log10(|x|)')
+        if left_title is not None:
+            title(left_title)
+        else:
+            title('log10(|x|)')
         xlabel('Time')
         ylabel('Space')
         
@@ -59,7 +62,10 @@ def plot_heat_map (x=None, Bu=None, myTitle='title', outputFileName=None):
             vmax=logmax
         )
         colorbar()
-        title('log10(|x|)')
+        if left_title is not None:
+            title(left_title)
+        else:
+            title('log10(|x|)')
         xlabel('Time')
         ylabel('Space')
 
@@ -71,7 +77,10 @@ def plot_heat_map (x=None, Bu=None, myTitle='title', outputFileName=None):
             vmax=logmax
         )
         colorbar()
-        title('log10(|u|)')
+        if right_title is not None:
+            title(right_title)
+        else:
+            title('log10(|u|)')
         xlabel('Time')
 
     if outputFileName is not None:

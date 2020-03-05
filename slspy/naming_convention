@@ -1,0 +1,11 @@
+- File names: use snake case
+  e.g., system_models.py
+
+- Class names: use upper camel case while separating abbreviations by underscores
+  e.g., LTI_System, SLS_OutputFeedback_FIR_Controller
+
+- Method names: use lower camel case while separating abbreviations by underscores
+  e.g., getControl
+
+- Attribute names: start with a underscore and use snake case
+  e.g., _optimal_objective_value

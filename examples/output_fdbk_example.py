@@ -1,7 +1,7 @@
 from slspy import *
 
 def output_fdbk_example():
-    sys = LTISystem (
+    sys = LTI_System (
         Nx = 10, Ny = 10, Nw = 10,
         state_feedback = False
     )
@@ -41,7 +41,7 @@ def output_fdbk_example():
     cov_vSqrt  = mmNoiseAmp * np.eye(10)
     
     # set SLS objective    
-    synthesizer << SLSObj_LQ(Cov_vSqrt=cov_vSqrt)
+    synthesizer << SLS_Obj_LQ(Cov_vSqrt=cov_vSqrt)
    
     # synthesize controller (the generated controller is actually initialized)
     # and use the synthesized controller in simulation

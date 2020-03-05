@@ -1,9 +1,9 @@
 import numpy as np
 import cvxpy as cp
 
-class SLS_Objective:
+class IOP_Objective:
     '''
-    The base class for SLS objectives
+    The base class for IOP objectives
     '''
     def __init__ (self):
         # to save the objective value
@@ -15,12 +15,12 @@ class SLS_Objective:
         else:
             return self._objective_expression.value
 
-    def addObjectiveValue(self, sls, objective_value):
+    def addObjectiveValue(self, iop, objective_value):
         return objective_value
 
-class SLS_Constraint(SLS_Objective):
+class IOP_Constraint(IOP_Objective):
     '''
-    The base class for SLS constriant
+    The base class for IOP constriant
     '''
-    def addConstraints(self, sls, constraints):
+    def addConstraints(self, iop, constraints):
         return constraints
