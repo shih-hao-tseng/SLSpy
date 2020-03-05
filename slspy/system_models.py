@@ -255,7 +255,7 @@ class LTI_FIR_System (SystemModel):
         y = G u + w_y
     '''
     def __init__ (self, Ny=0, Nu=0):
-        self._Ny = Ny
+        self._Nw = self._Ny = Ny
         self._Nu = Nu
 
         self._G = []
