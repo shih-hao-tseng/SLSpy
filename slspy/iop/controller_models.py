@@ -66,7 +66,7 @@ class IOP_FIR_Controller (ControllerModel):
 
     def getControl(self, y):
         # the controller is Y X^{-1}
-        self._FIFO_insert(self._delta, y - self._hat_y, self._FIR_horizon)
+        self._FIFO_insert(self._delta, y + self._hat_y, self._FIR_horizon)
         u           = self._convolve(A=self._Y,  B=self._delta, ub=self._FIR_horizon)
         self._hat_y = self._convolve(A=self._IX, B=self._delta, ub=self._FIR_horizon)
 

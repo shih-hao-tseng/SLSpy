@@ -12,7 +12,7 @@ def synthesis_algorithm_example():
 
     synthesizer = IOP (
         system_model = sys,
-        FIR_horizon = 10
+        FIR_horizon = 5
     )
     synthesizer << IOPObj_H2()
 
@@ -35,7 +35,7 @@ def synthesis_algorithm_example():
     # run the simulation
     _, y_history, _, u_history, _ = simulator.run ()
 
-    plot_heat_map(y_history, u_history, 'IOP')
+    plot_heat_map(y_history, u_history, 'IOP', left_title='log10(|y|)', right_title='log10(|u|)')
 
 if __name__ == '__main__':
     synthesis_algorithm_example()
