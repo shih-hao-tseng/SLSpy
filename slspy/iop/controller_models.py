@@ -27,7 +27,7 @@ class IOP_FIR_Controller (ControllerModel):
 
         self._delta = []
         self._hat_y = np.zeros([Ny,1])
-        self._IX = []
+        self._XI = []
 
     @staticmethod
     def _convolve(A,B,ub):
@@ -55,19 +55,19 @@ class IOP_FIR_Controller (ControllerModel):
         # initialize as zero
         self._hat_y = np.zeros([self._Ny,1])
 
-        # I - X
+        # X - I
         X_len = len(self._X)
-        self._IX = [None] * X_len
+        self._XI = [None] * X_len
         for tau in range(X_len):
             if tau == 0:
-                self._IX[tau] = np.eye(self._Ny) - self._X[tau]
+                self._XI[tau] = self._X[tau] - np.eye(self._Ny)
             else:
-                self._IX[tau] = -self._X[tau]
+                self._XI[tau] = self._X[tau]
 
     def getControl(self, y):
         # the controller is Y X^{-1}
-        self._FIFO_insert(self._delta, y + self._hat_y, self._FIR_horizon)
+        self._FIFO_insert(self._delta, y - self._hat_y, self._FIR_horizon)
         u           = self._convolve(A=self._Y,  B=self._delta, ub=self._FIR_horizon)
-        self._hat_y = self._convolve(A=self._IX, B=self._delta, ub=self._FIR_horizon)
+        self._hat_y = self._convolve(A=self._XI, B=self._delta, ub=self._FIR_horizon)
 
         return u
