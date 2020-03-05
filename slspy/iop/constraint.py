@@ -23,7 +23,7 @@ class IOP_Cons_IOP (IOP_Constraint):
                 continue
             if tmp < 0:
                 continue
-            AB += A[t] * B[tmp]
+            AB += A[t] @ B[tmp]
         return AB
 
     def addConstraints(self, iop, constraints=[]):
@@ -51,10 +51,10 @@ class IOP_Cons_IOP (IOP_Constraint):
             if tau < horizon:
                 if tau == 0:
                     constraints += [
-                        iop._X[0] == G[0] * iop._Y[0] + np.eye(Ny)
+                        iop._X[0] == G[0] @ iop._Y[0] + np.eye(Ny)
                     ]
                     constraints += [
-                        iop._Z[0] == iop._Y[0] * G[0] + np.eye(Nu)
+                        iop._Z[0] == iop._Y[0] @ G[0] + np.eye(Nu)
                     ]
                 else:
                     constraints += [
