@@ -33,3 +33,15 @@ or
 ## SLSpy Wiki
 A simple wiki page with basic explanation can be found at 
 http://slswiki.cms.caltech.edu/index.php/SLSpy
+
+## Built-in Synthesis Algorithms
+* System Level Synthesis (FIR version), c.f.\
+  James Anderson, John C. Doyle, Steven H. Low, and Nikolai Matni,\
+  ``System Level Synthesis,'' *Annual Reviews in Control*, 2019.
+
+  Yuh-Shyang Wang, Nikolai Matni, and John C. Doyle,\
+  ``A System Level Approach to Controller Synthesis,'' *IEEE Trans. Autom. Control*, 2019
+
+* Input-Output Parameterization (FIR version), c.f.\
+  Luca Furieri, Yang Zheng, Antonis Papachristodoulou, and Maryam Kamgarpour,\
+  ``An Input-Output Parameterization of Stabilizing Controllers: Amidst Youla and System Level Synthesis,'' *IEEE Control Systems Letters*, 2019
