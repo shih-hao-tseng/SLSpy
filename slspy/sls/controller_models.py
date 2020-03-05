@@ -12,7 +12,7 @@ class ControllerModel:
 
 class SLS_FIR_Controller (ControllerModel):
     '''
-    State base for SLS controllers
+    Base for SLS FIR controllers
     '''
     def __init__ (self, Nx=0, Nu=0, FIR_horizon=1):
         self._Nx = Nx # dimension of state
@@ -77,7 +77,6 @@ class SLS_State_Feedback_FIR_Controller (SLS_FIR_Controller):
             self._delta.append(delta)
 
     def getControl(self, y):
-        #TODO: check
         self._FIFO_insert(self._delta, y - self._hat_x, self._FIR_horizon+1)
         u           = self._convolve(A=self._Phi_u, B=self._delta, lb=1, ub=self._FIR_horizon+1, offset=1)
         self._hat_x = self._convolve(A=self._Phi_x, B=self._delta, lb=2, ub=self._FIR_horizon+1, offset=2)
