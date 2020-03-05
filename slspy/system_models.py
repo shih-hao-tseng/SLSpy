@@ -1,4 +1,4 @@
-from .core import SystemModel
+from .core import SystemModel, error_message
 import numpy as np
 '''
 To create a new system model, inherit the following base function and customize the specified methods.
@@ -292,3 +292,15 @@ class LTI_FIR_System (SystemModel):
                 y += self._w[tau]
         
         self._x = self._y = self._z = y
+
+def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=0):
+    if not isinstance(system,LTI_System):
+        error_message('The system must be LTI_System')
+        return
+
+    truncated_system = LTI_FIR_System (Ny=system._Ny, Nu=system._Nu)
+
+    #TODO
+
+
+    return truncated_system

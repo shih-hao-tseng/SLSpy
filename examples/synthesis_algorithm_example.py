@@ -3,36 +3,55 @@ import numpy as np
 
 def synthesis_algorithm_example():
     # specify system matrices
-    sys = LTI_FIR_System (
-        Ny = 10, Nu = 10
+    sys = LTI_System (
+        Nx = 10, Nw = 10
     )
 
-    sys._G.append(np.eye(sys._Ny))
-    sys._G.append(np.eye(sys._Ny))
-
-    synthesizer = IOP (
+    # generate sys._A, sys._B2
+    generate_doubly_stochastic_chain (
         system_model = sys,
-        FIR_horizon = 10
+        rho = 1,
+        actuator_density = 1,
+        alpha = 0.2
     )
-    synthesizer << IOP_Obj_H2()
+    generate_BCD_and_zero_initialization(sys)
 
+    sys_FIR = truncate_LTI_System_to_LTI_FIR_System (system=sys, FIR_horizon=5)
+
+    controller_FIR_horizon = 10
     sim_horizon = 25
-    noise = FixedNoiseVector (Nw = sys._Ny, horizon = sim_horizon)
+    noise = FixedNoiseVector (Nw = sys._Nx, horizon = sim_horizon)
     noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
     noise._w[0][sys._Nw//2] = 10
 
-    # synthesize controller (the generated controller is actually initialized)
-    controller = synthesizer.synthesizeControllerModel ()
+    # try SLS
+    synthesizer_sls = SLS (
+        system_model = sys,
+        FIR_horizon = controller_FIR_horizon
+    )
+    synthesizer_sls << SLS_Obj_H2()
+    controller_sls = synthesizer_sls.synthesizeControllerModel ()    
 
-    # and use the synthesized controller in simulation
     simulator = Simulator (
         system = sys,
-        controller = controller,
+        controller = controller_sls,
         noise = noise,
         horizon = sim_horizon
     )
+    _, y_history, _, u_history, _ = simulator.run ()
 
-    # run the simulation
+    plot_heat_map(y_history, u_history, 'SLS', left_title='log10(|y|)', right_title='log10(|u|)')
+
+    # try IOP
+    synthesizer_iop = IOP (
+        system_model = sys_FIR,
+        FIR_horizon = controller_FIR_horizon
+    )
+    synthesizer_iop << IOP_Obj_H2()
+    controller_iop = synthesizer_iop.synthesizeControllerModel ()
+
+    simulator.setSystem(sys_FIR)
+    simulator.setController(controller_iop)
     _, y_history, _, u_history, _ = simulator.run ()
 
     plot_heat_map(y_history, u_history, 'IOP', left_title='log10(|y|)', right_title='log10(|u|)')

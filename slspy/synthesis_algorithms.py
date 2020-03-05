@@ -125,7 +125,7 @@ class SLS (SynthesisAlgorithm):
         if self._system_model is None:
             return self.errorMessage('The system is not yet assigned.')
         if not isinstance(self._system_model,LTI_System):
-            return self.errorMessage('The system must be LTI.')
+            return self.errorMessage('The system must be LTI_System.')
         if not isinstance(self._FIR_horizon,int):
             return self.errorMessage('FIR horizon must be integer.')
         if self._FIR_horizon < 1:

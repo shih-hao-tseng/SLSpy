@@ -9,3 +9,8 @@
 
 - Attribute names: start with a underscore and use snake case
   e.g., _optimal_objective_value
+  please feel free to express the variables in the cases they were introduced in the analysis
+  e.g., _Phi_x, _Phi_u
+
+- Helper function names: use snake case
+  e.g., generate_random_chain
