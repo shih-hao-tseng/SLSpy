@@ -1,6 +1,6 @@
 import cvxpy as cp
 from .core import SystemModel,ControllerModel,SynthesisAlgorithm
-from .system_models import LTISystem
+from .system_models import *
 
 from .sls.components import *
 from .sls.constraint import SLSCons_SLS
@@ -331,7 +331,7 @@ class IOP (SynthesisAlgorithm):
             )
         
         # add IOP constraints
-        self._iop_constraints.addConstraints (iop = self)
+        constraints = self._iop_constraints.addConstraints (iop = self)
 
         # the constraints might also introduce additional terms at the objective
         for cons in self._constraints:

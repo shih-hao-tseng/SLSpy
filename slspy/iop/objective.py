@@ -32,7 +32,7 @@ class IOPObj_H2(IOPObjective):
         if X_len == 0:
             return objective_value
 
-        matrix = [[W[0], X[0] - np.eyes(Ny)],[Z[0] - np.eyes(Nu), Y[0]]]
+        matrix = [[W[0], X[0] - np.eye(Ny)],[Z[0] - np.eye(Nu), Y[0]]]
         self._objective_expression += cp.sum_squares(
             cp.bmat(matrix)
         )

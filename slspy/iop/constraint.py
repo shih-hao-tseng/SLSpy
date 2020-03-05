@@ -23,7 +23,7 @@ class IOPCons_IOP (IOPConstraint):
             AB_len = B_len
 
         for t in range(AB_len):
-            AB += A[t] * B[B_len - t]
+            AB += A[t] * B[B_len - 1 - t]
 
         return AB
 
@@ -52,17 +52,17 @@ class IOPCons_IOP (IOPConstraint):
                 ]
             else:
                 constraints += [
-                    iop._X[tau] == self._convolve(G, iop._Y, G_len, tau)
+                    iop._X[tau] == self._convolve(G, iop._Y, G_len, tau + 1)
                 ]
                 constraints += [
-                    iop._Z[tau] == self._convolve(iop._Y, G, tau, G_len)
+                    iop._Z[tau] == self._convolve(iop._Y, G, tau + 1, G_len)
                 ]
 
             constraints += [
-                iop._W[tau] == self._convolve(G, iop._Z, G_len, tau)
+                iop._W[tau] == self._convolve(G, iop._Z, G_len, tau + 1)
             ]
             constraints += [
-                iop._W[tau] == self._convolve(iop._X, G, tau, G_len)
+                iop._W[tau] == self._convolve(iop._X, G, tau + 1, G_len)
             ]
 
         return constraints

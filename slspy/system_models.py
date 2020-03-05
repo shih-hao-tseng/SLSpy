@@ -261,7 +261,10 @@ class LTI_FIR_System (SystemModel):
         self._G = []
         self._u = []
         self._w = []
-        
+
+        self._ignore_output = True
+        self._state_feedback = False
+
         self._zero = np.zeros([Ny,1])
         self._x = self._y = self._z = self._zero
 
@@ -275,12 +278,17 @@ class LTI_FIR_System (SystemModel):
         self._u = [u] + self._u
         self._w = [w] + self._w
 
-        if len(self._u) > Ng:
+        convolution_len = len(self._u)
+
+        if convolution_len > Ng:
             self._u.pop(-1)
             self._w.pop(-1)
-
+            convolution_len = Ng
+      
         y = self._zero
-        for tau in range(Ng):
-            y += np.dot(self._G[tau],self._u[tau]) + self._w[tau]
+        for tau in range(convolution_len):
+            y += np.dot(self._G[tau],self._u[tau])
+            if self._w[tau] is not None:
+                y += self._w[tau]
         
         self._x = self._y = self._z = y
