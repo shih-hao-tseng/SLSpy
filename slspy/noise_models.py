@@ -39,6 +39,7 @@ class GaussianNoise(NoiseModel):
     def getNoise (self,**kwargs):
         return np.random.normal (self._mu, self._sigma, (self._Nw,1))
     
+    
 class FixedNoiseVector(NoiseModel):
     '''
     Fixed noise vector
@@ -81,3 +82,27 @@ class FixedNoiseVector(NoiseModel):
             return w
 
         return np.zeros((self._Nw,1))
+
+
+class MixedNoise(NoiseModel):
+    '''
+    Concatenate different noise models together
+    Input list of NoiseModels in order.
+    '''
+    def __init__(self, *argv):
+        Nw = 0
+        for arg in argv:
+            Nw += arg._Nw
+        NoiseModel.__init__(self, Nw=Nw)
+        self._noise_models = argv
+
+    def initialize (self):
+        for noise_model in self._noise_models:
+            noise_model.initialize()
+
+    def getNoise(self, **kwargs):
+        noises = []
+        for noise_model in self._noise_models:
+            noises.append(noise_model.getNoise(**kwargs))
+
+        return np.concatenate(noises)
