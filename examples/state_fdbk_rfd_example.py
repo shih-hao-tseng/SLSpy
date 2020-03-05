@@ -38,7 +38,7 @@ def state_fdbk_rfd_example():
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
 
-        new_act_ids = obj_rfd.getActsRFD()
+        new_act_ids = obj_rfd.getActs_RFD()
         num_acts.append(len(new_act_ids))
 
         # check performance with rfd-designed system
@@ -76,7 +76,7 @@ def state_fdbk_rfd_example():
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
 
-        new_act_ids = obj_rfd.getActsRFD()
+        new_act_ids = obj_rfd.getActs_RFD()
         num_acts.append(len(new_act_ids))
         
         # check performance with rfd-designed system
@@ -113,7 +113,7 @@ def state_fdbk_rfd_example():
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
     
-        new_act_ids = obj_rfd.getActsRFD()
+        new_act_ids = obj_rfd.getActs_RFD()
         num_acts.append(len(new_act_ids))
         
         # check performance with rfd-designed system

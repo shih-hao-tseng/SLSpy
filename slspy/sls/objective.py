@@ -175,7 +175,7 @@ class SLS_Obj_RFD(SLS_Objective):
 
         return objective_value + self._objective_expression
 
-    def getActsRFD (self):
+    def getActs_RFD (self):
         tol = 1e-4
 
         acts = []
