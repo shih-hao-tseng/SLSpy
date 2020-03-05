@@ -1,10 +1,10 @@
-from .components import IOPObjective
+from .components import IOP_Objective
 import numpy as np
 import cvxpy as cp
 '''
 To create a new IOP constraint, inherit the following base function and customize the specified methods.
 
-class IOPObjective:
+class IOP_Objective:
     def __init__ (self):
     def getObjectiveValue(self):
         return self._objective_expression
@@ -12,7 +12,7 @@ class IOPObjective:
         return objective_value
 '''
 
-class IOPObj_H2(IOPObjective):
+class IOP_Obj_H2(IOP_Objective):
     '''
     return 
         || [ W,     X - I ] ||

@@ -1,10 +1,10 @@
-from .components import SLSObjective
+from .components import SLS_Objective
 import numpy as np
 import cvxpy as cp
 '''
 To create a new SLS constraint, inherit the following base function and customize the specified methods.
 
-class SLSObjective:
+class SLS_Objective:
     def __init__ (self):
     def getObjectiveValue(self):
         return self._objective_expression
@@ -12,7 +12,7 @@ class SLSObjective:
         return objective_value
 '''
 
-class SLSObj_H2(SLSObjective):
+class SLS_Obj_H2(SLS_Objective):
     '''
     return 
         || [C1, D12][Phi_x; Phi_u] ||_H2^2
@@ -51,7 +51,7 @@ class SLSObj_H2(SLSObjective):
 
         return objective_value + self._objective_expression
 
-class SLSObj_HInf(SLSObjective):
+class SLS_Obj_HInf(SLS_Objective):
     '''
     return max singular value of [C1,D12][R;M]
     '''
@@ -85,7 +85,7 @@ class SLSObj_HInf(SLSObjective):
 
         return objective_value + self._objective_expression
 
-class SLSObj_L1(SLSObjective):
+class SLS_Obj_L1(SLS_Objective):
     '''
     return max row sum of [C1,D12][R;M]
     '''
@@ -119,7 +119,7 @@ class SLSObj_L1(SLSObjective):
 
         return objective_value + self._objective_expression
 
-class SLSObj_RFD(SLSObjective):
+class SLS_Obj_RFD(SLS_Objective):
     '''
     regularization for design (RFD) objective
     '''

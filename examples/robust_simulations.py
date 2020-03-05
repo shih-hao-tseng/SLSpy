@@ -20,17 +20,17 @@ def robust_simulations():
         FIR_horizon = 10
     )
     # set objective
-    obj_H2 = SLSObj_H2 ()
+    obj_H2 = SLS_Obj_H2 ()
     synthesizer << obj_H2
 
     # add constraints
     # robustness constraint should be added before dlocalized as it modifies the SLS constriants
-    robust = SLSCons_Robust (
+    robust = SLS_Cons_Robust (
         gamma_coefficient = 10e3
     )
     synthesizer << robust
 
-    dlocalized = SLSCons_dLocalized (
+    dlocalized = SLS_Cons_dLocalized (
         actDelay = 1,
         d = 6
     )

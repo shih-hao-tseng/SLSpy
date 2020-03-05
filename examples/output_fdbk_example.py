@@ -37,7 +37,7 @@ def output_fdbk_example():
     )
 
     # set SLS objective
-    synthesizer << SLSObj_H2()
+    synthesizer << SLS_Obj_H2()
 
     # synthesize controller (the generated controller is actually initialized)
     # and use the synthesized controller in simulation

@@ -14,7 +14,7 @@ def synthesis_algorithm_example():
         system_model = sys,
         FIR_horizon = 10
     )
-    synthesizer << IOPObj_H2()
+    synthesizer << IOP_Obj_H2()
 
     sim_horizon = 25
     noise = FixedNoiseVector (Nw = sys._Ny, horizon = sim_horizon)

@@ -1,7 +1,7 @@
 import numpy as np
 import cvxpy as cp
 
-class SLSObjective:
+class SLS_Objective:
     '''
     The base class for SLS objectives
     '''
@@ -18,7 +18,7 @@ class SLSObjective:
     def addObjectiveValue(self, sls, objective_value):
         return objective_value
 
-class SLSConstraint(SLSObjective):
+class SLS_Constraint(SLS_Objective):
     '''
     The base class for SLS constriant
     '''

@@ -19,7 +19,7 @@ def state_fdbk_rfd_example():
 
     synthesizer = SLS (FIR_horizon = 15)
     # objective function
-    obj_H2 = SLSObj_H2 ()
+    obj_H2 = SLS_Obj_H2 ()
 
     rfdCoeffs = [0.01, 0.1, 1, 10, 100, 1000]
 
@@ -28,7 +28,7 @@ def state_fdbk_rfd_example():
     clnorms = []
 
     # add RFD regulator
-    obj_rfd = SLSObj_RFD()
+    obj_rfd = SLS_Obj_RFD()
 
     for rfdCoeff in rfdCoeffs:
         # equivalent to synthesizer.setSystemModel(sys)
@@ -63,7 +63,7 @@ def state_fdbk_rfd_example():
     num_acts = []
     clnorms = []
 
-    dlocalized = SLSCons_dLocalized (
+    dlocalized = SLS_Cons_dLocalized (
         actDelay = 1,
         cSpeed = 2,
         d = 3
@@ -101,7 +101,7 @@ def state_fdbk_rfd_example():
     num_acts = []
     clnorms = []
     
-    approx_dlocalized = SLSCons_ApproxdLocalized (
+    approx_dlocalized = SLS_Cons_ApproxdLocalized (
         base = dlocalized,
         robCoeff = 10e4
     )

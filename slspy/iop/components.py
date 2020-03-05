@@ -1,7 +1,7 @@
 import numpy as np
 import cvxpy as cp
 
-class IOPObjective:
+class IOP_Objective:
     '''
     The base class for IOP objectives
     '''
@@ -18,7 +18,7 @@ class IOPObjective:
     def addObjectiveValue(self, iop, objective_value):
         return objective_value
 
-class IOPConstraint(IOPObjective):
+class IOP_Constraint(IOP_Objective):
     '''
     The base class for IOP constriant
     '''

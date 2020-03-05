@@ -1,3 +1,6 @@
+- File names: use snake case
+  e.g., system_models.py
+
 - Class names: use upper camel case while separating abbreviations by underscores
   e.g., LTI_System, SLS_OutputFeedback_FIR_Controller
 

@@ -1,16 +1,16 @@
 
-from .components import IOPConstraint
+from .components import IOP_Constraint
 import cvxpy as cp
 import numpy as np
 '''
 To create a new IOP constraint, inherit the following base function and customize the specified methods.
 
-class IOPConstraint:
+class IOP_Constraint:
     def addConstraints(self, iop, constraints):
         return constraints
 '''
 
-class IOPCons_IOP (IOPConstraint):
+class IOP_Cons_IOP (IOP_Constraint):
     '''
     The descrete-time IOP constrains
     '''

@@ -3,11 +3,11 @@ from .core import SystemModel,ControllerModel,SynthesisAlgorithm
 from .system_models import *
 
 from .sls.components import *
-from .sls.constraint import SLSCons_SLS
+from .sls.constraint import SLS_Cons_SLS
 from .sls.controller_models import *
 
 from .iop.components import *
-from .iop.constraint import IOPCons_IOP
+from .iop.constraint import IOP_Cons_IOP
 from .iop.controller_models import *
 
 '''
@@ -37,7 +37,7 @@ class SLS (SynthesisAlgorithm):
         self.resetObjAndCons()
 
         self._sls_problem = None #cp.Problem(cp.Minimize(0))
-        self._sls_constraints = SLSCons_SLS ()
+        self._sls_constraints = SLS_Cons_SLS ()
 
     def setSystemModel(self,system_model):
         if isinstance(system_model,SystemModel):
@@ -96,17 +96,17 @@ class SLS (SynthesisAlgorithm):
         self._constraints = []
 
     def addObjOrCons (self, obj_or_cons):
-        if isinstance(obj_or_cons, SLSConstraint):
+        if isinstance(obj_or_cons, SLS_Constraint):
             self._constraints.append(obj_or_cons)
-        elif isinstance(obj_or_cons, SLSObjective):
+        elif isinstance(obj_or_cons, SLS_Objective):
             self._objectives.append(obj_or_cons)
         return self
 
     def setObjOrCons (self, obj_or_cons):
-        if isinstance(obj_or_cons, SLSConstraint):
+        if isinstance(obj_or_cons, SLS_Constraint):
             self._constraints = []
             self._constraints.append(obj_or_cons)
-        elif isinstance(obj_or_cons, SLSObjective):
+        elif isinstance(obj_or_cons, SLS_Objective):
             self._objectives = []
             self._objectives.append(obj_or_cons)
         return self
@@ -236,7 +236,7 @@ class IOP (SynthesisAlgorithm):
         self.resetObjAndCons()
 
         self._iop_problem = None
-        self._iop_constraints = IOPCons_IOP ()
+        self._iop_constraints = IOP_Cons_IOP ()
 
     # overload plus and less than or equal operators as syntactic sugars
     def __add__(self, obj_or_cons):
@@ -260,17 +260,17 @@ class IOP (SynthesisAlgorithm):
         self._constraints = []
 
     def addObjOrCons (self, obj_or_cons):
-        if isinstance(obj_or_cons, IOPConstraint):
+        if isinstance(obj_or_cons, IOP_Constraint):
             self._constraints.append(obj_or_cons)
-        elif isinstance(obj_or_cons, IOPObjective):
+        elif isinstance(obj_or_cons, IOP_Objective):
             self._objectives.append(obj_or_cons)
         return self
 
     def setObjOrCons (self, obj_or_cons):
-        if isinstance(obj_or_cons, IOPConstraint):
+        if isinstance(obj_or_cons, IOP_Constraint):
             self._constraints = []
             self._constraints.append(obj_or_cons)
-        elif isinstance(obj_or_cons, IOPObjective):
+        elif isinstance(obj_or_cons, IOP_Objective):
             self._objectives = []
             self._objectives.append(obj_or_cons)
         return self
