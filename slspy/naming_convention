@@ -1,6 +1,15 @@
 - File names: use snake case
   e.g., system_models.py
 
+note: In industry people often follow the naming convention strictly, and the
+  cases in abbreviations will not be respected. For example, "TCP header" 
+  becomes "TcpHeader." In SLSpy, we try to maintain that standard while allowing 
+  researchers to read the abbreviations in the original cases, which may look 
+  more familiar for the people in academia. Therefore, we adopt a hybrid naming 
+  convention below that preserves the cases of the abbreviations. The trade-off 
+  is that we will need to insert underscores between abbreviations and other parts
+  to avoid weird looking such as LTIFIRSystem.
+
 - Class names: use upper camel case while separating abbreviations by underscores
   e.g., SystemModel, LTI_System, SLS_OutputFeedback_FIR_Controller
 
@@ -9,7 +18,8 @@
 
 - Attribute names: start with a underscore and use snake case
   e.g., _optimal_objective_value
-  please feel free to express the variables in the cases they were introduced in the analysis
+  please feel free to express the variables in the cases they were introduced in 
+  the analysis
   e.g., _Phi_x, _Phi_u
 
 - Helper function names: use snake case
