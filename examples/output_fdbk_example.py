@@ -36,9 +36,13 @@ def output_fdbk_example():
         state_feedback = False # use output-feedback synthesizer
     )
 
-    # set SLS objective
-    synthesizer << SLS_Obj_H2()
-
+    # assume uncorrelated measurement noise
+    mm_noise_amp = 1.0
+    cov_v_sqrt  = mm_noise_amp * np.eye(10)
+    
+    # set SLS objective    
+    synthesizer << SLS_Obj_LQ(Cov_v_sqrt=cov_v_sqrt)
+   
     # synthesize controller (the generated controller is actually initialized)
     # and use the synthesized controller in simulation
     controller = synthesizer.synthesizeControllerModel ()

@@ -114,7 +114,7 @@ class SLS (SynthesisAlgorithm):
     def getOptimalObjectiveValue (self):
         return self._optimal_objective_value
 
-    def getSLSProblem (self):
+    def get_SLS_Problem (self):
         return self._sls_problem
 
     def sanityCheck (self):
@@ -278,7 +278,7 @@ class IOP (SynthesisAlgorithm):
     def getOptimalObjectiveValue (self):
         return self._optimal_objective_value
 
-    def getIOPProblem (self):
+    def get_IOP_Problem (self):
         return self._iop_problem
 
     def sanityCheck (self):

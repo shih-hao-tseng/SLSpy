@@ -18,7 +18,7 @@ class ZeroNoise (NoiseModel):
     def __init__ (self, Nw=0):
         self.setDimension(Nw)
     
-    def setDimension(self,Nw=0):
+    def setDimension(self, Nw=0):
         self._Nw = Nw
         self._w = np.zeros([Nw,1])
 
@@ -26,7 +26,7 @@ class ZeroNoise (NoiseModel):
         return self._w.copy()
 
 
-class GuassianNoise(NoiseModel):
+class GaussianNoise(NoiseModel):
     '''
     Generate Gaussian noise
     '''

@@ -109,15 +109,15 @@ class SynthesisAlgorithm (ObjBase):
     '''
     The base class for synthesis algorithm, which takes a system model and generates a controller model correspondingly.
     '''
-    def __init__(self,system_model=None):
+    def __init__(self, system_model=None):
         self.setSystemModel(system_model=system_model)
 
     # overload the less than or equal operator as a syntactic sugar
-    def __lshift__ (self, sytem):
+    def __lshift__ (self, system):
         return self.setSystemModel(system_model=system)
 
-    def setSystemModel(self,system_model):
-        if isinstance(system_model,SystemModel):
+    def setSystemModel(self, system_model):
+        if isinstance(system_model, SystemModel):
             self._system_model = system_model
         return self
     
