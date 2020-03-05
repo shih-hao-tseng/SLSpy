@@ -287,8 +287,8 @@ class IOP (SynthesisAlgorithm):
 
         if self._system_model is None:
             return self.errorMessage('The system is not yet assigned.')
-        if not isinstance(self._system_model,LTISystem):
-            return self.errorMessage('The system must be LTI.')
+        if not isinstance(self._system_model,LTI_FIR_System):
+            return self.errorMessage('The system must be LTI FIR.')
         if not isinstance(self._FIR_horizon,int):
             return self.errorMessage('FIR horizon must be integer.')
         if self._FIR_horizon < 1:

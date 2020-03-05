@@ -8,7 +8,7 @@ class SystemModel:
         ignore_output=False,
         state_feedback=True
     ):
-    def systemProgress (self, **kwargs):
+    def systemProgress (self, u, w=None, **kwargs):
         # this function takes the input and progress to next time 
 '''
 
@@ -247,3 +247,40 @@ class LTISystem (SystemModel):
         sys._Nw = self._Nw
 
         return sys
+
+
+class LTI_FIR_System (SystemModel):
+    '''
+    The LTI FIR system with
+        y = G u + w_y
+    '''
+    def __init__ (self, Ny=0, Nu=0):
+        self._Ny = Ny
+        self._Nu = Nu
+
+        self._G = []
+        self._u = []
+        self._w = []
+        
+        self._zero = np.zeros([Ny,1])
+        self._x = self._y = self._z = self._zero
+
+    def systemProgress (self, u, w=None, **kwargs):
+        Ng = len(self._G)
+
+        if Ng == 0:
+            self._x = self._y = self._z = self._zero
+            return
+        
+        self._u = [u] + self._u
+        self._w = [w] + self._w
+
+        if len(self._u) > Ng:
+            self._u.pop(-1)
+            self._w.pop(-1)
+
+        y = self._zero
+        for tau in range(Ng):
+            y += np.dot(self._G[tau],self._u[tau]) + self._w[tau]
+        
+        self._x = self._y = self._z = y
