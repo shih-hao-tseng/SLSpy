@@ -1,4 +1,3 @@
-
 from .components import SLS_Constraint
 import cvxpy as cp
 import numpy as np
@@ -103,20 +102,20 @@ class SLS_Cons_SLS (SLS_Constraint):
 class SLS_Cons_dLocalized (SLS_Constraint):
     def __init__(self,
         base=None,
-        actDelay=0, cSpeed=1, d=1
+        act_delay=0, comm_speed=1, d=1
     ):
         '''
-        actDelay: actuation delay
-        cSpeed: communication speed
+        act_delay: actuation delay
+        comm_speed: communication speed
         d: for d-localized
         '''
         if isinstance(base,SLS_Cons_dLocalized):
-            self._actDelay = base._actDelay
-            self._cSpeed = base._cSpeed
+            self._act_delay = base._act_delay
+            self._comm_speed = base._comm_speed
             self._d = base._d
         else:
-            self._actDelay = actDelay
-            self._cSpeed = cSpeed
+            self._act_delay = act_delay
+            self._comm_speed = comm_speed
             self._d = d
     
     def addConstraints(self, sls, constraints):
@@ -132,15 +131,15 @@ class SLS_Cons_dLocalized (SLS_Constraint):
         absB2T = np.absolute(sls._system_model._B2).T
 
         # adjacency matrix for available information 
-        infoAdj = np.eye(sls._system_model._Nx) > 0
-        transmission_time = -self._cSpeed*self._actDelay
+        info_adj = np.eye(sls._system_model._Nx) > 0
+        transmission_time = -self._comm_speed*self._act_delay
         for t in range(1,sls._FIR_horizon+1):
-            transmission_time += self._cSpeed
+            transmission_time += self._comm_speed
             while transmission_time >= 1:
                 transmission_time -= 1
-                infoAdj = np.dot(infoAdj,commsAdj)
+                info_adj = np.dot(info_adj,commsAdj)
 
-            support_x = np.logical_and(infoAdj, localityR)
+            support_x = np.logical_and(info_adj, localityR)
             support_u = np.dot(absB2T,support_x) > 0
 
             # shutdown those not in the support
@@ -227,18 +226,18 @@ class SLS_Cons_Robust (SLS_Constraint):
 
 class SLS_Cons_ApproxdLocalized (SLS_Cons_dLocalized, SLS_Cons_Robust):
     def __init__(self,
-        robCoeff=0,
+        rob_coeff=0,
         **kwargs
     ):
         SLS_Cons_dLocalized.__init__(self,**kwargs)
 
         base = kwargs.get('base')
         if isinstance(base,SLS_Cons_ApproxdLocalized):
-            self._robCoeff = base._robCoeff
+            self._rob_coeff = base._rob_coeff
         else:
-            self._robCoeff = robCoeff
+            self._rob_coeff = rob_coeff
 
-        SLS_Cons_Robust.__init__(self,gamma_coefficient=robCoeff)
+        SLS_Cons_Robust.__init__(self,gamma_coefficient=rob_coeff)
 
     def addObjectiveValue(self, sls, objective_value):
         return SLS_Cons_Robust.addObjectiveValue(self, sls, objective_value)

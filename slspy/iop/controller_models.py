@@ -1,16 +1,16 @@
-from ..core import ControllerModel
+from ..core import Controller_Model
 import numpy as np
 '''
 To create a new controller model, inherit the following base function and customize the specified methods.
 
-class ControllerModel:
+class Controller_Model:
     def initialize (self):
         # initialize internal state
     def getControl(self, y, **kwargs):
         return u
 '''
 
-class IOP_FIR_Controller (ControllerModel):
+class IOP_FIR_Controller (Controller_Model):
     '''
     Base for IOP FIR controllers, the controller architecure is borrowed from SLS state-feedback FIR controller
     '''

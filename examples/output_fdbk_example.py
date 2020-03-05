@@ -17,8 +17,8 @@ def output_fdbk_example():
 
     sim_horizon = 25
     # generate noise
-    noise = FixedNoiseVector (Nw = sys._Nw, horizon = sim_horizon)
-    noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
+    noise = Fixed_Noise_Vector (Nw = sys._Nw, horizon = sim_horizon)
+    noise.generateNoiseFromNoiseModel (cls = Zero_Noise)
     noise._w[0][sys._Nw//2] = 10
 
     simulator = Simulator (
@@ -37,11 +37,11 @@ def output_fdbk_example():
     )
 
     # assume uncorrelated measurement noise
-    mmNoiseAmp = 1.0
-    cov_vSqrt  = mmNoiseAmp * np.eye(10)
+    mm_noise_amp = 1.0
+    cov_v_sqrt  = mm_noise_amp * np.eye(10)
     
     # set SLS objective    
-    synthesizer << SLS_Obj_LQ(Cov_vSqrt=cov_vSqrt)
+    synthesizer << SLS_Obj_LQ(Cov_v_sqrt=cov_v_sqrt)
    
     # synthesize controller (the generated controller is actually initialized)
     # and use the synthesized controller in simulation

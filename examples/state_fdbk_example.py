@@ -16,8 +16,8 @@ def state_fdbk_example():
 
     sim_horizon = 25
     # generate noise
-    noise = FixedNoiseVector (Nw = sys._Nw, horizon = sim_horizon)
-    noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
+    noise = Fixed_Noise_Vector (Nw = sys._Nw, horizon = sim_horizon)
+    noise.generateNoiseFromNoiseModel (cls = Zero_Noise)
     noise._w[0][sys._Nw//2] = 10
 
     simulator = Simulator (
@@ -50,8 +50,8 @@ def state_fdbk_example():
 
     ## (2) d-localized sls
     dlocalized = SLS_Cons_dLocalized (
-        actDelay = 1,
-        cSpeed = 2,
+        act_delay = 1,
+        comm_speed = 2,
         d = 3
     )
     synthesizer << dlocalized
@@ -69,7 +69,7 @@ def state_fdbk_example():
     ## (3) approximate d-localized sls
     approx_dlocalized = SLS_Cons_ApproxdLocalized (
         base = dlocalized,
-        robCoeff = 10e3
+        rob_coeff = 10e3
     )
     approx_dlocalized._cSpeed = 1
 

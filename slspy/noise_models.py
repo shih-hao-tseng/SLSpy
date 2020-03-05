@@ -1,4 +1,4 @@
-from .core import NoiseModel
+from .core import Noise_Model
 import numpy as np
 '''
 To create a new noise model, inherit the following base function and customize the specified methods.
@@ -11,14 +11,14 @@ class NoiseModel:
         return w
 '''
 
-class ZeroNoise (NoiseModel):
+class Zero_Noise (Noise_Model):
     '''
     Generate zero vector as the noise
     '''
     def __init__ (self, Nw=0):
         self.setDimension(Nw)
     
-    def setDimension(self,Nw=0):
+    def setDimension(self, Nw=0):
         self._Nw = Nw
         self._w = np.zeros([Nw,1])
 
@@ -26,12 +26,12 @@ class ZeroNoise (NoiseModel):
         return self._w.copy()
 
 
-class GuassianNoise(NoiseModel):
+class Gaussian_Noise(Noise_Model):
     '''
     Generate Gaussian noise
     '''
     def __init__ (self, Nw=0, mu=0, sigma=1):
-        NoiseModel.__init__(self,Nw=Nw)
+        Noise_Model.__init__(self,Nw=Nw)
 
         self._mu = mu
         self._sigma = sigma
@@ -39,12 +39,12 @@ class GuassianNoise(NoiseModel):
     def getNoise (self,**kwargs):
         return np.random.normal (self._mu, self._sigma, (self._Nw,1))
     
-class FixedNoiseVector(NoiseModel):
+class Fixed_Noise_Vector(Noise_Model):
     '''
     Fixed noise vector
     '''
     def __init__ (self, Nw=0, horizon=0, t0=0):
-        NoiseModel.__init__(self,Nw=Nw)
+        Noise_Model.__init__(self,Nw=Nw)
         self._horizon = horizon
         self._t = 0
         self._t0 = 0
@@ -57,7 +57,7 @@ class FixedNoiseVector(NoiseModel):
         self._t = self._t0 = t
 
     def generateNoiseFromNoiseModelInstance (self, noise_model=None):
-        if not isinstance (noise_model, NoiseModel):
+        if not isinstance (noise_model, Noise_Model):
             return
 
         self._Nw = noise_model._Nw
@@ -66,7 +66,7 @@ class FixedNoiseVector(NoiseModel):
         for t in range (self._horizon):
             self._w.append(noise_model.getNoise())
         
-    def generateNoiseFromNoiseModel (self, cls=NoiseModel):
+    def generateNoiseFromNoiseModel (self, cls=Noise_Model):
         noise_model = cls(Nw=self._Nw)
         self.generateNoiseFromNoiseModelInstance (noise_model=noise_model)
     

@@ -3,12 +3,12 @@ import numpy as np
 '''
 The core abstract classes that form the SLSpy framework:
 
-    SystemModel -> SynthesisAlgorithm -> ControllerModel
+    System_Model -> Synthesis_Algorithm -> Controller_Model
 
-    SystemModel, ControllerModel, NoiseModel -> Simulator -> simulation results
+    System_Model, Controller_Model, Noise_Model -> Simulator -> simulation results
 '''
 
-class ObjBase:
+class Obj_Base:
     '''
     The object base that defines debugging tools
     '''
@@ -27,7 +27,7 @@ class ObjBase:
         print(self.__class__.__name__+'-'+inspect.stack()[1][3]+': [WARNING] '+msg+'\n')
         return False
 
-class SystemModel (ObjBase):
+class System_Model (Obj_Base):
     '''
     The base class for discrete-time system models.
     A controller synthesizer takes a system model and synthesizes a controller.
@@ -72,7 +72,7 @@ class SystemModel (ObjBase):
         # Is this model state-feedback?
         self._state_feedback = state_feedback
 
-class ControllerModel (ObjBase):
+class Controller_Model (Obj_Base):
     '''
     The base class for discrete-time controller.
     '''
@@ -83,7 +83,7 @@ class ControllerModel (ObjBase):
     def getControl(self, y, **kwargs):
         return None
 
-class NoiseModel (ObjBase):
+class Noise_Model (Obj_Base):
     '''
     The base class for noise model.
     NoiseModel is responsible for the right format of noise (dimension, etc.)
@@ -99,26 +99,26 @@ class NoiseModel (ObjBase):
         # the noise can depend on some parameters such as state or control
         return 0
 
-class SynthesisAlgorithm (ObjBase):
+class Synthesis_Algorithm (Obj_Base):
     '''
     The base class for synthesis algorithm, which takes a system model and generates a controller model correspondingly.
     '''
-    def __init__(self,system_model=None):
+    def __init__(self, system_model=None):
         self.setSystemModel(system_model=system_model)
 
     # overload the less than or equal operator as a syntactic sugar
-    def __lshift__ (self, sytem):
+    def __lshift__ (self, system):
         return self.setSystemModel(system_model=system)
 
-    def setSystemModel(self,system_model):
-        if isinstance(system_model,SystemModel):
+    def setSystemModel(self, system_model):
+        if isinstance(system_model, System_Model):
             self._system_model = system_model
         return self
     
     def synthesizeControllerModel(self):
         return None
 
-class Simulator (ObjBase):
+class Simulator (Obj_Base):
     '''
     The simulator
     '''
@@ -135,15 +135,15 @@ class Simulator (ObjBase):
         pass
 
     def setSystem (self, system=None):
-        if isinstance(system, SystemModel):
+        if isinstance(system, System_Model):
             self._system = system
 
     def setController (self, controller=None):
-        if isinstance(controller, ControllerModel):
+        if isinstance(controller, Controller_Model):
             self._controller = controller
 
     def setNoise (self, noise=None):
-        if isinstance(noise, NoiseModel):
+        if isinstance(noise, Noise_Model):
             self._noise = noise
         else:
             self._noise = None

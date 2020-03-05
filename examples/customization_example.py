@@ -1,10 +1,10 @@
 from slspy import *
 # import the bases of controller model and synthesis algorithm
-from slspy.core import ControllerModel, SynthesisAlgorithm
+from slspy.core import Controller_Model, Synthesis_Algorithm
 import numpy as np
 
 # define a new controller model
-class MyControllerModel (ControllerModel):
+class My_Controller_Model (Controller_Model):
     def __init__(self, Nu):
         # this model takes a variable Nu
         self._Nu = Nu
@@ -19,13 +19,13 @@ class MyControllerModel (ControllerModel):
         return u
 
 # define a new synthesis algorithm
-class MySynthesisAlgorithm (SynthesisAlgorithm):
+class My_Synthesis_Algorithm (Synthesis_Algorithm):
     # a synthesis algorithm must have a method called
     #    synthesizeControllerModel(self)
     # which uses its parameters and generate a controller model
     def synthesizeControllerModel(self):
         # In this case, we return an instance of MyControllerModel
-        controller = MyControllerModel(Nu=10)
+        controller = My_Controller_Model(Nu=10)
         return controller
 
 def customization_example():
@@ -54,8 +54,8 @@ def customization_example():
     # which is an impulse at time 0
     # NoiseModel is, again, customizable, and the base class is NoiseModel
     # here we use a predefined noise model FixedNoiseVector
-    noise = FixedNoiseVector (Nw = sys._Nw, horizon = sim_horizon)
-    noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
+    noise = Fixed_Noise_Vector(Nw = sys._Nw, horizon = sim_horizon)
+    noise.generateNoiseFromNoiseModel (cls = Zero_Noise)
     noise._w[0][sys._Nw//2] = 10
 
     # we need a simulator to run the simulation
@@ -68,7 +68,7 @@ def customization_example():
     )
 
     # create a synthesizer
-    synthesizer = MySynthesisAlgorithm (
+    synthesizer = My_Synthesis_Algorithm (
         system_model = sys
     )
 

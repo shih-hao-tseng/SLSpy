@@ -1,5 +1,5 @@
 import cvxpy as cp
-from .core import SystemModel,ControllerModel,SynthesisAlgorithm
+from .core import System_Model,Controller_Model,Synthesis_Algorithm
 from .system_models import *
 
 from .sls.components import *
@@ -13,13 +13,13 @@ from .iop.controller_models import *
 '''
 To create a new synthesis algorithm, inherit the following base function and customize the specified methods.
 
-class SynthesisAlgorithm:
+class Synthesis_Algorithm:
     def __init__(self,system_model=None):
     def synthesizeControllerModel(self):
         return controller_model
 '''
 
-class SLS (SynthesisAlgorithm):
+class SLS (Synthesis_Algorithm):
     '''
     Synthesizing the controller using System Level Synthesis method.
     '''
@@ -40,7 +40,7 @@ class SLS (SynthesisAlgorithm):
         self._sls_constraints = SLS_Cons_SLS ()
 
     def setSystemModel(self,system_model):
-        if isinstance(system_model,SystemModel):
+        if isinstance(system_model,System_Model):
             self._system_model = system_model
         
         self.initializePhi()
@@ -79,7 +79,7 @@ class SLS (SynthesisAlgorithm):
         return self.addObjOrCons(obj_or_cons)
 
     def __lshift__ (self, obj_or_cons_or_system):
-        if isinstance(obj_or_cons_or_system,SystemModel):
+        if isinstance(obj_or_cons_or_system,System_Model):
             return self.setSystemModel(system_model=obj_or_cons_or_system)
         else:
             return self.setObjOrCons(obj_or_cons=obj_or_cons_or_system)
@@ -219,7 +219,7 @@ class SLS (SynthesisAlgorithm):
         controller.initialize()
         return controller
 
-class IOP (SynthesisAlgorithm):
+class IOP (Synthesis_Algorithm):
     '''
     Synthesizing the controller using Input-Output Parameterization method, c.f.
         Furieri et al., ``An Input-Output Parameterization of Stabilizing Controllers: Amidst Youla and System Level Synthesis,'' 2019.
@@ -243,7 +243,7 @@ class IOP (SynthesisAlgorithm):
         return self.addObjOrCons(obj_or_cons)
 
     def __lshift__ (self, obj_or_cons_or_system):
-        if isinstance(obj_or_cons_or_system,SystemModel):
+        if isinstance(obj_or_cons_or_system,System_Model):
             return self.setSystemModel(system_model=obj_or_cons_or_system)
         else:
             return self.setObjOrCons(obj_or_cons=obj_or_cons_or_system)

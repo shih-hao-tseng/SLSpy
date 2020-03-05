@@ -1,4 +1,3 @@
-
 from .components import IOP_Constraint
 import cvxpy as cp
 import numpy as np

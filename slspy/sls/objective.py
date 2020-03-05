@@ -66,27 +66,27 @@ class SLS_Obj_LQ(SLS_Objective):
         i.e. LQG for output-feedback SLS
     '''
     
-    def __init__(self, QSqrt=None, RSqrt=None, Cov_wSqrt=None, Cov_vSqrt=None):   
-        self._QSqrt = QSqrt        
-        self._RSqrt = RSqrt
-        self._Cov_wSqrt = Cov_wSqrt
-        self._Cov_vSqrt = Cov_vSqrt
+    def __init__(self, Q_sqrt=None, R_sqrt=None, Cov_w_sqrt=None, Cov_v_sqrt=None):   
+        self._Q_sqrt = Q_sqrt        
+        self._R_sqrt = R_sqrt
+        self._Cov_w_sqrt = Cov_w_sqrt
+        self._Cov_v_sqrt = Cov_v_sqrt
 
     def addObjectiveValue(self, sls, objective_value):
-        QSqrt = self._QSqrt 
-        RSqrt = self._RSqrt
-        Cov_wSqrt = self._Cov_wSqrt
-        Cov_vSqrt = self._Cov_vSqrt
+        Q_sqrt = self._Q_sqrt 
+        R_sqrt = self._R_sqrt
+        Cov_w_sqrt = self._Cov_w_sqrt
+        Cov_v_sqrt = self._Cov_v_sqrt
         
         # default values
-        if QSqrt is None:
-            QSqrt = sls._system_model._C1
-        if RSqrt is None:
-            RSqrt = sls._system_model._D12 
-        if Cov_wSqrt is None:
-            Cov_wSqrt = sls._system_model._B1 
-        if Cov_vSqrt is None:
-            Cov_vSqrt = sls._system_model._D21
+        if Q_sqrt is None:
+            Q_sqrt = sls._system_model._C1
+        if R_sqrt is None:
+            R_sqrt = sls._system_model._D12 
+        if Cov_w_sqrt is None:
+            Cov_w_sqrt = sls._system_model._B1 
+        if Cov_v_sqrt is None:
+            Cov_v_sqrt = sls._system_model._D21
 
         self._objective_expression = 0
         if sls._state_feedback:
@@ -94,8 +94,8 @@ class SLS_Obj_LQ(SLS_Objective):
             Phi_x = sls._Phi_x
             Phi_u = sls._Phi_u
             for tau in range(len(Phi_x)):
-                self._objective_expression += cp.sum_squares(QSqrt * Phi_x[tau] * Cov_wSqrt + 
-                                                             RSqrt * Phi_u[tau] * Cov_wSqrt)
+                self._objective_expression += cp.sum_squares(Q_sqrt * Phi_x[tau] * Cov_w_sqrt + 
+                                                             R_sqrt * Phi_u[tau] * Cov_w_sqrt)
         else:
             # output-feedback
             Phi_xx = sls._Phi_xx
@@ -105,10 +105,10 @@ class SLS_Obj_LQ(SLS_Objective):
 
             for tau in range(len(Phi_xx)):
                 self._objective_expression += cp.sum_squares(
-                    QSqrt * Phi_xx[tau] * Cov_wSqrt +
-                    RSqrt * Phi_ux[tau] * Cov_wSqrt +
-                    QSqrt * Phi_xy[tau] * Cov_vSqrt + 
-                    RSqrt * Phi_uy[tau] * Cov_vSqrt
+                    Q_sqrt * Phi_xx[tau] * Cov_w_sqrt +
+                    R_sqrt * Phi_ux[tau] * Cov_w_sqrt +
+                    Q_sqrt * Phi_xy[tau] * Cov_v_sqrt + 
+                    R_sqrt * Phi_uy[tau] * Cov_v_sqrt
                 )
 
         return objective_value + self._objective_expression
@@ -186,12 +186,12 @@ class SLS_Obj_RFD(SLS_Objective):
     regularization for design (RFD) objective
     '''
     # not yet support output feedback
-    def __init__ (self,rfdCoeff=0):
-        self._rfdCoeff = rfdCoeff
+    def __init__ (self,rfd_coeff=0):
+        self._rfd_coeff = rfd_coeff
         self._acts_rfd = []
 
     def addObjectiveValue(self, sls, objective_value):
-        actPenalty = 0
+        act_penalty = 0
         self._acts_rfd = []
         for i in range (sls._system_model._Nu):
             Phi_u_i = []
@@ -199,9 +199,9 @@ class SLS_Obj_RFD(SLS_Objective):
             for t in range (1,sls._FIR_horizon+1):
                 Phi_u_i.append(sls._Phi_u[t][i,:])
 
-            actPenalty += cp.norm(cp.bmat([Phi_u_i]),2)
+            act_penalty += cp.norm(cp.bmat([Phi_u_i]),2)
 
-        self._objective_expression = self._rfdCoeff * actPenalty
+        self._objective_expression = self._rfd_coeff * act_penalty
 
         return objective_value + self._objective_expression
 

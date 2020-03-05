@@ -1,9 +1,9 @@
-from .core import SystemModel
+from .core import System_Model
 import numpy as np
 '''
 To create a new system model, inherit the following base function and customize the specified methods.
 
-class SystemModel:
+class System_Model:
     def __init__ (self,
         ignore_output=False,
         state_feedback=True
@@ -12,12 +12,12 @@ class SystemModel:
         # this function takes the input and progress to next time 
 '''
 
-class LTI_System (SystemModel):
+class LTI_System (System_Model):
     '''
     Contains all matrices of an LTI system
     '''
     def __init__(self, Nx=0, Nw=0, Nu=0, Ny=0, Nz=0, **kwargs):
-        SystemModel.__init__(self, **kwargs)
+        System_Model.__init__(self, **kwargs)
 
         if not isinstance(Nx,int):
             Nx = 0
@@ -53,7 +53,7 @@ class LTI_System (SystemModel):
         self._Ny = Ny  # measurement
 
     def initialize (self, x0=None):
-        SystemModel.initialize(self)
+        System_Model.initialize(self)
 
         if x0 is None:
             # use the previous x0
@@ -249,7 +249,7 @@ class LTI_System (SystemModel):
         return sys
 
 
-class LTI_FIR_System (SystemModel):
+class LTI_FIR_System (System_Model):
     '''
     The LTI FIR system with
         y = G u + w_y

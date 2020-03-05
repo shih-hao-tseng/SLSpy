@@ -21,7 +21,7 @@ def state_fdbk_rfd_example():
     # objective function
     obj_H2 = SLS_Obj_H2 ()
 
-    rfdCoeffs = [0.01, 0.1, 1, 10, 100, 1000]
+    rfd_coeffs = [0.01, 0.1, 1, 10, 100, 1000]
 
     ## (1) basic sls (centralized controller) with rfd
     num_acts = []
@@ -30,11 +30,11 @@ def state_fdbk_rfd_example():
     # add RFD regulator
     obj_rfd = SLS_Obj_RFD()
 
-    for rfdCoeff in rfdCoeffs:
+    for rfd_coeff in rfd_coeffs:
         # equivalent to synthesizer.setSystemModel(sys)
         # then add obj_H2
         synthesizer << sys << obj_H2
-        obj_rfd._rfdCoeff = rfdCoeff
+        obj_rfd._rfd_coeff = rfd_coeff
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
 
@@ -42,10 +42,10 @@ def state_fdbk_rfd_example():
         num_acts.append(len(new_act_ids))
 
         # check performance with rfd-designed system
-        sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
+        sys_after_rfd = sys.updateActuation(new_act_ids=new_act_ids)
 
         # only H2
-        synthesizer << sysAfterRFD << obj_H2
+        synthesizer << sys_after_rfd << obj_H2
         synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())
@@ -64,15 +64,15 @@ def state_fdbk_rfd_example():
     clnorms = []
 
     dlocalized = SLS_Cons_dLocalized (
-        actDelay = 1,
-        cSpeed = 2,
+        act_delay = 1,
+        comm_speed = 2,
         d = 3
     )
     synthesizer << dlocalized
 
-    for rfdCoeff in rfdCoeffs:
+    for rfd_coeff in rfd_coeffs:
         synthesizer << sys << obj_H2
-        obj_rfd._rfdCoeff = rfdCoeff
+        obj_rfd._rfd_coeff = rfd_coeff
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
 
@@ -80,10 +80,10 @@ def state_fdbk_rfd_example():
         num_acts.append(len(new_act_ids))
         
         # check performance with rfd-designed system
-        sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
+        sys_after_rfd = sys.updateActuation(new_act_ids=new_act_ids)
 
         # only H2
-        synthesizer << sysAfterRFD << obj_H2
+        synthesizer << sys_after_rfd << obj_H2
         synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())
@@ -103,13 +103,13 @@ def state_fdbk_rfd_example():
     
     approx_dlocalized = SLS_Cons_ApproxdLocalized (
         base = dlocalized,
-        robCoeff = 10e4
+        rob_coeff = 10e4
     )
     synthesizer << approx_dlocalized
     
-    for rfdCoeff in rfdCoeffs:
+    for rfd_coeff in rfd_coeffs:
         synthesizer << sys << obj_H2
-        obj_rfd._rfdCoeff = rfdCoeff
+        obj_rfd._rfd_coeff = rfd_coeff
         synthesizer += obj_rfd
         synthesizer.synthesizeControllerModel ()
     
@@ -117,10 +117,10 @@ def state_fdbk_rfd_example():
         num_acts.append(len(new_act_ids))
         
         # check performance with rfd-designed system
-        sysAfterRFD = sys.updateActuation(new_act_ids=new_act_ids)
+        sys_after_rfd = sys.updateActuation(new_act_ids=new_act_ids)
     
         # only H2
-        synthesizer << sysAfterRFD << obj_H2
+        synthesizer << sys_after_rfd << obj_H2
         synthesizer.synthesizeControllerModel ()
         
         clnorms.append(synthesizer.getOptimalObjectiveValue())

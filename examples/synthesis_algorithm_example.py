@@ -17,8 +17,8 @@ def synthesis_algorithm_example():
     synthesizer << IOP_Obj_H2()
 
     sim_horizon = 25
-    noise = FixedNoiseVector (Nw = sys._Ny, horizon = sim_horizon)
-    noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
+    noise = Fixed_Noise_Vector (Nw = sys._Ny, horizon = sim_horizon)
+    noise.generateNoiseFromNoiseModel (cls = Zero_Noise)
     noise._w[0][sys._Nw//2] = 10
 
     # synthesize controller (the generated controller is actually initialized)
