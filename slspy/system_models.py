@@ -301,13 +301,13 @@ def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
     '''
     y = (C2 (zI - A)^{-1} B2 + D22) u + (C2 (zI - A)^{-1} B1 + D21) w
         G = C2 (zI - A)^{-1} B2 + D22
-          = D22 + z^{-1} C2 ( 1 - z^{-1} A + z^{-2} A^2 - z^{-3} A^3 ... ) B2
+          = D22 + z^{-1} C2 ( 1 + z^{-1} A + z^{-2} A^2 + z^{-3} A^3 ... ) B2
         Pyw = C2 (zI - A)^{-1} B1 + D21
-            = D21 + z^{-1} C2 ( 1 - z^{-1} A + z^{-2} A^2 - z^{-3} A^3 ... ) B1
+            = D21 + z^{-1} C2 ( 1 + z^{-1} A + z^{-2} A^2 + z^{-3} A^3 ... ) B1
 
     z = (C1 (zI - A)^{-1} B2 + D12) u + (C1 (zI - A)^{-1} B1 + D11) w
-        Pzu = D12 + z^{-1} C1 ( 1 - z^{-1} A + z^{-2} A^2 - z^{-3} A^3 ... ) B2
-        Pzw = D11 + z^{-1} C1 ( 1 - z^{-1} A + z^{-2} A^2 - z^{-3} A^3 ... ) B1
+        Pzu = D12 + z^{-1} C1 ( 1 + z^{-1} A + z^{-2} A^2 + z^{-3} A^3 ... ) B2
+        Pzw = D11 + z^{-1} C1 ( 1 + z^{-1} A + z^{-2} A^2 + z^{-3} A^3 ... ) B1
     '''
     if not isinstance(system,LTI_System):
         error_message('The system must be LTI_System')
@@ -330,7 +330,7 @@ def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
 
     B2 = system._B2
     B1 = system._B1
-    mA  = -system._A
+    A  = system._A
     if system._state_feedback:
         C2  = np.eye(Ny)
         D22 = np.zeros([Ny,Nu])
@@ -351,7 +351,7 @@ def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
     for t in range(1,FIR_horizon):
         truncated_system._G[t]   = np.dot(tmp_y,B2)
         truncated_system._Pyw[t] = np.dot(tmp_y,B1)
-        tmp_y = np.dot(tmp_y,mA)
+        tmp_y = np.dot(tmp_y,A)
 
     if not system._ignore_output:
         tmp_z = 0 if system._C1 is None else system._C1
@@ -365,6 +365,6 @@ def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
         for t in range(1,FIR_horizon):
             truncated_system._Pzu[t] = np.dot(tmp_z,B2)
             truncated_system._Pzw[t] = np.dot(tmp_z,B1)
-            tmp_z = np.dot(tmp_z,mA)
+            tmp_z = np.dot(tmp_z,A)
 
     return truncated_system
