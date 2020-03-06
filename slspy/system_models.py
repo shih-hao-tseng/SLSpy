@@ -255,7 +255,9 @@ class LTI_FIR_System (SystemModel):
         y = G    u + P_yw w
         z = P_zu u + P_zw w
     '''
-    def __init__ (self, Nw=0, Nu=0, Ny=0, Nz=0):
+    def __init__ (self, Nw=0, Nu=0, Ny=0, Nz=0, **kwargs):
+        SystemModel.__init__(self, **kwargs)
+
         self._Nw = Nw
         self._Nx = self._Ny = Ny
         self._Nz = Nz
@@ -269,11 +271,10 @@ class LTI_FIR_System (SystemModel):
         self._u = []
         self._w = []
 
-        self._ignore_output = True
         self._state_feedback = False
 
-        self._zero = np.zeros([Ny,1])
-        self._x = self._y = self._z = self._zero.copy()
+        self._x = self._y = np.zeros([Ny,1])
+        self._z = np.zeros([Nz,1])
 
     @staticmethod
     def _convolve(G,u):
@@ -299,11 +300,14 @@ class LTI_FIR_System (SystemModel):
 def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
     '''
     y = (C2 (zI - A)^{-1} B2 + D22) u + (C2 (zI - A)^{-1} B1 + D21) w
-    so
         G = C2 (zI - A)^{-1} B2 + D22
           = D22 + z^{-1} C2 ( 1 - z^{-1} A + z^{-2} A^2 - z^{-3} A^3 ... ) B2
         Pyw = C2 (zI - A)^{-1} B1 + D21
             = D21 + z^{-1} C2 ( 1 - z^{-1} A + z^{-2} A^2 - z^{-3} A^3 ... ) B1
+
+    z = (C1 (zI - A)^{-1} B2 + D12) u + (C1 (zI - A)^{-1} B1 + D11) w
+        Pzu = D12 + z^{-1} C1 ( 1 - z^{-1} A + z^{-2} A^2 - z^{-3} A^3 ... ) B2
+        Pzw = D11 + z^{-1} C1 ( 1 - z^{-1} A + z^{-2} A^2 - z^{-3} A^3 ... ) B1
     '''
     if not isinstance(system,LTI_System):
         error_message('The system must be LTI_System')
@@ -316,7 +320,10 @@ def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
     Nu = system._Nu
     Nw = system._Nw
 
-    truncated_system = LTI_FIR_System (Ny=Ny, Nu=Nu, Nw=Nw)
+    if not system._ignore_output:
+        Nz = system._Nz
+
+    truncated_system = LTI_FIR_System (Ny=Ny, Nz=Nz, Nu=Nu, Nw=Nw)
 
     if FIR_horizon <= 0:
         return truncated_system
@@ -332,7 +339,8 @@ def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
         C2  = system._C2
         D22 = system._D22
         D21 = system._D21
-    tmp = C2
+    
+    tmp_y = C2
 
     truncated_system._G = [None] * FIR_horizon
     truncated_system._G[0] = D22
@@ -341,8 +349,22 @@ def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
     truncated_system._Pyw[0] = D21
 
     for t in range(1,FIR_horizon):
-        truncated_system._G[t]   = np.dot(tmp,B2)
-        truncated_system._Pyw[t] = np.dot(tmp,B1)
-        tmp = np.dot(tmp,mA)
+        truncated_system._G[t]   = np.dot(tmp_y,B2)
+        truncated_system._Pyw[t] = np.dot(tmp_y,B1)
+        tmp_y = np.dot(tmp_y,mA)
+
+    if not system._ignore_output:
+        tmp_z = 0 if system._C1 is None else system._C1
+
+        truncated_system._Pzu = [None] * FIR_horizon
+        truncated_system._Pzu[0] = np.zeros([Nz,Nu]) if system._D12 is None else system._D12 
+
+        truncated_system._Pzw = [None] * FIR_horizon
+        truncated_system._Pzw[0] = np.zeros([Nz,Nw]) if system._D11 is None else system._D11
+
+        for t in range(1,FIR_horizon):
+            truncated_system._Pzu[t] = np.dot(tmp_z,B2)
+            truncated_system._Pzw[t] = np.dot(tmp_z,B1)
+            tmp_z = np.dot(tmp_z,mA)
 
     return truncated_system
