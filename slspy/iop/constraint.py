@@ -85,3 +85,19 @@ class IOP_Cons_IOP (IOP_Constraint):
                 ]
 
         return constraints
+
+class IOP_Cons_Sparse (IOP_Constraint):
+    def __init__(self, S=None):
+        # the mask
+        self._S = S
+
+    def addConstraints(self, iop, constraints=[]):
+        if self._S is None:
+            return constraints
+
+        for tau in range(iop._FIR_horizon):
+            for ix,iy in np.ndindex(self._S.shape):
+                if self._S[ix,iy] == 0:
+                    constraints += [ iop._Y[tau][ix,iy] == 0 ]
+
+        return constraints

@@ -16,7 +16,7 @@ def synthesis_algorithm_example():
     )
     generate_BCD_and_zero_initialization(sys)
 
-    sys_FIR = truncate_LTI_System_to_LTI_FIR_System (system=sys, FIR_horizon=5)
+    sys_FIR = truncate_LTI_System_to_LTI_FIR_System (system=sys, FIR_horizon=10)
 
     controller_FIR_horizon = 10
     sim_horizon = 25
@@ -31,7 +31,7 @@ def synthesis_algorithm_example():
     )
     synthesizer_sls << SLS_Obj_H2()
     controller_sls = synthesizer_sls.synthesizeControllerModel ()    
-
+    
     simulator = Simulator (
         system = sys,
         controller = controller_sls,
@@ -39,7 +39,7 @@ def synthesis_algorithm_example():
         horizon = sim_horizon
     )
     _, y_history, _, u_history, _ = simulator.run ()
-
+    
     plot_heat_map(y_history, u_history, 'SLS', left_title='log10(|y|)', right_title='log10(|u|)')
 
     # try IOP

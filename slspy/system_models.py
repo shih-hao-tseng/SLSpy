@@ -252,13 +252,20 @@ class LTI_System (SystemModel):
 class LTI_FIR_System (SystemModel):
     '''
     The LTI FIR system with
-        y = G u + w_y
+        y = G    u + P_yw w
+        z = P_zu u + P_zw w
     '''
-    def __init__ (self, Ny=0, Nu=0):
-        self._Nw = self._Ny = Ny
+    def __init__ (self, Nw=0, Nu=0, Ny=0, Nz=0):
+        self._Nw = Nw
+        self._Nx = self._Ny = Ny
+        self._Nz = Nz
         self._Nu = Nu
 
         self._G = []
+        self._Pyw = []
+        self._Pzu = []
+        self._Pzw = []
+
         self._u = []
         self._w = []
 
@@ -268,30 +275,26 @@ class LTI_FIR_System (SystemModel):
         self._zero = np.zeros([Ny,1])
         self._x = self._y = self._z = self._zero.copy()
 
-    def systemProgress (self, u, w=None, **kwargs):
-        Ng = len(self._G)
+    @staticmethod
+    def _convolve(G,u):
+        # perform sum_{t = 0}^{infty} G[t]u[t]
+        Gu = 0
+        convolution_len = min(len(G),len(u))
+        for tau in range(convolution_len):
+            Gu += np.dot(G[tau],u[tau])
+        return Gu
 
-        if Ng == 0:
-            self._x = self._y = self._z = self._zero
-            return
-        
+    def systemProgress (self, u, w=None, **kwargs):
         self._u = [u] + self._u
         self._w = [w] + self._w
 
-        convolution_len = len(self._u)
-
-        if convolution_len > Ng:
+        while (len(self._u) > len(self._G)) and (len(self._u) > len(self._Pzu)):
             self._u.pop(-1)
+        while (len(self._w) > len(self._Pyw)) and (len(self._w) > len(self._Pzw)):
             self._w.pop(-1)
-            convolution_len = Ng
-      
-        y = self._zero.copy()
-        for tau in range(convolution_len):
-            y += np.dot(self._G[tau],self._u[tau])
-            if self._w[tau] is not None:
-                y += self._w[tau]
-        
-        self._x = self._y = self._z = y
+
+        self._x = self._y = self._convolve(self._G, self._u) + self._convolve(self._Pyw, self._w)
+        self._z = self._convolve(self._Pzu, self._u) + self._convolve(self._Pzw, self._w)
 
 def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
     '''
@@ -299,6 +302,8 @@ def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
     so
         G = C2 (zI - A)^{-1} B2 + D22
           = D22 + z^{-1} C2 ( 1 - z^{-1} A + z^{-2} A^2 - z^{-3} A^3 ... ) B2
+        Pyw = C2 (zI - A)^{-1} B1 + D21
+            = D21 + z^{-1} C2 ( 1 - z^{-1} A + z^{-2} A^2 - z^{-3} A^3 ... ) B1
     '''
     if not isinstance(system,LTI_System):
         error_message('The system must be LTI_System')
@@ -309,26 +314,35 @@ def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
     else:
         Ny = system._Ny
     Nu = system._Nu
+    Nw = system._Nw
 
-    truncated_system = LTI_FIR_System (Ny=Ny, Nu=Nu)
+    truncated_system = LTI_FIR_System (Ny=Ny, Nu=Nu, Nw=Nw)
 
     if FIR_horizon <= 0:
         return truncated_system
 
-    tmp = system._B2
+    B2 = system._B2
+    B1 = system._B1
     mA  = -system._A
     if system._state_feedback:
         C2  = np.eye(Ny)
         D22 = np.zeros([Ny,Nu])
+        D21 = np.zeros([Ny,Nw])
     else:
         C2  = system._C2
         D22 = system._D22
+        D21 = system._D21
+    tmp = C2
 
     truncated_system._G = [None] * FIR_horizon
     truncated_system._G[0] = D22
 
+    truncated_system._Pyw = [None] * FIR_horizon
+    truncated_system._Pyw[0] = D21
+
     for t in range(1,FIR_horizon):
-        truncated_system._G[t] = np.dot(C2,tmp)
-        tmp = np.dot(mA,tmp)
+        truncated_system._G[t]   = np.dot(tmp,B2)
+        truncated_system._Pyw[t] = np.dot(tmp,B1)
+        tmp = np.dot(tmp,mA)
 
     return truncated_system
