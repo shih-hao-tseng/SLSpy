@@ -39,7 +39,7 @@ class IOP_Cons_IOP (IOP_Constraint):
 
         G = iop._system_model._G
         G_len = len(G)
-        horizon = iop._FIR_horizon
+        total = iop._FIR_horizon + 1
 
         # also the outside convolutions
         Zx = np.zeros([Ny,Ny])
@@ -47,8 +47,8 @@ class IOP_Cons_IOP (IOP_Constraint):
         Zz = np.zeros([Nu,Nu])
 
         # iop constraints
-        for tau in range(horizon+G_len-1):
-            if tau < horizon:
+        for tau in range(total+G_len-1):
+            if tau < total:
                 if tau == 0:
                     constraints += [
                         iop._X[0] == G[0] @ iop._Y[0] + np.eye(Ny)
@@ -58,30 +58,30 @@ class IOP_Cons_IOP (IOP_Constraint):
                     ]
                 else:
                     constraints += [
-                        iop._X[tau] == self._convolve(G, G_len, iop._Y, horizon, tau)
+                        iop._X[tau] == self._convolve(G, G_len, iop._Y, total, tau)
                     ]
                     constraints += [
-                        iop._Z[tau] == self._convolve(iop._Y, horizon, G, G_len, tau)
+                        iop._Z[tau] == self._convolve(iop._Y, total, G, G_len, tau)
                     ]
 
                 constraints += [
-                    iop._W[tau] == self._convolve(G, G_len, iop._Z, horizon, tau)
+                    iop._W[tau] == self._convolve(G, G_len, iop._Z, total, tau)
                 ]
                 constraints += [
-                    iop._W[tau] == self._convolve(iop._X, horizon, G, G_len, tau)
+                    iop._W[tau] == self._convolve(iop._X, total, G, G_len, tau)
                 ]
             else:
                 constraints += [
-                    Zx == self._convolve(G, G_len, iop._Y, horizon, tau)
+                    Zx == self._convolve(G, G_len, iop._Y, total, tau)
                 ]
                 constraints += [
-                    Zz == self._convolve(iop._Y, horizon, G, G_len, tau)
+                    Zz == self._convolve(iop._Y, total, G, G_len, tau)
                 ]
                 constraints += [
-                    Zw == self._convolve(G, G_len, iop._Z, horizon, tau)
+                    Zw == self._convolve(G, G_len, iop._Z, total, tau)
                 ]
                 constraints += [
-                    Zw == self._convolve(iop._X, horizon, G, G_len, tau)
+                    Zw == self._convolve(iop._X, total, G, G_len, tau)
                 ]
 
         return constraints
@@ -95,7 +95,7 @@ class IOP_Cons_Sparse (IOP_Constraint):
         if self._S is None:
             return constraints
 
-        for tau in range(iop._FIR_horizon):
+        for tau in range(iop._FIR_horizon + 1):
             for ix,iy in np.ndindex(self._S.shape):
                 if self._S[ix,iy] == 0:
                     constraints += [ iop._Y[tau][ix,iy] == 0 ]

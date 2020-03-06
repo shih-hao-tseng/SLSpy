@@ -16,7 +16,7 @@ def synthesis_algorithm_example():
     )
     generate_BCD_and_zero_initialization(sys)
 
-    sys_FIR = truncate_LTI_System_to_LTI_FIR_System (system=sys, FIR_horizon=10)
+    sys_FIR = truncate_LTI_System_to_LTI_FIR_System (system=sys, FIR_horizon=5)
 
     controller_FIR_horizon = 10
     sim_horizon = 25

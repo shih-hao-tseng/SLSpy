@@ -311,12 +311,14 @@ class IOP (SynthesisAlgorithm):
             FIR_horizon=self._FIR_horizon
         )
 
+        total = self._FIR_horizon + 1
+
         # initialize the variables
-        self._X = [None] * self._FIR_horizon
-        self._W = [None] * self._FIR_horizon
-        self._Y = [None] * self._FIR_horizon
-        self._Z = [None] * self._FIR_horizon
-        for tau in range(self._FIR_horizon):
+        self._X = [None] * total
+        self._W = [None] * total
+        self._Y = [None] * total
+        self._Z = [None] * total
+        for tau in range(total):
             self._X[tau] = cp.Variable(shape=(Ny,Ny))
             self._W[tau] = cp.Variable(shape=(Ny,Nu))
             self._Y[tau] = cp.Variable(shape=(Nu,Ny))
@@ -357,11 +359,11 @@ class IOP (SynthesisAlgorithm):
         else:
             # save the solved problem for the users to examine if needed
             self._optimal_objective_value = self._iop_problem.value
-            controller._X = [None] * self._FIR_horizon
-            controller._W = [None] * self._FIR_horizon
-            controller._Y = [None] * self._FIR_horizon
-            controller._Z = [None] * self._FIR_horizon
-            for tau in range(self._FIR_horizon):
+            controller._X = [None] * total
+            controller._W = [None] * total
+            controller._Y = [None] * total
+            controller._Z = [None] * total
+            for tau in range(total):
                 controller._X[tau] = self._X[tau].value
                 controller._W[tau] = self._W[tau].value
                 controller._Y[tau] = self._Y[tau].value

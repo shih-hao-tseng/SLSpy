@@ -20,10 +20,10 @@ class IOP_FIR_Controller (ControllerModel):
 
         self._FIR_horizon = FIR_horizon
 
-        self._X = []  # = [ X[0], X[1], X[2], ... X[FIR_horizon-1] ]
-        self._W = []  # = [ W[0], W[1], W[2], ... W[FIR_horizon-1] ]
-        self._Y = []  # = [ Y[0], Y[1], Y[2], ... Y[FIR_horizon-1] ]
-        self._Z = []  # = [ Z[0], Z[1], Z[2], ... Z[FIR_horizon-1] ]
+        self._X = []  # = [ X[0], X[1], X[2], ... X[FIR_horizon] ]
+        self._W = []  # = [ W[0], W[1], W[2], ... W[FIR_horizon] ]
+        self._Y = []  # = [ Y[0], Y[1], Y[2], ... Y[FIR_horizon] ]
+        self._Z = []  # = [ Z[0], Z[1], Z[2], ... Z[FIR_horizon] ]
 
         self._delta = []
         self._hat_y = np.zeros([Ny,1])
@@ -63,11 +63,13 @@ class IOP_FIR_Controller (ControllerModel):
                 self._XI[tau] = self._X[tau] - np.eye(self._Ny)
             else:
                 self._XI[tau] = self._X[tau]
+        
+        self._total = self._FIR_horizon + 1
 
     def getControl(self, y):
         # the controller is Y X^{-1}
-        self._FIFO_insert(self._delta, y - self._hat_y, self._FIR_horizon)
-        u           = self._convolve(A=self._Y,  B=self._delta, ub=self._FIR_horizon)
-        self._hat_y = self._convolve(A=self._XI, B=self._delta, ub=self._FIR_horizon)
+        self._FIFO_insert(self._delta, y - self._hat_y, self._total)
+        u           = self._convolve(A=self._Y,  B=self._delta, ub=self._total )
+        self._hat_y = self._convolve(A=self._XI, B=self._delta, ub=self._total )
 
         return u
