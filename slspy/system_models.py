@@ -273,8 +273,11 @@ class LTI_FIR_System (SystemModel):
 
         self._state_feedback = False
 
-        self._x = self._y = np.zeros([Ny,1])
-        self._z = np.zeros([Nz,1])
+        self._zero_y = np.zeros([Ny,1])
+        self._zero_z = np.zeros([Nz,1])
+
+        self._x = self._y = self._zero_y.copy()
+        self._z = self._zero_z.copy()
 
     @staticmethod
     def _convolve(G,u):
@@ -295,7 +298,11 @@ class LTI_FIR_System (SystemModel):
             self._w.pop(-1)
 
         self._x = self._y = self._convolve(self._G, self._u) + self._convolve(self._Pyw, self._w)
+        if self._y is 0:
+            self._y = self._zero_y.copy()
         self._z = self._convolve(self._Pzu, self._u) + self._convolve(self._Pzw, self._w)
+        if self._z is 0:
+            self._z = self._zero_z.copy()
 
 def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
     '''
