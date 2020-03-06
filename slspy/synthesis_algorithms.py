@@ -221,8 +221,8 @@ class SLS (SynthesisAlgorithm):
 
 class IOP (SynthesisAlgorithm):
     '''
-    Synthesizing the controller using Input-Output Parameterization method, c.f.
-        Furieri et al., ``An Input-Output Parameterization of Stabilizing Controllers: Amidst Youla and System Level Synthesis,'' 2019.
+    Synthesizing the controller using Input-Output Parametrization method, c.f.
+        Furieri et al., ``An Input-Output Parametrization of Stabilizing Controllers: Amidst Youla and System Level Synthesis,'' 2019.
     This is a finite impulse response implementation of the proposal
     '''
     def __init__(self,
