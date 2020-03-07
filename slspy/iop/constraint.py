@@ -48,41 +48,25 @@ class IOP_Cons_IOP (IOP_Constraint):
 
         # iop constraints
         for tau in range(total+G_len-1):
+            GY = self._convolve(G, G_len, iop._Y, total, tau)
+            YG = self._convolve(iop._Y, total, G, G_len, tau)
+            GZ = self._convolve(G, G_len, iop._Z, total, tau)
+            XG = self._convolve(iop._X, total, G, G_len, tau)
             if tau < total:
                 if tau == 0:
-                    constraints += [
-                        iop._X[0] == G[0] @ iop._Y[0] + np.eye(Ny)
-                    ]
-                    constraints += [
-                        iop._Z[0] == iop._Y[0] @ G[0] + np.eye(Nu)
-                    ]
+                    constraints += [ iop._X[0] == GY + np.eye(Ny) ]
+                    constraints += [ iop._Z[0] == YG + np.eye(Nu) ]
                 else:
-                    constraints += [
-                        iop._X[tau] == self._convolve(G, G_len, iop._Y, total, tau)
-                    ]
-                    constraints += [
-                        iop._Z[tau] == self._convolve(iop._Y, total, G, G_len, tau)
-                    ]
+                    constraints += [ iop._X[tau] == GY ]
+                    constraints += [ iop._Z[tau] == YG ]
 
-                constraints += [
-                    iop._W[tau] == self._convolve(G, G_len, iop._Z, total, tau)
-                ]
-                constraints += [
-                    iop._W[tau] == self._convolve(iop._X, total, G, G_len, tau)
-                ]
+                constraints += [ iop._W[tau] == GZ ]
+                constraints += [ iop._W[tau] == XG ]
             else:
-                constraints += [
-                    Zx == self._convolve(G, G_len, iop._Y, total, tau)
-                ]
-                constraints += [
-                    Zz == self._convolve(iop._Y, total, G, G_len, tau)
-                ]
-                constraints += [
-                    Zw == self._convolve(G, G_len, iop._Z, total, tau)
-                ]
-                constraints += [
-                    Zw == self._convolve(iop._X, total, G, G_len, tau)
-                ]
+                constraints += [ Zx == GY ]
+                constraints += [ Zz == YG ]
+                constraints += [ Zw == GZ ]
+                constraints += [ Zw == XG ]
 
         return constraints
 
