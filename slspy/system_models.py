@@ -68,6 +68,7 @@ class LTI_System (SystemModel):
         # set x0
         self._Nx = x0.shape[0]
         self._x  = x0
+        self._x_next = x0
 
         # initializing output and measurements by treating w and u to be zeros.
         # one might change this part for some other initialization strategies
@@ -176,7 +177,9 @@ class LTI_System (SystemModel):
                 # in case w is a list
                 w = np.array(w)
             
-            self._x = (
+            self._x = self._x_next
+
+            self._x_next = (
                 np.dot (self._A, self._x) +
                 np.dot (self._B1, w) + 
                 np.dot (self._B2, u)
@@ -197,7 +200,9 @@ class LTI_System (SystemModel):
                 )
         else:
             # noise free
-            self._x = (
+            self._x = self._x_next
+
+            self._x_next = (
                 np.dot (self._A, self._x) +
                 np.dot (self._B2, u)
             )
@@ -300,6 +305,7 @@ class LTI_FIR_System (SystemModel):
         self._x = self._y = self._convolve(self._G, self._u) + self._convolve(self._Pyw, self._w)
         if self._y is 0:
             self._y = self._zero_y.copy()
+
         self._z = self._convolve(self._Pzu, self._u) + self._convolve(self._Pzw, self._w)
         if self._z is 0:
             self._z = self._zero_z.copy()
@@ -350,10 +356,10 @@ def truncate_LTI_System_to_LTI_FIR_System (system=None,FIR_horizon=1):
     tmp_y = C2
 
     truncated_system._G = [None] * FIR_horizon
-    truncated_system._G[0] = D22
+    truncated_system._G[0] = np.zeros([Ny,Ny]) if D22 is None else D22
 
     truncated_system._Pyw = [None] * FIR_horizon
-    truncated_system._Pyw[0] = D21
+    truncated_system._Pyw[0] = np.zeros([Ny,Nw]) if D21 is None else D21
 
     for t in range(1,FIR_horizon):
         truncated_system._G[t]   = np.dot(tmp_y,B2)
