@@ -68,7 +68,6 @@ class LTI_System (SystemModel):
         # set x0
         self._Nx = x0.shape[0]
         self._x  = x0
-        self._x_next = x0
 
         # initializing output and measurements by treating w and u to be zeros.
         # one might change this part for some other initialization strategies
@@ -177,14 +176,6 @@ class LTI_System (SystemModel):
                 # in case w is a list
                 w = np.array(w)
             
-            self._x = self._x_next
-
-            self._x_next = (
-                np.dot (self._A, self._x) +
-                np.dot (self._B1, w) + 
-                np.dot (self._B2, u)
-            )
-
             if not self._ignore_output:
                 self._z = (
                     np.dot (self._C1, self._x) +
@@ -198,15 +189,14 @@ class LTI_System (SystemModel):
                     np.dot (self._D21, w) + 
                     np.dot (self._D22, u)
                 )
-        else:
-            # noise free
-            self._x = self._x_next
 
-            self._x_next = (
+            self._x = (
                 np.dot (self._A, self._x) +
+                np.dot (self._B1, w) + 
                 np.dot (self._B2, u)
             )
-
+        else:
+            # noise free
             if not self._ignore_output:
                 self._z = (
                     np.dot (self._C1, self._x) +
@@ -218,6 +208,11 @@ class LTI_System (SystemModel):
                     np.dot (self._C2, self._x) +
                     np.dot (self._D22, u)
                 )
+
+            self._x = (
+                np.dot (self._A, self._x) +
+                np.dot (self._B2, u)
+            )
 
     def updateActuation (self,new_act_ids=[]):
         '''
