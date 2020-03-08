@@ -176,19 +176,19 @@ class LTI_System (SystemModel):
                 w = np.array(w)
 
             if not self._state_feedback:
-                self._y = (
+                y = (
                     np.dot (self._C2, self._x) +
                     np.dot (self._D21, w) + 
                     np.dot (self._D22, u)
                 )
         else:
             if not self._state_feedback:
-                self._y = (
+                y = (
                     np.dot (self._C2, self._x) +
                     np.dot (self._D22, u)
                 )
 
-        return self._y
+        return y
 
     def systemProgress (self, u, w=None):
         # x[t] -> x[t+1]
@@ -204,6 +204,13 @@ class LTI_System (SystemModel):
             if not isinstance(w, np.ndarray):
                 # in case w is a list
                 w = np.array(w)
+
+            if not self._state_feedback:
+                self._y = (
+                    np.dot (self._C2, self._x) +
+                    np.dot (self._D21, w) + 
+                    np.dot (self._D22, u)
+                )
             
             if not self._ignore_output:
                 self._z = (
@@ -219,6 +226,12 @@ class LTI_System (SystemModel):
             )
         else:
             # noise free
+            if not self._state_feedback:
+                self._y = (
+                    np.dot (self._C2, self._x) +
+                    np.dot (self._D22, u)
+                )
+
             if not self._ignore_output:
                 self._z = (
                     np.dot (self._C1, self._x) +
@@ -307,12 +320,12 @@ class LTI_FIR_System (SystemModel):
     def measurementConverge(self, u, w=None):
         u_convergence = [u] + self._u
         w_convergence = [w] + self._w
-        self._y = self._convolve(self._G, u_convergence) + self._convolve(self._Pyw, w_convergence)
+        y = self._convolve(self._G, u_convergence) + self._convolve(self._Pyw, w_convergence)
 
-        if self._y is 0:
-            self._y = self._zero_y.copy()
+        if y is 0:
+            y = self._zero_y.copy()
 
-        return self._y
+        return y
 
     def systemProgress (self, u, w=None, **kwargs):
         self._u = [u] + self._u
@@ -323,7 +336,7 @@ class LTI_FIR_System (SystemModel):
         while (len(self._w) > len(self._Pyw)) and (len(self._w) > len(self._Pzw)):
             self._w.pop(-1)
 
-        self._x = self._y
+        self._x = self._y = self._convolve(self._G, self._u) + self._convolve(self._Pyw, self._w)
         self._z = self._convolve(self._Pzu, self._u) + self._convolve(self._Pzw, self._w)
         if self._z is 0:
             self._z = self._zero_z.copy()

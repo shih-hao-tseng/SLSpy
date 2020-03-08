@@ -230,7 +230,7 @@ class Simulator (ObjBase):
                 u_convergence = self._controller.controlConvergence(y=y_convergence_prev)
                 y_convergence = self._system.measurementConverge(u=u_convergence,w=w)
 
-                while np.sum((y_convergence_prev - y_convergence)**2) > self._convergence_threshold:
+                while np.sum(np.square(y_convergence_prev - y_convergence)) > self._convergence_threshold:
                     y_convergence_prev = y_convergence
                     u_convergence = self._controller.controlConvergence(y=y_convergence_prev)
                     y_convergence = self._system.measurementConverge(u=u_convergence,w=w)

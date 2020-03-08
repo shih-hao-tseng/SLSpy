@@ -6,6 +6,9 @@ To create a new controller model, inherit the following base function and custom
 class ControllerModel:
     def initialize (self):
         # initialize internal state
+    def controlConvergence(self, y, **kwargs):
+        # getControl without changing the internal state
+        return u
     def getControl(self, y, **kwargs):
         return u
 '''
@@ -65,6 +68,11 @@ class IOP_FIR_Controller (ControllerModel):
                 self._XI[tau] = self._X[tau]
         
         self._total = self._FIR_horizon + 1
+
+    def controlConvergence(self, y):
+        delta = [y - self._hat_y] + self._delta
+        u = self._convolve(A=self._Y,  B=delta, ub=self._total )
+        return u
 
     def getControl(self, y):
         # the controller is Y X^{-1}
