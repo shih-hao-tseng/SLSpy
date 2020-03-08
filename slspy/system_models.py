@@ -165,6 +165,9 @@ class LTI_System (SystemModel):
         return True
 
     def systemProgress (self, u, w=None):
+        # x[t] -> x[t+1]
+        # (y[t-1]) -> y[t]
+        # (z[t-1]) -> z[t]
         if u.shape[0] != self._Nu:
             return self.errorMessage('Dimension mismatch: u')
 
