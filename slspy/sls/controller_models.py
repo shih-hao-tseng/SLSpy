@@ -6,6 +6,9 @@ To create a new controller model, inherit the following base function and custom
 class ControllerModel:
     def initialize (self):
         # initialize internal state
+    def controlConvergence(self, y, **kwargs):
+        # getControl without changing the internal state
+        return u
     def getControl(self, y, **kwargs):
         return u
 '''
@@ -25,12 +28,18 @@ class SLS_FIR_Controller (ControllerModel):
         self._delta = []
         self._hat_x = np.zeros([Nx,1])
 
+        self._u = np.zeros([self._Nu,1])
+
     def initialize (self, delta0=None):
         pass
 
+    def controlConvergence(self, y):
+        # zero control
+        return self._u
+
     def getControl(self, y):
         # zero control
-        return np.zeros([self._Nu,1])
+        return self._u
 
     @staticmethod
     def _convolve(A,B,lb,ub,offset):
@@ -76,6 +85,11 @@ class SLS_StateFeedback_FIR_Controller (SLS_FIR_Controller):
             (delta.shape[1] == 1)):
             self._delta.append(delta)
 
+    def controlConvergence(self, y):
+        delta = [y - self._hat_x] + self._delta
+        u = self._convolve(A=self._Phi_u, B=delta, lb=1, ub=self._FIR_horizon+1, offset=1)
+        return u
+
     def getControl(self, y):
         self._FIFO_insert(self._delta, y - self._hat_x, self._FIR_horizon+1)
         u           = self._convolve(A=self._Phi_u, B=self._delta, lb=1, ub=self._FIR_horizon+1, offset=1)
@@ -101,6 +115,14 @@ class SLS_OutputFeedback_FIR_Controller (SLS_FIR_Controller):
         self._beta = []
         self._bar_y = []
         self.precalculation()
+
+    def controlConvergence(self, y):
+        u_prime = (
+            self._convolve(A=self._tilde_Phi_ux, B=self._beta,  lb=0, ub=self._FIR_horizon,   offset=0) +
+            self._convolve(A=self._Phi_uy,       B=self._bar_y, lb=1, ub=self._FIR_horizon+1, offset=1)
+        )
+        u = np.dot(self._u_multiplier, u_prime + np.dot(self._Phi_uy[0], y))
+        return u
 
     def getControl(self, y):
         '''

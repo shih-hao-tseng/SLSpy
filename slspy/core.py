@@ -51,8 +51,20 @@ class SystemModel (ObjBase):
 
         self._x0 = None
 
+    def measurementConverge(self, u, w=None):
+        # In an output-feedback system, the current measurement can depend on the current control
+        # while the current control also depend on the current measurement
+        # e.g., y(t) = G u(t) and u(t) = K y(t)
+        # Therefore, we need a convergence phase for them to agree with each other
+
+        # This function allows the measurement to converge with the control
+        # This function does not change the system's internal state
+        return self._y
+
     def systemProgress (self, u, w=None, **kwargs):
-        # this function takes the input (and the noise) and progress to next time 
+        # This function takes the input (and the noise) and progress to next time
+        # It also serves the purpose of convergence commitment, 
+        # i.e., it does change the system's internal state
         pass
 
     def getState(self):
@@ -86,7 +98,17 @@ class ControllerModel (ObjBase):
         # initialize internal state
         pass
 
+    def controlConvergence(self, y, **kwargs):
+        # In an output-feedback system, the current measurement can depend on the current control
+        # while the current control also depend on the current measurement
+        # e.g., y(t) = G u(t) and u(t) = K y(t)
+        # Therefore, we need a convergence phase for them to agree with each other
+        
+        # This function does not change the controller's internal state
+        return None
+
     def getControl(self, y, **kwargs):
+        # this function commits the control, i.e., the measurement y will really change the controller state
         return None
 
 class NoiseModel (ObjBase):
@@ -132,12 +154,14 @@ class Simulator (ObjBase):
         system=None,
         controller=None,
         noise=None,
-        horizon=-1
+        horizon=-1,
+        convergence_threshold=1e-10
     ):
         self.setSystem (system)
         self.setController (controller)
         self.setNoise (noise)
         self.setHorizon (horizon)
+        self.setConvergenceThreshold (convergence_threshold)
         pass
 
     def setSystem (self, system=None):
@@ -157,6 +181,9 @@ class Simulator (ObjBase):
     def setHorizon (self, horizon=-1):
         if isinstance(horizon, int):
             self._horizon = horizon
+    
+    def setConvergenceThreshold (self, convergence_threshold=1e-10):
+        self._convergence_threshold = convergence_threshold
 
     def run (self,initialize=True):
         # run the system and return 
@@ -184,21 +211,43 @@ class Simulator (ObjBase):
         u_history = []
         w_history = []
 
+        # In an output-feedback system, the current measurement can depend on the current control
+        # while the current control also depend on the current measurement
+        # e.g., y(t) = G u(t) and u(t) = K y(t)
+        # therefore, we need a convergence phase for them to agree with each other
+        need_convergence_phase = not self._system._state_feedback
+        y = self._system.getMeasurement()
+
         for t in range (self._horizon):
             x = self._system.getState()
-            x_history.append(x)
-            y = self._system.getMeasurement()
-            y_history.append(y)
-            z = self._system.getOutput()
-            z_history.append(z)
-
-            u = self._controller.getControl(y=y)
-            u_history.append(u)
             if self._noise is not None:
                 w = self._noise.getNoise()
             else:
                 w = None
-            w_history.append(w)
+
+            if need_convergence_phase:
+                y_convergence_prev = y
+                u_convergence = self._controller.controlConvergence(y=y_convergence_prev)
+                y_convergence = self._system.measurementConverge(u=u_convergence,w=w)
+
+                while np.sum((y_convergence_prev - y_convergence)**2) > self._convergence_threshold:
+                    y_convergence_prev = y_convergence
+                    u_convergence = self._controller.controlConvergence(y=y_convergence_prev)
+                    y_convergence = self._system.measurementConverge(u=u_convergence,w=w)
+
+                u = self._controller.getControl(y=y_convergence)
+            else:
+                u = self._controller.getControl(y=y)
+
             self._system.systemProgress(u=u, w=w)
+
+            y = self._system.getMeasurement()
+            z = self._system.getOutput()
+
+            x_history.append(x)
+            y_history.append(y)
+            z_history.append(z)
+            u_history.append(u)
+            w_history.append(w)
 
         return x_history, y_history, z_history, u_history, w_history
