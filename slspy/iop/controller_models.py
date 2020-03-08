@@ -60,24 +60,20 @@ class IOP_FIR_Controller (ControllerModel):
 
         # X - I
         X_len = len(self._X)
-        self._XI = [None] * X_len
-        for tau in range(X_len):
-            if tau == 0:
-                self._XI[tau] = self._X[tau] - np.eye(self._Ny)
-            else:
-                self._XI[tau] = self._X[tau]
+        if X_len > 0:
+            self._X0_inv = np.linalg.pinv(self._X[0])
+            self._X_delta = self._X[1:]
         
         self._total = self._FIR_horizon + 1
 
     def controlConvergence(self, y):
-        delta = [y - self._hat_y] + self._delta
+        delta = [np.dot(self._X0_inv,y - self._hat_y)] + self._delta
         u = self._convolve(A=self._Y,  B=delta, ub=self._total )
         return u
 
     def getControl(self, y):
         # the controller is Y X^{-1}
-        self._FIFO_insert(self._delta, y - self._hat_y, self._total)
+        self._FIFO_insert(self._delta, np.dot(self._X0_inv,y - self._hat_y), self._total)
         u           = self._convolve(A=self._Y,  B=self._delta, ub=self._total )
-        self._hat_y = self._convolve(A=self._XI, B=self._delta, ub=self._total )
-
+        self._hat_y = self._convolve(A=self._X_delta, B=self._delta, ub=self._total )
         return u
