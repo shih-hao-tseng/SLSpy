@@ -10,16 +10,16 @@ def synthesis_algorithm_example():
     # generate sys._A, sys._B2
     generate_doubly_stochastic_chain (
         system_model = sys,
-        rho = 1,
+        rho = 0.5,
         actuator_density = 1,
         alpha = 0.2
     )
     generate_BCD_and_zero_initialization(sys)
 
-    sys_FIR = truncate_LTI_System_to_LTI_FIR_System (system=sys, FIR_horizon=5)
+    sim_horizon = 25
+    sys_FIR = truncate_LTI_System_to_LTI_FIR_System (system=sys, FIR_horizon=sim_horizon)
 
     controller_FIR_horizon = 10
-    sim_horizon = 25
     noise = FixedNoiseVector (Nw = sys._Nx, horizon = sim_horizon)
     noise.generateNoiseFromNoiseModel (cls = ZeroNoise)
     noise._w[0][sys._Nw//2] = 10

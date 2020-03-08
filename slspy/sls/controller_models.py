@@ -171,4 +171,4 @@ class SLS_OutputFeedback_FIR_Controller (SLS_FIR_Controller):
             if i > 0:
                 self._tilde_Phi_xx.append(-self._Phi_xx[i+1])
         
-        self._u_multiplier = np.linalg.inv( np.eye(self._D22.shape[1]) + np.dot(self._Phi_uy[0], self._D22) )
+        self._u_multiplier = np.linalg.pinv( np.eye(self._D22.shape[1]) + np.dot(self._Phi_uy[0], self._D22) )
