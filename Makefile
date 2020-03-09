@@ -5,9 +5,9 @@ ifneq (,$(shell which dnf))
 PM=dnf
 LIBS=blas blas-devel lapack lapack-devel
 ifeq ($(PYTHON_VERSION),3)
-LIBS+= python3-devel
+LIBS+= python3-devel python3-tkinter
 else
-LIBS+= python-devel
+LIBS+= python-devel python-tkinter
 endif
 else
 ifneq (,$(shell which yum))
