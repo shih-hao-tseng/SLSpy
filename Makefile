@@ -15,9 +15,9 @@ ifneq (,$(shell which yum))
 PM=yum
 LIBS=blas blas-devel lapack lapack-devel
 ifeq ($(PYTHON_VERSION),3)
-LIBS+= python3-devel
+LIBS+= python3-devel python3-tkinter
 else
-LIBS+= python-devel
+LIBS+= python-devel python-tkinter
 endif
 else
 ifneq (,$(shell which apt))
@@ -25,9 +25,9 @@ ifneq (,$(shell which apt))
 PM=apt
 LIBS=libblas-dev liblapack-dev
 ifeq ($(PYTHON_VERSION),3)
-LIBS+= libpython3-dev
+LIBS+= libpython3-dev pyhton3-tk
 else
-LIBS+= libpython-dev
+LIBS+= libpython-dev python-tk
 endif
 else
 ifneq (,$(shell which pkg))
