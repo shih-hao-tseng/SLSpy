@@ -25,7 +25,7 @@ ifneq (,$(shell which apt))
 PM=apt
 LIBS=libblas-dev liblapack-dev
 ifeq ($(PYTHON_VERSION),3)
-LIBS+= libpython3-dev pyhton3-tk
+LIBS+= libpython3-dev python3-tk
 else
 LIBS+= libpython-dev python-tk
 endif
