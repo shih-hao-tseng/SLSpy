@@ -27,7 +27,7 @@ class IOP_Obj_H2(IOP_Objective):
                 continue
             if tmp < 0:
                 continue
-            AB += A[t] @ B[tmp]
+            AB += A[t] * B[tmp]
         return AB
 
     def addObjectiveValue(self, iop, objective_value):
