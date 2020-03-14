@@ -12,43 +12,6 @@ class SLS_Objective:
         return objective_value
 '''
 
-class SLS_Obj_H2(SLS_Objective):
-    '''
-    return 
-        || [C1, D12][Phi_x; Phi_u] ||_H2^2
-        for state-feedback SLS
-        || [C1, D12][Phi_xx, Phi_xy; Phi_ux, Phi_uy][B1; D21]||_H2^2
-        for output-feedback SLS
-    '''
-    def addObjectiveValue(self, sls, objective_value):
-        C1  = sls._system_model._C1
-        D12 = sls._system_model._D12
-
-        self._objective_expression = 0
-        if sls._state_feedback:
-            # state-feedback
-            Phi_x = sls._Phi_x
-            Phi_u = sls._Phi_u
-            for tau in range(len(Phi_x)):
-                self._objective_expression += cp.sum_squares(C1 * Phi_x[tau] + D12 * Phi_u[tau])
-        else:
-            # output-feedback
-            B1  = sls._system_model._B1
-            D21 = sls._system_model._D21
-            Phi_xx = sls._Phi_xx
-            Phi_ux = sls._Phi_ux
-            Phi_xy = sls._Phi_xy
-            Phi_uy = sls._Phi_uy
-            for tau in range(len(Phi_xx)):
-                self._objective_expression += cp.sum_squares(
-                    C1  * Phi_xx[tau] * B1 +
-                    D12 * Phi_ux[tau] * B1 +
-                    C1  * Phi_xy[tau] * D21 + 
-                    D12 * Phi_uy[tau] * D21
-                )
-
-        return objective_value + self._objective_expression
-
 class SLS_Obj_LQ(SLS_Objective):
     '''
     This function assumes 
@@ -112,6 +75,15 @@ class SLS_Obj_LQ(SLS_Objective):
                 )
 
         return objective_value + self._objective_expression
+
+class SLS_Obj_H2(SLS_Obj_LQ):
+    '''
+    return 
+        || [C1, D12][Phi_x; Phi_u] ||_H2^2
+        for state-feedback SLS
+        || [C1, D12][Phi_xx, Phi_xy; Phi_ux, Phi_uy][B1; D21]||_H2^2
+        for output-feedback SLS
+    '''
     
 class SLS_Obj_HInf(SLS_Objective):
     '''
