@@ -86,23 +86,44 @@ class FixedNoiseVector(NoiseModel):
 
 class MixedNoise(NoiseModel):
     '''
-    Concatenate different noise models together
-    Input list of NoiseModels in order.
+    Combine different noise models
+    '''
+    def __init__(self, Nw, *argv):
+        NoiseModel.__init__(self, Nw=Nw)
+        self._noise_models = argv
+    
+    def initialize(self):
+        for noise_model in self._noise_models:
+            noise_model.initialize()
+
+
+class MixedNoiseConcat(MixedNoise):
+    '''
+    Concatenate different noise models together in the order they are inputted in
     '''
     def __init__(self, *argv):
         Nw = 0
         for arg in argv:
             Nw += arg._Nw
-        NoiseModel.__init__(self, Nw=Nw)
-        self._noise_models = argv
-
-    def initialize (self):
-        for noise_model in self._noise_models:
-            noise_model.initialize()
+        MixedNoise.__init__(self, Nw, *argv)
 
     def getNoise(self, **kwargs):
-        noises = []
+        totalNoise = []
         for noise_model in self._noise_models:
-            noises.append(noise_model.getNoise(**kwargs))
+            totalNoise.append(noise_model.getNoise(**kwargs))
+        return np.concatenate(totalNoise)
 
-        return np.concatenate(noises)
+
+class MixedNoiseAdd(MixedNoise):
+    '''
+    Add noise models together. Models must have same Nw
+    '''
+    def __init__(self, *argv):
+        Nw = argv[0]._Nw
+        MixedNoise.__init__(self, Nw, *argv)
+            
+    def getNoise(self, **kwargs):
+        totalNoise = np.zeros((self._Nw, 1))
+        for noise_model in self._noise_models:
+            totalNoise += noise_model.getNoise(**kwargs)
+        return totalNoise
