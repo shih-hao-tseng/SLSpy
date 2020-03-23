@@ -2,7 +2,9 @@ from matplotlib.pyplot import *
 import matplotlib.pyplot as plt
 import numpy as np
 
-def matrix_list_multiplication (matrix_A=None, list_B=[]):
+def matrix_list_multiplication (matrix_A=None, list_B=None):
+    if list_B is None:
+        list_B = []
     AB = []
     for t in range(len(list_B)):
         AB.append(np.dot(matrix_A,list_B[t]))
@@ -90,7 +92,11 @@ def plot_heat_map (x=None, Bu=None, myTitle='title', outputFileName=None, left_t
 
     show(block=False)
 
-def plot_line_chart(list_x=[], list_y=[], title='title', xlabel='xlabel', ylabel='ylabel',line_format='o-', invert_x=False):
+def plot_line_chart(list_x=None, list_y=None, title='title', xlabel='xlabel', ylabel='ylabel',line_format='o-', invert_x=False):
+    if list_x is None:
+        list_x = []
+    if list_y is None:
+        list_y = []
     figure()
     plot(list_x,list_y,line_format)
     if invert_x:

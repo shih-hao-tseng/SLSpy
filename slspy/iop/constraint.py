@@ -26,7 +26,7 @@ class IOP_Cons_IOP (IOP_Constraint):
             AB += A[t] * B[tmp]
         return AB
 
-    def addConstraints(self, iop, constraints=[]):
+    def addConstraints(self, iop, constraints=None):
         '''
         IOP constraints:
         [ I, -G ][ X W ] = [ I 0 ]
@@ -34,6 +34,9 @@ class IOP_Cons_IOP (IOP_Constraint):
         [ X W ][ -G ] = [ 0 ]
         [ Y Z ][  I ]   [ I ]
         '''
+        if constraints is None:
+            constraints = [] 
+
         Ny = iop._system_model._Ny
         Nu = iop._system_model._Nu
 
@@ -75,7 +78,10 @@ class IOP_Cons_Sparse (IOP_Constraint):
         # the mask
         self._S = S
 
-    def addConstraints(self, iop, constraints=[]):
+    def addConstraints(self, iop, constraints=None):
+        if constraints is None:
+            constraints = []
+
         if self._S is None:
             return constraints
 

@@ -16,7 +16,7 @@ class SLS_Cons_SLS (SLS_Constraint):
     def __init__(self, state_feedback=False):
         self._state_feedback = state_feedback
 
-    def addConstraints(self, sls, constraints=[]):
+    def addConstraints(self, sls, constraints=None):
         '''
         state-feedback constraints:
         [ zI-A, -B2 ][ Phi_x ] = I
@@ -28,6 +28,10 @@ class SLS_Cons_SLS (SLS_Constraint):
         [ Phi_xx Phi_xy ][ zI-A ] = [ I ]
         [ Phi_ux Phi_uy ][ -C2  ]   [ 0 ]
         '''
+        if constraints is None:
+            # avoid using empty list as default arguments, which can cause unwanted issue
+            constraints = []
+
         Nx = sls._system_model._Nx
         Nu = sls._system_model._Nu
 

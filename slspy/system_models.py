@@ -243,11 +243,13 @@ class LTI_System (SystemModel):
                 np.dot (self._B2, u)
             )
 
-    def updateActuation (self,new_act_ids=[]):
+    def updateActuation (self,new_act_ids=None):
         '''
         make a new system with the dynamics of the old system and updated
         actuation (based on rfd output)
         '''
+        if new_act_ids is None:
+            new_act_ids = []
         sys = self.__copy()
         sys._B2  = self._B2 [:, new_act_ids]
         sys._D12 = self._D12[:, new_act_ids]
