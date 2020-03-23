@@ -99,7 +99,7 @@ def generate_doubly_stochastic_chain (system_model=None, rho=0, actuator_density
         x = int(floor(i/actuator_density)) % Nx
         system_model._B2[x,i] = 1
 
-def generate_random_chain (system_model=None, rho=1, actuator_density=1):
+def generate_random_chain (system_model=None, rho=1, actuator_density=1, random_seed=None):
     '''
     Populates (A, B2) of the specified system with a random chain 
     (tridiagonal A matrix) and a random actuation (B) matrix
@@ -116,6 +116,9 @@ def generate_random_chain (system_model=None, rho=1, actuator_density=1):
 
     if system_model._Nx == 0:
         return
+
+    if random_seed is not None:
+        np.random.seed(seed=random_seed)
 
     Nx = system_model._Nx
     Nu = int(ceil(Nx*actuator_density))
