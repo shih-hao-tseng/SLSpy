@@ -187,7 +187,7 @@ class SLS_Cons_Robust (SLS_Constraint):
         '''
         [ zI-A, -B2 ][ Phi_x ] = I + Delta
                      [ Phi_u ]
-        || Delta ||_{Epsilon_1} <= gamma
+        || Delta ||_{E_1} <= gamma
         '''
         # reset constraints
         hat_Phi_x = sls._Phi_x
@@ -221,7 +221,7 @@ class SLS_Cons_Robust (SLS_Constraint):
                 )
             ]
 
-        # Epsilon_1 robustness
+        # E_l (elementwise l1 norm) robustness
         constraints += [
             cp.norm(cp.bmat([self._Delta[1:-1]]),'inf') <= self._gamma
         ]
