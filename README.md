@@ -1,34 +1,30 @@
-# SLSpy: Python-based Simulation Framework for System Level Synthesis
+# SLSpy: Python-based System-Level Controller Synthesis Framework
 
 ## Synopsis
-*SLSpy* provides a Python-based framework to simulate model-based control systems, especially for system level synthesis (SLS) methods. The simulation workflow follows the descriptions in the paper
+*SLSpy* provides a Python-based framework to design and simulate model-based control systems, especially for system level synthesis (SLS) methods. The details of the framework are described in the paper
+
+Shih-Hao Tseng and Jing Shuang (Lisa) Li, ``SLSpy: Python-Based System-Level Controller Synthesis Framework,'' 2020 (submitted for review).
+
+The synthesis workflow follows the structure in the paper
 
 Shih-Hao Tseng and James Anderson, ``[Deployment Architectures for Cyber-Physical Control Systems](https://arxiv.org/abs/1911.01510),'' 2019.
 
 ## System Requirement
 * Python 2.7 or higher
-* Python pip
+* Python pip (or pip3 for Python 3)
 
-For Python 3 or higher version, the user might need to install cvxpy manually. The current pip install method may fail.  
+We recommend using Python 3 (and pip3) or above. A system with both Python 3 and Python 2.7 may encounter installation error. In that case, please make Python 3 your default choice by appropriate aliasing.
 
 ## Install
-To install SLSpy, one may type
+First install the necessary packages by
+
+`sudo make setup`
+
+then install SLSpy by typing
 
 `sudo make install`
 
-which has been tested under Fedora 30.
-
-To install the packages manually, the user should install
-* blas-devel/libblas-dev
-* lapack-devel/liblapack-dev
-
-first, then reinstall scs package by
-
-`pip install --no-cache-dir --ignore-installed scs`
-
-or
-
-`pip install --no-cache-dir -I scs`
+which has been tested under Fedora 30 and Ubuntu 18.04.
 
 ## SLSpy Wiki
 A simple wiki page with basic explanation can be found at 
