@@ -4,6 +4,7 @@ from .system_models import *
 
 from .sls.components import *
 from .sls.constraint import SLS_Cons_SLS
+from .sls.solver import SLS_Sol_CVX
 from .sls.controller_models import *
 
 from .iop.components import *
@@ -26,7 +27,8 @@ class SLS (SynthesisAlgorithm):
     def __init__(self,
         system_model=None,
         FIR_horizon=1,
-        state_feedback=True
+        state_feedback=True,
+        solver=None
     ):
         self._FIR_horizon = FIR_horizon
         self._state_feedback = state_feedback
@@ -36,7 +38,13 @@ class SLS (SynthesisAlgorithm):
         
         self.resetObjAndCons()
 
-        self._sls_problem = None #cp.Problem(cp.Minimize(0))
+        if not isinstance(solver,SLS_Solver):
+            solver = None
+        if solver is None:
+            self._solver = SLS_Sol_CVX(sls=self)
+        else:
+            self._solver = solver
+
         self._sls_constraints = SLS_Cons_SLS ()
 
     def setSystemModel(self,system_model):
@@ -115,7 +123,10 @@ class SLS (SynthesisAlgorithm):
         return self._optimal_objective_value
 
     def get_SLS_Problem (self):
-        return self._sls_problem
+        if isinstance(self._solver, SLS_Sol_CVX):
+            return self._solver.get_SLS_Problem()
+        else:
+            return None
 
     def sanityCheck (self):
         # we can extend the algorithm to work for non-state-feedback SLS
@@ -186,19 +197,20 @@ class SLS (SynthesisAlgorithm):
                 constraints = constraints
             )
 
-        # obtain results and put into controller
-        self._sls_problem = cp.Problem (cp.Minimize(objective_value), constraints)
-        self._sls_problem.solve()
+        problem_value, solver_status = self._solver.solve(
+            objective_value = objective_value,
+            constraints = constraints
+        )
 
-        if self._sls_problem.status is "infeasible":
+        if solver_status is 'infeasible':
             self.warningMessage('SLS problem infeasible')
             return None
-        elif self._sls_problem.status is "unbounded":
+        elif solver_status is 'unbounded':
             self.warningMessage('SLS problem unbounded')
             return None
         else:
             # save the solved problem for the users to examine if needed
-            self._optimal_objective_value = self._sls_problem.value
+            self._optimal_objective_value = problem_value
             if self._use_state_feedback_version:
                 controller._Phi_x = [None] * total
                 controller._Phi_u = [None] * total
@@ -216,8 +228,8 @@ class SLS (SynthesisAlgorithm):
                     controller._Phi_xy[tau] = self._Phi_xy[tau].value
                     controller._Phi_uy[tau] = self._Phi_uy[tau].value
 
-        controller.initialize()
-        return controller
+            controller.initialize()
+            return controller
 
 class IOP (SynthesisAlgorithm):
     '''

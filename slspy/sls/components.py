@@ -24,3 +24,23 @@ class SLS_Constraint(SLS_Objective):
     '''
     def addConstraints(self, sls, constraints):
         return constraints
+
+class SLS_Solver:
+    '''
+    The base class for SLS solver
+    A solver takes the objective and constraints to solve the SLS problem and generate the controller 
+    '''
+    def __init__ (self, sls):
+        # solvers might need to alter _Phi_x, _Phi_u, directly
+        pass
+    def solve (
+        self,
+        objective_value,
+        constraints
+    ):
+        '''
+        status: string return by the solver
+        '''
+        problem_value = 0.0
+        solver_status = 'feasible'
+        return problem_value, solver_status
