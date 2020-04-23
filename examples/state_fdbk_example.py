@@ -71,7 +71,7 @@ def state_fdbk_example():
         base = dlocalized,
         rob_coeff = 10e3
     )
-    approx_dlocalized._cSpeed = 1
+    approx_dlocalized._comm_speed = 1
 
     # set the constriant
     synthesizer << approx_dlocalized
