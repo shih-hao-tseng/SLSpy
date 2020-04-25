@@ -2,14 +2,8 @@ import cvxpy as cp
 from .core import SystemModel,ControllerModel,SynthesisAlgorithm
 from .system_models import *
 
-from .sls.components import *
-from .sls.constraint import SLS_Cons_SLS
-from .sls.solver import SLS_Sol_CVX
-from .sls.controller_models import *
-
-from .iop.components import *
-from .iop.constraint import IOP_Cons_IOP
-from .iop.controller_models import *
+from .sls import *
+from .iop import *
 
 '''
 To create a new synthesis algorithm, inherit the following base function and customize the specified methods.
