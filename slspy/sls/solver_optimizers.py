@@ -21,16 +21,16 @@ class SLS_SolverOptimizer:
         pass
 '''
 
-class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
+class SLS_SolOpt_ReduceVariables (SLS_SolverOptimizer):
     assigned_variables = {}
 
     @staticmethod
     def getAssignedVariables(expression):
         if isinstance(expression,CVX_Multiplication):
             # handle nested multiplication
-            return SLS_SolOpt_ReduceRedundancy.expandMultiplication(expression)
+            return SLS_SolOpt_ReduceVariables.expandMultiplication(expression)
         elif isinstance(expression,CVX_Variable):
-            if expression not in SLS_SolOpt_ReduceRedundancy.assigned_variables:
+            if expression not in SLS_SolOpt_ReduceVariables.assigned_variables:
                 # create variable
                 rows = []
                 for ix in range(expression.shape[0]):
@@ -38,8 +38,8 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
                     for iy in range(expression.shape[1]):
                         row.append(cp.Variable(1))
                     rows.append(row)
-                SLS_SolOpt_ReduceRedundancy.assigned_variables[expression] = cp.bmat(rows)
-            return SLS_SolOpt_ReduceRedundancy.assigned_variables[expression]
+                SLS_SolOpt_ReduceVariables.assigned_variables[expression] = cp.bmat(rows)
+            return SLS_SolOpt_ReduceVariables.assigned_variables[expression]
         return expression
 
     @staticmethod
@@ -49,11 +49,11 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
 
         It turns out to be very inefficient. Avoid this trick.
         '''
-        expression = SLS_SolOpt_ReduceRedundancy.getAssignedVariables(multiplication.args[0])
+        expression = SLS_SolOpt_ReduceVariables.getAssignedVariables(multiplication.args[0])
         expression_constant = isinstance(expression,CVX_Constant)
 
         for argument_index in range(1,len(multiplication.args)):
-            arg = SLS_SolOpt_ReduceRedundancy.getAssignedVariables(multiplication.args[argument_index])
+            arg = SLS_SolOpt_ReduceVariables.getAssignedVariables(multiplication.args[argument_index])
             arg_constant = isinstance(arg,CVX_Constant)
             # compute expression * arg
             rows = []
@@ -109,22 +109,22 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
             return
         if isinstance(expression,CVX_Variable):
             # replace the variable if it exists in assigned variables
-            if expression in SLS_SolOpt_ReduceRedundancy.assigned_variables:
-                arguments[argument_index] = SLS_SolOpt_ReduceRedundancy.assigned_variables[expression]
+            if expression in SLS_SolOpt_ReduceVariables.assigned_variables:
+                arguments[argument_index] = SLS_SolOpt_ReduceVariables.assigned_variables[expression]
             return
         #if isinstance(expression,CVX_Multiplication):
         #    # flatten the multiplications
-        #    arguments[argument_index] = SLS_SolOpt_ReduceRedundancy.expandMultiplication(expression)
+        #    arguments[argument_index] = SLS_SolOpt_ReduceVariables.expandMultiplication(expression)
         #    return
         # expand
         for argument_index in range(len(expression.args)):
-            SLS_SolOpt_ReduceRedundancy.expandArguments(argument_index,expression.args)
+            SLS_SolOpt_ReduceVariables.expandArguments(argument_index,expression.args)
 
     @staticmethod
     def expandExpression(expression):
         # expand
         for argument_index in range(len(expression.args)):
-            SLS_SolOpt_ReduceRedundancy.expandArguments(argument_index,expression.args)
+            SLS_SolOpt_ReduceVariables.expandArguments(argument_index,expression.args)
     
     @staticmethod
     def optimize(objective_value, constraints):
@@ -134,7 +134,7 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
 
         # first check if the constraint is an assignment
         # remember the assignment of variables
-        SLS_SolOpt_ReduceRedundancy.assigned_variables = {}
+        SLS_SolOpt_ReduceVariables.assigned_variables = {}
 
         for item in objective_value.args:
             if isinstance(item, CVX_Constant):
@@ -170,13 +170,13 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
                 if (variable is not None) and (value is not None):
                     # it is an assignment
                     # print ('assign %s == %s' %(variable,value))
-                    if variable in SLS_SolOpt_ReduceRedundancy.assigned_variables.keys():
+                    if variable in SLS_SolOpt_ReduceVariables.assigned_variables.keys():
                         # have to check if there exist two conflict assignments
-                        if value != SLS_SolOpt_ReduceRedundancy.assigned_variables[variable]:
+                        if value != SLS_SolOpt_ReduceVariables.assigned_variables[variable]:
                             # conflict assignment
                             return 'infeasible', objective_value, constraints
                     else:
-                        SLS_SolOpt_ReduceRedundancy.assigned_variables[variable] = value
+                        SLS_SolOpt_ReduceVariables.assigned_variables[variable] = value
                         # assign the value when post-processing
                         #variable.value = value
                     continue
@@ -185,18 +185,18 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
                     # get the corresponding variable
                     # print ('assign %s == %s' %(index,value))
                     variable = index.args[0]
-                    if variable in SLS_SolOpt_ReduceRedundancy.assigned_variables.keys():
+                    if variable in SLS_SolOpt_ReduceVariables.assigned_variables.keys():
                         # have to check if there exist two conflict assignments
-                        assigned_value = SLS_SolOpt_ReduceRedundancy.assigned_variables[variable][index.key[0],index.key[1]]
+                        assigned_value = SLS_SolOpt_ReduceVariables.assigned_variables[variable][index.key[0],index.key[1]]
                         if assigned_value[0,0] is not None:
                             if value != assigned_value:
                                 # conflict assignment
                                 return 'infeasible', objective_value, constraints
                         else:
-                            SLS_SolOpt_ReduceRedundancy.assigned_variables[variable][index.key[0],index.key[1]] = value
+                            SLS_SolOpt_ReduceVariables.assigned_variables[variable][index.key[0],index.key[1]] = value
                     else:
-                        SLS_SolOpt_ReduceRedundancy.assigned_variables[variable] = np.full(variable.shape, None)
-                        SLS_SolOpt_ReduceRedundancy.assigned_variables[variable][index.key[0],index.key[1]] = value
+                        SLS_SolOpt_ReduceVariables.assigned_variables[variable] = np.full(variable.shape, None)
+                        SLS_SolOpt_ReduceVariables.assigned_variables[variable][index.key[0],index.key[1]] = value
                         # assign the value when post-processing
                         #if variable.value is None:
                         #    variable.value = np.empty(variable.shape)
@@ -207,8 +207,8 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
             reduced_constraints.append(constraint)
 
         # organize assigned variables: replace None by cvxpy variable, and make it CVX_Constant if all the values are defined?
-        for variable in SLS_SolOpt_ReduceRedundancy.assigned_variables.keys():
-            value = SLS_SolOpt_ReduceRedundancy.assigned_variables[variable]
+        for variable in SLS_SolOpt_ReduceVariables.assigned_variables.keys():
+            value = SLS_SolOpt_ReduceVariables.assigned_variables[variable]
 
             if None in value:
                 rows = []
@@ -220,19 +220,19 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
                         else:
                             row.append(value[ix,iy])
                     rows.append(row)
-                SLS_SolOpt_ReduceRedundancy.assigned_variables[variable] = cp.bmat(rows)
+                SLS_SolOpt_ReduceVariables.assigned_variables[variable] = cp.bmat(rows)
             else:
-                SLS_SolOpt_ReduceRedundancy.assigned_variables[variable] = CVX_Constant(value=value)
+                SLS_SolOpt_ReduceVariables.assigned_variables[variable] = CVX_Constant(value=value)
 
         # expand the all multiplications in args
-        SLS_SolOpt_ReduceRedundancy.expandExpression(reduced_objective_value)
+        SLS_SolOpt_ReduceVariables.expandExpression(reduced_objective_value)
 
         for constraint in reduced_constraints:
-            SLS_SolOpt_ReduceRedundancy.expandExpression(constraint)
+            SLS_SolOpt_ReduceVariables.expandExpression(constraint)
 
         return 'success', reduced_objective_value, reduced_constraints
 
     @staticmethod
     def postProcess():
-        for variable in SLS_SolOpt_ReduceRedundancy.assigned_variables.keys():
-            variable.value = SLS_SolOpt_ReduceRedundancy.assigned_variables[variable].value
+        for variable in SLS_SolOpt_ReduceVariables.assigned_variables.keys():
+            variable.value = SLS_SolOpt_ReduceVariables.assigned_variables[variable].value

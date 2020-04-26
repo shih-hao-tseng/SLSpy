@@ -1,5 +1,5 @@
 from .components import SLS_Solver, SLS_SolverOptimizer
-from .solver_optimizers import SLS_SolOpt_ReduceRedundancy
+from .solver_optimizers import SLS_SolOpt_ReduceVariables
 import cvxpy as cp
 #import time
 
@@ -11,15 +11,14 @@ class SLS_Solver:
         pass
     def solve (
         self,
-        controller,
         objective_value,
         constraints
     ):
-        return controller
+        return problem_value, solver_status
 '''
 
 class SLS_Sol_CVX:
-    def __init__ (self, sls, optimizers=[SLS_SolOpt_ReduceRedundancy]):
+    def __init__ (self, sls, optimizers=[SLS_SolOpt_ReduceVariables]):
         self._sls = sls
         self._sls_problem = None #cp.Problem(cp.Minimize(0))
         self._solver_optimizers = []

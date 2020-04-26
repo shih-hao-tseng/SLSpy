@@ -204,20 +204,19 @@ class SLS_Cons_Robust (SLS_Constraint):
         for t in range(len_delta, sls._FIR_horizon+1):
             self._Delta.append(cp.Variable(shape=(Nx,Nx)))
 
-        constraints =  [ hat_Phi_x[1] == np.eye(Nx) + self._Delta[1] ]
+        constraints =  [ hat_Phi_x[1] - self._Delta[1] == np.eye(Nx) ]
         constraints += [
-            (sls._system_model._A  * hat_Phi_x[sls._FIR_horizon] +
-             sls._system_model._B2 * hat_Phi_u[sls._FIR_horizon] +
-             self._Delta[sls._FIR_horizon]
-            ) == np.zeros([Nx,Nx])
+            - self._Delta[sls._FIR_horizon] == ( 
+                sls._system_model._A  * hat_Phi_x[sls._FIR_horizon]
+              + sls._system_model._B2 * hat_Phi_u[sls._FIR_horizon]
+            ) 
         ]
 
         for t in range(1,sls._FIR_horizon):
             constraints += [
-                self._Delta[t+1] == (
-                    hat_Phi_x[t+1]
-                    - sls._system_model._A  * hat_Phi_x[t]
-                    - sls._system_model._B2 * hat_Phi_u[t]
+                hat_Phi_x[t+1] - self._Delta[t+1] == (
+                    sls._system_model._A  * hat_Phi_x[t]
+                  + sls._system_model._B2 * hat_Phi_u[t]
                 )
             ]
 
