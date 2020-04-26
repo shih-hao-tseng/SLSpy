@@ -34,7 +34,9 @@ class SLS_Sol_CVX:
         for sol_opt in self._solver_optimizers:
             # apply the optimizers
             if issubclass(sol_opt, SLS_SolverOptimizer):
-                objective_value, constraints = sol_opt.optimize(objective_value, constraints)
+                solver_status, objective_value, constraints = sol_opt.optimize(objective_value, constraints)
+                if solver_status == 'infeasible':
+                    return 0.0, solver_status
 
         self._sls_problem = cp.Problem (cp.Minimize(objective_value), constraints)
         self._sls_problem.solve()
