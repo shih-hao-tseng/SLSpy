@@ -134,21 +134,20 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
         for variable in SLS_SolOpt_ReduceRedundancy.assigned_variables.keys():
             value = SLS_SolOpt_ReduceRedundancy.assigned_variables[variable]
 
-            rows = []
-            has_variable = False
-            for ix in range(value.shape[0]):
-                row = []
-                for iy in range(value.shape[1]):
-                    if value[ix,iy] is None:
-                        has_variable = True
-                        row.append(cp.Variable(1))
-                    else:
-                        row.append(value[ix,iy])
-                rows.append(row)
-            if has_variable:
+            if None in value:
+                rows = []
+                for ix in range(value.shape[0]):
+                    row = []
+                    for iy in range(value.shape[1]):
+                        if value[ix,iy] is None:
+                            row.append(cp.Variable(1))
+                        else:
+                            row.append(value[ix,iy])
+                    rows.append(row)
                 SLS_SolOpt_ReduceRedundancy.assigned_variables[variable] = cp.bmat(rows)
             else:
                 SLS_SolOpt_ReduceRedundancy.assigned_variables[variable] = CVX_Constant(value=value)
+
             #print (SLS_SolOpt_ReduceRedundancy.assigned_variables[variable].variables())
 
         # expand the all multiplications in args
