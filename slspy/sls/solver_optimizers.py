@@ -127,8 +127,19 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
             reduced_constraints.append(constraint)
 
         # organize assigned variables: replace None by cvxpy variable, and make it CVX_Constant if all the values are defined?
-        #TODO
+        for variable in SLS_SolOpt_ReduceRedundancy.assigned_variables.keys():
+            value = SLS_SolOpt_ReduceRedundancy.assigned_variables[variable]
 
+            rows = []
+            for ix in range(value.shape[0]):
+                row = []
+                for iy in range(value.shape[1]):
+                    if value[ix,iy] is None:
+                        row.append(variable[ix,iy])
+                    else:
+                        row.append(value[ix,iy])
+                rows.append(row)
+            SLS_SolOpt_ReduceRedundancy.assigned_variables[variable] = cp.bmat(rows)
         #for constraint in reduced_constraints:
         #    print(constraint)
 
