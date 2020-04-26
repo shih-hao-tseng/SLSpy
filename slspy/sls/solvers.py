@@ -1,6 +1,7 @@
 from .components import SLS_Solver, SLS_SolverOptimizer
 from .solver_optimizers import SLS_SolOpt_ReduceRedundancy
 import cvxpy as cp
+#import time
 
 '''
 To create a new SLS solver, inherit the following base function and customize the specified methods.
@@ -34,6 +35,13 @@ class SLS_Sol_CVX:
         objective_value,
         constraints
     ):
+        #time_start = time.perf_counter()
+        #self._sls_problem = cp.Problem (cp.Minimize(objective_value), constraints)
+        #self._sls_problem.solve()
+        #time_end   = time.perf_counter()
+        #print(" without optimization %.8f, " % (time_end-time_start))
+
+        #time_start = time.perf_counter()
         for sol_opt in self._solver_optimizers:
             # apply the optimizers
             solver_status, objective_value, constraints = sol_opt.optimize(objective_value, constraints)
@@ -43,11 +51,13 @@ class SLS_Sol_CVX:
         self._sls_problem = cp.Problem (cp.Minimize(objective_value), constraints)
         self._sls_problem.solve()
 
-        problem_value = self._sls_problem.value
-        solver_status = self._sls_problem.status 
-
         for sol_opt in self._solver_optimizers:
             # optimizers post-process
             sol_opt.postProcess()
+        #time_end   = time.perf_counter()
+        #print(" with optimization %.8f, " % (time_end-time_start))
+
+        problem_value = self._sls_problem.value
+        solver_status = self._sls_problem.status 
 
         return problem_value, solver_status
