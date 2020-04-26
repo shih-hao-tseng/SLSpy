@@ -6,6 +6,7 @@ from cvxpy.constraints.zero import Equality as CVX_Equality
 from cvxpy.atoms.affine.index import index as CVX_index
 from cvxpy.expressions.constants.constant import Constant as CVX_Constant
 from cvxpy.atoms.affine.binary_operators import MulExpression as CVX_Multiplication
+from cvxpy.atoms.affine.reshape import reshape as CVX_reshape
 
 '''
 To create a new solver optimizer, inherit the following base function and customize the specified methods.
@@ -25,21 +26,81 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
 
     @staticmethod
     def getAssignedVariables(expression):
-        if isinstance(expression,CVX_Variable):
-            if expression in SLS_SolOpt_ReduceRedundancy.assigned_variables:
-                return SLS_SolOpt_ReduceRedundancy.assigned_variables[expression]
+        if isinstance(expression,CVX_Multiplication):
+            # handle nested multiplication
+            return SLS_SolOpt_ReduceRedundancy.expandMultiplication(expression)
+        elif isinstance(expression,CVX_Variable):
+            if expression not in SLS_SolOpt_ReduceRedundancy.assigned_variables:
+                # create variable
+                rows = []
+                for ix in range(expression.shape[0]):
+                    row = []
+                    for iy in range(expression.shape[1]):
+                        row.append(cp.Variable(1))
+                    rows.append(row)
+                SLS_SolOpt_ReduceRedundancy.assigned_variables[expression] = cp.bmat(rows)
+            return SLS_SolOpt_ReduceRedundancy.assigned_variables[expression]
         return expression
 
     @staticmethod
     def expandMultiplication(multiplication):
+        '''
+        expand multiplication and eliminate zero terms
+
+        It turns out to be very inefficient. Avoid this trick.
+        '''
         expression = SLS_SolOpt_ReduceRedundancy.getAssignedVariables(multiplication.args[0])
+        expression_constant = isinstance(expression,CVX_Constant)
+
         for argument_index in range(1,len(multiplication.args)):
             arg = SLS_SolOpt_ReduceRedundancy.getAssignedVariables(multiplication.args[argument_index])
+            arg_constant = isinstance(arg,CVX_Constant)
             # compute expression * arg
-            #TODO
-            expression *= arg
+            rows = []
+            for ix in range(expression.shape[0]):
+                row = []
+                for iy in range(arg.shape[1]):
+                    dot_product = None
+                    for iz in range(expression.shape[1]):
+                        # only work for Constant
+                        if expression_constant:
+                            value_a = expression.value[ix, iz]
+                            if value_a == 0.0:
+                                continue
+                        else:
+                            value_a = expression.args[ix].args[iz]
+                            if isinstance(value_a,CVX_reshape):
+                                value_a = value_a.value
+                                if value_a == 0.0:
+                                    continue
+                        # cannot check value_a == 0.0 here
+                        # as value_a might be cp Variable
+
+                        if arg_constant:
+                            value_b = arg.value[iz, iy]
+                            if value_b == 0.0:
+                                continue
+                        else:
+                            value_b = arg.args[iz].args[iy]
+                            if isinstance(value_b,CVX_reshape):
+                                value_b = value_b.value
+                                if value_b == 0.0:
+                                    continue
+
+                        product = value_a * value_b
+                        if dot_product is None:
+                            dot_product = product
+                        else: 
+                            dot_product += product
+                    if dot_product is None:
+                        dot_product = 0.0
+                    #print(dot_product)
+                    row.append(dot_product)
+                rows.append(row)
+            expression = cp.bmat(rows)
+            expression_constant = isinstance(expression,CVX_Constant)
         return expression
-    
+
     @staticmethod
     def expandArguments(argument_index, arguments):
         # this allows replacing an argument in the 'arguments' list
@@ -51,10 +112,10 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
             if expression in SLS_SolOpt_ReduceRedundancy.assigned_variables:
                 arguments[argument_index] = SLS_SolOpt_ReduceRedundancy.assigned_variables[expression]
             return
-        if isinstance(expression,CVX_Multiplication):
-            # flatten the multiplications
-            arguments[argument_index] = SLS_SolOpt_ReduceRedundancy.expandMultiplication(expression)
-            return
+        #if isinstance(expression,CVX_Multiplication):
+        #    # flatten the multiplications
+        #    arguments[argument_index] = SLS_SolOpt_ReduceRedundancy.expandMultiplication(expression)
+        #    return
         # expand
         for argument_index in range(len(expression.args)):
             SLS_SolOpt_ReduceRedundancy.expandArguments(argument_index,expression.args)
