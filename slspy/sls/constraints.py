@@ -167,7 +167,7 @@ class SLS_Cons_Robust (SLS_Constraint):
         self._gamma_coefficient = gamma_coefficient
 
         # this matches the index and avoids the confusion
-        self._Delta = [None]
+        self._Delta = []
         self._gamma = cp.Variable(1)
 
     def getStabilityMargin (self):
@@ -199,12 +199,13 @@ class SLS_Cons_Robust (SLS_Constraint):
         len_delta = len(self._Delta)
         if len_delta > 1:
             if (self._Delta[1].shape[0] != Nx) or (self._Delta[1].shape[1] != Nx):
-                self._Delta = [None]
-                len_delta = 1
+                self._Delta = []
+                len_delta = 0
         for t in range(len_delta, sls._FIR_horizon+1):
             self._Delta.append(cp.Variable(shape=(Nx,Nx)))
 
-        constraints =  [ hat_Phi_x[1] - self._Delta[1] == np.eye(Nx) ]
+        constraints =  [ hat_Phi_x[1] - self._Delta[0] == np.eye(Nx) ]
+        # move Delta to the left hand side to omit creating zero
         constraints += [
             - self._Delta[sls._FIR_horizon] == ( 
                 sls._system_model._A  * hat_Phi_x[sls._FIR_horizon]
@@ -214,7 +215,7 @@ class SLS_Cons_Robust (SLS_Constraint):
 
         for t in range(1,sls._FIR_horizon):
             constraints += [
-                hat_Phi_x[t+1] - self._Delta[t+1] == (
+                hat_Phi_x[t+1] - self._Delta[t] == (
                     sls._system_model._A  * hat_Phi_x[t]
                   + sls._system_model._B2 * hat_Phi_u[t]
                 )
@@ -222,7 +223,7 @@ class SLS_Cons_Robust (SLS_Constraint):
 
         # E_l (elementwise l1 norm) robustness
         constraints += [
-            cp.norm(cp.bmat([self._Delta[1:-1]]),'inf') <= self._gamma
+            cp.norm(cp.bmat(self._Delta),'inf') <= self._gamma
         ]
 
         return constraints
