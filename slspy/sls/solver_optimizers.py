@@ -105,7 +105,8 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
                             return 'infeasible', objective_value, constraints
                     else:
                         SLS_SolOpt_ReduceRedundancy.assigned_variables[variable] = value
-                        variable.value = value
+                        # assign the value when post-processing
+                        #variable.value = value
                     continue
 
                 if (index is not None) and (value is not None):
@@ -119,12 +120,15 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
                             if value != assigned_value:
                                 # conflict assignment
                                 return 'infeasible', objective_value, constraints
+                        else:
+                            SLS_SolOpt_ReduceRedundancy.assigned_variables[variable][index.key[0],index.key[1]] = value
                     else:
                         SLS_SolOpt_ReduceRedundancy.assigned_variables[variable] = np.full(variable.shape, None)
                         SLS_SolOpt_ReduceRedundancy.assigned_variables[variable][index.key[0],index.key[1]] = value
-                        if variable.value is None:
-                            variable.value = np.empty(variable.shape)
-                        variable.value[index.key[0],index.key[1]] = value
+                        # assign the value when post-processing
+                        #if variable.value is None:
+                        #    variable.value = np.empty(variable.shape)
+                        #variable.value[index.key[0],index.key[1]] = value
                     continue
 
             # not a simple assignment:
