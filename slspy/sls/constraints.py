@@ -223,7 +223,7 @@ class SLS_Cons_Robust (SLS_Constraint):
 
         # E_l (elementwise l1 norm) robustness
         constraints += [
-            cp.norm(cp.bmat(self._Delta),'inf') <= self._gamma
+            cp.norm(cp.bmat([self._Delta]),'inf') <= self._gamma
         ]
 
         return constraints
