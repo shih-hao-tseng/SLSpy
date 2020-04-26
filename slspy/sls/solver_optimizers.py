@@ -5,6 +5,7 @@ from cvxpy.expressions.variable import Variable as CVX_Variable
 from cvxpy.constraints.zero import Equality as CVX_Equality
 from cvxpy.atoms.affine.index import index as CVX_index
 from cvxpy.expressions.constants.constant import Constant as CVX_Constant
+from cvxpy.atoms.affine.binary_operators import MulExpression as CVX_Multiplication
 
 '''
 To create a new solver optimizer, inherit the following base function and customize the specified methods.
@@ -21,8 +22,100 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
         pass
     
     @staticmethod
+    def expandExpression(expression):
+        print(type(expression))
+        print(expression)
+        for arg in expression.args:
+            if isinstance(arg,CVX_Constant):
+                print('const')
+                continue
+            if isinstance(arg,CVX_Variable):
+                print('varible')
+                continue
+            SLS_SolOpt_ReduceRedundancy.expandExpression(arg)
+    
+    @staticmethod
     def optimize(objective_value, constraints):
-        #TODO
+        # parse and expand all constraints
+        reduced_objective_value = None
+        reduced_constraints = []
+
+        # first check if the constraint is an assignment
+        # remember the assignment of variables
+        assigned_variables = {}
+
+        for item in objective_value.args:
+            if isinstance(item, CVX_Constant):
+                # constant does not matter
+                continue
+            if reduced_objective_value is None:
+                reduced_objective_value = item
+            else:
+                reduced_objective_value += item
+
+        for constraint in constraints:
+            # reduce the assignment constraints
+            if isinstance(constraint, CVX_Equality):
+                # handle equality: args[0] == args[1]
+                variable = None
+                index = None
+                value = None
+
+                if isinstance(constraint.args[0], CVX_Variable):
+                    variable = constraint.args[0]
+                if isinstance(constraint.args[0], CVX_index):
+                    index = constraint.args[0]
+                if isinstance(constraint.args[0], CVX_Constant):
+                    value = constraint.args[0]
+                
+                if isinstance(constraint.args[1], CVX_Variable):
+                    variable = constraint.args[1]
+                if isinstance(constraint.args[1], CVX_index):
+                    index = constraint.args[1]
+                if isinstance(constraint.args[1], CVX_Constant):
+                    value = constraint.args[1].value
+
+                if (variable is not None) and (value is not None):
+                    # it is an assignment
+                    # print ('assign %s == %s' %(variable,value))
+                    if variable in assigned_variables.keys():
+                        # have to check if there exist two conflict assignments
+                        if value != assigned_variables[variable]:
+                            # conflict assignment
+                            return 'infeasible', objective_value, constraints
+                    else:
+                        assigned_variables[variable] = value
+                        variable.value = value
+                    continue
+
+                if (index is not None) and (value is not None):
+                    # get the corresponding variable
+                    # print ('assign %s == %s' %(index,value))
+                    variable = index.args[0]
+                    if variable in assigned_variables.keys():
+                        # have to check if there exist two conflict assignments
+                        assigned_value = assigned_variables[variable][index.key[0],index.key[1]]
+                        if assigned_value[0,0] is not None:
+                            if value != assigned_value:
+                                # conflict assignment
+                                return 'infeasible', objective_value, constraints
+                    else:
+                        assigned_variables[variable] = np.full(variable.shape, None)
+                        assigned_variables[variable][index.key[0],index.key[1]] = value
+                        if variable.value is None:
+                            variable.value = np.empty(variable.shape)
+                        variable.value[index.key[0],index.key[1]] = value
+                    continue
+
+            # not a simple assignment:
+            reduced_constraints.append(constraint)
+
+        for constraint in reduced_constraints:
+            print(constraint)
+
+        # expand the all multiplications in args
+        SLS_SolOpt_ReduceRedundancy.expandExpression(reduced_objective_value)
+
         '''
         x = cp.Variable(1)
         y = np.zeros([1,1])
@@ -34,75 +127,6 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
             con.args[0] = cp.bmat([x,y + x])
             print(con)
         '''
-
-        # parse and expand all constraints
-        reduced_objective_value = 0.0
-        reduced_constraints = []
-
-        '''
-        for arg in objective_value.args:
-            print(arg)
-            print(type(arg))
-            if not isinstance(arg,CVX_Constant):
-                # remove constants
-                reduced_objective_value += arg
-    
-        objective_value = reduced_objective_value
-        '''
-
-        # first check if the constraint is an assignment
-        # remember the assignment of variables
-        assigned_variables = {}
-
-        for constraint in constraints:
-            if isinstance(constraint, CVX_Equality):
-                # equality: args[0] == args[1]
-                print('is equality')
-                print(type(constraint.args[0]))
-                print(type(constraint.args[1]))
-                variable = None
-                index = None
-                value = None
-
-                if isinstance(constraint.args[0], CVX_Equality):
-                    variable = constraint.args[0]
-                if isinstance(constraint.args[0], CVX_index):
-                    index = constraint.args[0]
-                if isinstance(constraint.args[0], CVX_Constant):
-                    value = constraint.args[0]
-                
-                if isinstance(constraint.args[1], CVX_Equality):
-                    variable = constraint.args[1]
-                if isinstance(constraint.args[1], CVX_index):
-                    index = constraint.args[1]
-                if isinstance(constraint.args[1], CVX_Constant):
-                    value = constraint.args[1]
-
-                if (variable is not None) and (value is not None):
-                    # it is an assignment
-                    print('assign %s = %s' % (variable,value))
-                    if variable in assigned_variables.keys():
-                        # have to check if there exist two conflict assignments
-                        if value != assigned_variables[variable]:
-                            # conflict assignment
-                            return 'infeasible', objective_value, constraints
-                    else:
-                        assigned_variables[variable] = value    
-                        variable.value = value.value
-                    continue
-
-                if (index is not None) and (value is not None):
-                    print('assign %s = %s' % (index,value))
-                    variable = index
-                    assigned_variables[variable] = value
-                    print(type(value.value))
-                    print(type(variable.value))
-                    continue
-
-
-            
-
-
 
 
         '''
