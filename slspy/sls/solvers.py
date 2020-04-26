@@ -44,4 +44,9 @@ class SLS_Sol_CVX:
         problem_value = self._sls_problem.value
         solver_status = self._sls_problem.status 
 
+        for sol_opt in self._solver_optimizers:
+            # optimizers post-process
+            if issubclass(sol_opt, SLS_SolverOptimizer):
+                sol_opt.postProcess()
+
         return problem_value, solver_status

@@ -56,3 +56,7 @@ class SLS_SolverOptimizer:
     def optimize(objective_value, constraints):
         # status: the issues detected by the optimizer, e.g., 'success', 'infeasible', etc.
         return status, objective_value, constraints
+
+    @staticmethod
+    def postProcess():
+        pass
