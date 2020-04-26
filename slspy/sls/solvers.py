@@ -25,9 +25,13 @@ class SLS_Sol_CVX:
         for sol_opt in optimizers:
             if issubclass(sol_opt, SLS_SolverOptimizer):
                 self._solver_optimizers.append(sol_opt)
+        self._CVX_solver = None
 
     def get_SLS_Problem (self):
         return self._sls_problem
+
+    def set_CVX_Solver(self, CVX_solver):
+        self._CVX_solver = CVX_solver
 
     def solve (
         self,
@@ -48,7 +52,10 @@ class SLS_Sol_CVX:
                 return 0.0, solver_status
 
         self._sls_problem = cp.Problem (cp.Minimize(objective_value), constraints)
-        self._sls_problem.solve()
+        if self._CVX_solver is not None:
+            self._sls_problem.solve(solver=self._CVX_solver)
+        else:
+            self._sls_problem.solve()
 
         for sol_opt in self._solver_optimizers:
             # optimizers post-process

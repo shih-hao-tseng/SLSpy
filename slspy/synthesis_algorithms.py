@@ -32,12 +32,7 @@ class SLS (SynthesisAlgorithm):
         
         self.resetObjAndCons()
 
-        if not isinstance(solver,SLS_Solver):
-            solver = None
-        if solver is None:
-            self._solver = SLS_Sol_CVX(sls=self)
-        else:
-            self._solver = solver
+        self.setSolver(solver=solver)
 
         self._sls_constraints = SLS_Cons_SLS ()
 
@@ -48,6 +43,18 @@ class SLS (SynthesisAlgorithm):
         self.initializePhi()
 
         return self
+
+    def setSolver(self,solver):
+        # optimizer is embedded in the solver
+        if not isinstance(solver,SLS_Solver):
+            solver = None
+        if solver is None:
+            self._solver = SLS_Sol_CVX(sls=self)
+        else:
+            self._solver = solver
+
+    def getSolver(self):
+        return self._solver
 
     def initializePhi (self):
         self._Phi_x = self._Phi_xx = []

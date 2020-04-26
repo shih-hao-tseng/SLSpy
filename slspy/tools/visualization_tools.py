@@ -92,13 +92,14 @@ def plot_heat_map (x=None, Bu=None, myTitle='title', outputFileName=None, left_t
 
     show(block=False)
 
-def plot_line_chart(list_x=None, list_y=None, title='title', xlabel='xlabel', ylabel='ylabel',line_format='o-', invert_x=False):
+def plot_line_chart(list_x=None, list_y=None, title='title', xlabel='xlabel', ylabel='ylabel', line_format='o-', invert_x=False):
     if list_x is None:
         list_x = []
     if list_y is None:
         list_y = []
     figure()
     plot(list_x,list_y,line_format)
+    suptitle(title)
     if invert_x:
         gca().invert_xaxis()
     plt.xlabel(xlabel)
