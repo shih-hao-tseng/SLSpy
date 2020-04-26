@@ -148,8 +148,6 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
             else:
                 SLS_SolOpt_ReduceRedundancy.assigned_variables[variable] = CVX_Constant(value=value)
 
-            #print (SLS_SolOpt_ReduceRedundancy.assigned_variables[variable].variables())
-
         # expand the all multiplications in args
         SLS_SolOpt_ReduceRedundancy.expandExpression(reduced_objective_value)
 
