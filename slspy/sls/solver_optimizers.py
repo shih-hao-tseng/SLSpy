@@ -17,22 +17,38 @@ class SLS_SolverOptimizer:
 '''
 
 class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
+    assigned_variables = {}
+
     @staticmethod
-    def expandMultiplication(assigned_variables, multi):
+    def expandMultiplication(multiplication):
+        
         pass
     
     @staticmethod
+    def expandArguments(argument_index, arguments):
+        # this allows replacing an argument in the 'arguments' list
+        expression = arguments[argument_index]
+        if isinstance(expression,CVX_Constant):
+            return
+        if isinstance(expression,CVX_Variable):
+            # replace the variable if it exists in assigned variables
+            if expression in SLS_SolOpt_ReduceRedundancy.assigned_variables:
+                arguments[argument_index] = SLS_SolOpt_ReduceRedundancy.assigned_variables[expression]
+            return
+        if isinstance(expression,CVX_Multiplication):
+            print('multiplication')
+            print(expression)
+            SLS_SolOpt_ReduceRedundancy.expandMultiplication(expression)
+            return
+        # expand
+        for argument_index in range(len(expression.args)):
+            SLS_SolOpt_ReduceRedundancy.expandArguments(argument_index,expression.args)
+
+    @staticmethod
     def expandExpression(expression):
-        print(type(expression))
-        print(expression)
-        for arg in expression.args:
-            if isinstance(arg,CVX_Constant):
-                print('const')
-                continue
-            if isinstance(arg,CVX_Variable):
-                print('varible')
-                continue
-            SLS_SolOpt_ReduceRedundancy.expandExpression(arg)
+        # expand
+        for argument_index in range(len(expression.args)):
+            SLS_SolOpt_ReduceRedundancy.expandArguments(argument_index,expression.args)
     
     @staticmethod
     def optimize(objective_value, constraints):
@@ -42,7 +58,7 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
 
         # first check if the constraint is an assignment
         # remember the assignment of variables
-        assigned_variables = {}
+        SLS_SolOpt_ReduceRedundancy.assigned_variables = {}
 
         for item in objective_value.args:
             if isinstance(item, CVX_Constant):
@@ -78,13 +94,13 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
                 if (variable is not None) and (value is not None):
                     # it is an assignment
                     # print ('assign %s == %s' %(variable,value))
-                    if variable in assigned_variables.keys():
+                    if variable in SLS_SolOpt_ReduceRedundancy.assigned_variables.keys():
                         # have to check if there exist two conflict assignments
-                        if value != assigned_variables[variable]:
+                        if value != SLS_SolOpt_ReduceRedundancy.assigned_variables[variable]:
                             # conflict assignment
                             return 'infeasible', objective_value, constraints
                     else:
-                        assigned_variables[variable] = value
+                        SLS_SolOpt_ReduceRedundancy.assigned_variables[variable] = value
                         variable.value = value
                     continue
 
@@ -92,16 +108,16 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
                     # get the corresponding variable
                     # print ('assign %s == %s' %(index,value))
                     variable = index.args[0]
-                    if variable in assigned_variables.keys():
+                    if variable in SLS_SolOpt_ReduceRedundancy.assigned_variables.keys():
                         # have to check if there exist two conflict assignments
-                        assigned_value = assigned_variables[variable][index.key[0],index.key[1]]
+                        assigned_value = SLS_SolOpt_ReduceRedundancy.assigned_variables[variable][index.key[0],index.key[1]]
                         if assigned_value[0,0] is not None:
                             if value != assigned_value:
                                 # conflict assignment
                                 return 'infeasible', objective_value, constraints
                     else:
-                        assigned_variables[variable] = np.full(variable.shape, None)
-                        assigned_variables[variable][index.key[0],index.key[1]] = value
+                        SLS_SolOpt_ReduceRedundancy.assigned_variables[variable] = np.full(variable.shape, None)
+                        SLS_SolOpt_ReduceRedundancy.assigned_variables[variable][index.key[0],index.key[1]] = value
                         if variable.value is None:
                             variable.value = np.empty(variable.shape)
                         variable.value[index.key[0],index.key[1]] = value
@@ -110,46 +126,16 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
             # not a simple assignment:
             reduced_constraints.append(constraint)
 
-        for constraint in reduced_constraints:
-            print(constraint)
+        # organize assigned variables: replace None by cvxpy variable, and make it CVX_Constant if all the values are defined?
+        #TODO
+
+        #for constraint in reduced_constraints:
+        #    print(constraint)
 
         # expand the all multiplications in args
         SLS_SolOpt_ReduceRedundancy.expandExpression(reduced_objective_value)
 
-        '''
-        x = cp.Variable(1)
-        y = np.zeros([1,1])
-        #z = np.concatenate(x,y)
-        cons = [ cp.bmat([x,y]) == np.zeros([2,1]) ]
-        print(cons)
-        for con in cons:
-            print(con)
-            con.args[0] = cp.bmat([x,y + x])
-            print(con)
-        '''
+        for constraint in reduced_constraints:
+            SLS_SolOpt_ReduceRedundancy.expandExpression(constraint)
 
-
-        '''
-            print (type(constraint))
-            print (len(constraint.args))
-
-
-            for arg in constraint.args:
-                print(arg)
-                print(arg.shape)
-                pass
-
-
-            if isinstance(constraint.args[0], CVX_Variable):
-                print ('is variable')
-                pass
-            print(constraint.args[0])
-            print(constraint.args[0].id)
-            print(type(constraint.args[0]))
-            print(constraint.args[1])
-            print(type(constraint.args[1]))
-
-            print('---')
-            pass
-        '''
-        return 'success', objective_value, constraints
+        return 'success', reduced_objective_value, reduced_constraints
