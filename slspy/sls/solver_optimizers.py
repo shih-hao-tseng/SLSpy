@@ -23,7 +23,7 @@ class SLS_SolverOptimizer:
 
 class SLS_SolOpt_ReduceVariables (SLS_SolverOptimizer):
     assigned_variables = {}
-
+    '''
     @staticmethod
     def getAssignedVariables(expression):
         if isinstance(expression,CVX_Multiplication):
@@ -44,11 +44,11 @@ class SLS_SolOpt_ReduceVariables (SLS_SolverOptimizer):
 
     @staticmethod
     def expandMultiplication(multiplication):
-        '''
-        expand multiplication and eliminate zero terms
+        
+        #expand multiplication and eliminate zero terms
 
-        It turns out to be very inefficient. Avoid this trick.
-        '''
+        #It turns out to be very inefficient. Avoid this trick.
+        
         expression = SLS_SolOpt_ReduceVariables.getAssignedVariables(multiplication.args[0])
         expression_constant = isinstance(expression,CVX_Constant)
 
@@ -100,7 +100,7 @@ class SLS_SolOpt_ReduceVariables (SLS_SolverOptimizer):
             expression = cp.bmat(rows)
             expression_constant = isinstance(expression,CVX_Constant)
         return expression
-
+    '''
     @staticmethod
     def expandArguments(argument_index, arguments):
         # this allows replacing an argument in the 'arguments' list
