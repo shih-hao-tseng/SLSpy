@@ -24,9 +24,21 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
     assigned_variables = {}
 
     @staticmethod
+    def getAssignedVariables(expression):
+        if isinstance(expression,CVX_Variable):
+            if expression in SLS_SolOpt_ReduceRedundancy.assigned_variables:
+                return SLS_SolOpt_ReduceRedundancy.assigned_variables[expression]
+        return expression
+
+    @staticmethod
     def expandMultiplication(multiplication):
-        
-        pass
+        expression = SLS_SolOpt_ReduceRedundancy.getAssignedVariables(multiplication.args[0])
+        for argument_index in range(1,len(multiplication.args)):
+            arg = SLS_SolOpt_ReduceRedundancy.getAssignedVariables(multiplication.args[argument_index])
+            # compute expression * arg
+            #TODO
+            expression *= arg
+        return expression
     
     @staticmethod
     def expandArguments(argument_index, arguments):
@@ -39,11 +51,10 @@ class SLS_SolOpt_ReduceRedundancy (SLS_SolverOptimizer):
             if expression in SLS_SolOpt_ReduceRedundancy.assigned_variables:
                 arguments[argument_index] = SLS_SolOpt_ReduceRedundancy.assigned_variables[expression]
             return
-        #if isinstance(expression,CVX_Multiplication):
-        #    print('multiplication')
-        #    print(expression)
-        #    SLS_SolOpt_ReduceRedundancy.expandMultiplication(expression)
-        #    return
+        if isinstance(expression,CVX_Multiplication):
+            # flatten the multiplications
+            arguments[argument_index] = SLS_SolOpt_ReduceRedundancy.expandMultiplication(expression)
+            return
         # expand
         for argument_index in range(len(expression.args)):
             SLS_SolOpt_ReduceRedundancy.expandArguments(argument_index,expression.args)
