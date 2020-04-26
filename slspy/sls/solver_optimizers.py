@@ -158,7 +158,7 @@ class SLS_SolOpt_ReduceVariables (SLS_SolverOptimizer):
                 if isinstance(constraint.args[0], CVX_index):
                     index = constraint.args[0]
                 if isinstance(constraint.args[0], CVX_Constant):
-                    value = constraint.args[0]
+                    value = constraint.args[0].value
                 
                 if isinstance(constraint.args[1], CVX_Variable):
                     variable = constraint.args[1]
@@ -167,41 +167,34 @@ class SLS_SolOpt_ReduceVariables (SLS_SolverOptimizer):
                 if isinstance(constraint.args[1], CVX_Constant):
                     value = constraint.args[1].value
 
-                if (variable is not None) and (value is not None):
-                    # it is an assignment
-                    # print ('assign %s == %s' %(variable,value))
-                    if variable in SLS_SolOpt_ReduceVariables.assigned_variables.keys():
-                        # have to check if there exist two conflict assignments
-                        if value != SLS_SolOpt_ReduceVariables.assigned_variables[variable]:
-                            # conflict assignment
-                            return 'infeasible', objective_value, constraints
-                    else:
-                        SLS_SolOpt_ReduceVariables.assigned_variables[variable] = value
-                        # assign the value when post-processing
-                        #variable.value = value
-                    continue
-
-                if (index is not None) and (value is not None):
-                    # get the corresponding variable
-                    # print ('assign %s == %s' %(index,value))
-                    variable = index.args[0]
-                    if variable in SLS_SolOpt_ReduceVariables.assigned_variables.keys():
-                        # have to check if there exist two conflict assignments
-                        assigned_value = SLS_SolOpt_ReduceVariables.assigned_variables[variable][index.key[0],index.key[1]]
-                        if assigned_value[0,0] is not None:
-                            if value != assigned_value:
+                if value is not None:
+                    if variable is not None:
+                        # it is an assignment
+                        if variable in SLS_SolOpt_ReduceVariables.assigned_variables.keys():
+                            # have to check if there exist two conflict assignments
+                            if value != SLS_SolOpt_ReduceVariables.assigned_variables[variable]:
                                 # conflict assignment
                                 return 'infeasible', objective_value, constraints
                         else:
+                            SLS_SolOpt_ReduceVariables.assigned_variables[variable] = value
+                        continue
+
+                    if index is not None:
+                        # get the corresponding variable
+                        variable = index.args[0]
+                        if variable in SLS_SolOpt_ReduceVariables.assigned_variables.keys():
+                            # have to check if there exist two conflict assignments
+                            assigned_value = SLS_SolOpt_ReduceVariables.assigned_variables[variable][index.key[0],index.key[1]]
+                            if assigned_value[0,0] is not None:
+                                if value != assigned_value:
+                                    # conflict assignment
+                                    return 'infeasible', objective_value, constraints
+                            else:
+                                SLS_SolOpt_ReduceVariables.assigned_variables[variable][index.key[0],index.key[1]] = value
+                        else:
+                            SLS_SolOpt_ReduceVariables.assigned_variables[variable] = np.full(variable.shape, None)
                             SLS_SolOpt_ReduceVariables.assigned_variables[variable][index.key[0],index.key[1]] = value
-                    else:
-                        SLS_SolOpt_ReduceVariables.assigned_variables[variable] = np.full(variable.shape, None)
-                        SLS_SolOpt_ReduceVariables.assigned_variables[variable][index.key[0],index.key[1]] = value
-                        # assign the value when post-processing
-                        #if variable.value is None:
-                        #    variable.value = np.empty(variable.shape)
-                        #variable.value[index.key[0],index.key[1]] = value
-                    continue
+                        continue
 
             # not a simple assignment:
             reduced_constraints.append(constraint)
