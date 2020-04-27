@@ -1,5 +1,5 @@
 from .components import SLS_Solver, SLS_SolverOptimizer
-from .solver_optimizers import SLS_SolOpt_ReduceVariables
+from .solver_optimizers import SLS_SolOpt_VariableReduction
 import cvxpy as cp
 #import time
 
@@ -18,7 +18,7 @@ class SLS_Solver:
 '''
 
 class SLS_Sol_CVX:
-    def __init__ (self, sls, optimizers=[SLS_SolOpt_ReduceVariables]):
+    def __init__ (self, sls, optimizers=[SLS_SolOpt_VariableReduction]):
         self._sls = sls
         self._sls_problem = None #cp.Problem(cp.Minimize(0))
         self._solver_optimizers = []
