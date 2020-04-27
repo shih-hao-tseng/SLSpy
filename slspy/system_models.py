@@ -10,6 +10,7 @@ class SystemModel:
     ):
     def measurementConverge(self, u, w=None):
         # getMeasurement without changing the internal state
+        return y
     def systemProgress (self, u, w=None, **kwargs):
         # this function takes the input and progress to next time 
 '''
