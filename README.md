@@ -3,11 +3,11 @@
 ## Synopsis
 *SLSpy* provides a Python-based framework to design and simulate model-based control systems, especially for system level synthesis (SLS) methods. The details of the framework are described in the paper
 
-Shih-Hao Tseng and Jing Shuang (Lisa) Li, ``SLSpy: Python-Based System-Level Controller Synthesis Framework,'' 2020 (submitted for review).
+Shih-Hao Tseng and Jing Shuang (Lisa) Li, ``[SLSpy: Python-Based System-Level Controller Synthesis Framework](https://arxiv.org/abs/2004.12565),'' 2020.
 
 The synthesis workflow follows the structure in the paper
 
-Shih-Hao Tseng and James Anderson, ``[Deployment Architectures for Cyber-Physical Control Systems](https://arxiv.org/abs/1911.01510),'' 2019.
+Shih-Hao Tseng and James Anderson, ``[Deployment Architectures for Cyber-Physical Control Systems](https://arxiv.org/abs/1911.01510),'' 2019. (also in *Proc. IEEE ACC*, 2020)
 
 ## System Requirement
 * Python 2.7 or higher
