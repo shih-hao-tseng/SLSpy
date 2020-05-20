@@ -171,14 +171,15 @@ class SLS_SolOpt_VariableReduction (SLS_SolverOptimizer):
                     if variable is not None:
                         # it is an assignment
                         # python 3.2 above:
-                        if variable in SLS_SolOpt_VariableReduction.assigned_variables.keys():
+                        # if variable in SLS_SolOpt_VariableReduction.assigned_variables.keys():
 
-                        # python 2.7
-                        # matched_key = None
-                        # for key in SLS_SolOpt_VariableReduction.assigned_variables.keys():
-                        #     if variable is key:
-                        #         matched_key = key
-                        # if matched_key is not None:
+                        # for python 2.7 compatibility
+                        matched_key = None
+                        for key in SLS_SolOpt_VariableReduction.assigned_variables.keys():
+                            if variable is key:
+                                matched_key = key
+                                break
+                        if matched_key is not None:
 
                             # have to check if there exist two conflict assignments
                             if value != SLS_SolOpt_VariableReduction.assigned_variables[variable]:
@@ -193,14 +194,15 @@ class SLS_SolOpt_VariableReduction (SLS_SolverOptimizer):
                         variable = index.args[0]
                         
                         # python 3.2 above
-                        if variable in SLS_SolOpt_VariableReduction.assigned_variables.keys():
+                        # if variable in SLS_SolOpt_VariableReduction.assigned_variables.keys():
 
-                        # python 2.7
-                        # matched_key = None
-                        # for key in SLS_SolOpt_VariableReduction.assigned_variables.keys():
-                        #     if variable is key:                        
-                        #         matched_key = key
-                        # if matched_key is not None:
+                        # for python 2.7 compatibility
+                        matched_key = None
+                        for key in SLS_SolOpt_VariableReduction.assigned_variables.keys():
+                            if variable is key:                        
+                                matched_key = key
+                                break
+                        if matched_key is not None:
 
                             # have to check if there exist two conflict assignments
                             assigned_value = SLS_SolOpt_VariableReduction.assigned_variables[variable][index.key[0],index.key[1]]
