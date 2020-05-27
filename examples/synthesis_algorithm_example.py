@@ -73,18 +73,18 @@ def synthesis_algorithm_example():
     plot_heat_map(y_history, u_history, 'SLS with ECOS solver', left_title='log10(|y|)', right_title='log10(|u|)')
 
     # try IOP
-    #synthesizer_iop = IOP (
-    #    system_model = sys_FIR,
-    #    FIR_horizon = controller_FIR_horizon
-    #)
-    #synthesizer_iop << IOP_Obj_H2()
-    #controller_iop = synthesizer_iop.synthesizeControllerModel ()
-#
-    #simulator.setSystem(sys_FIR)
-    #simulator.setController(controller_iop)
-    #_, y_history, _, u_history, _ = simulator.run ()
-#
-    #plot_heat_map(y_history, u_history, 'IOP', left_title='log10(|y|)', right_title='log10(|u|)')
+    synthesizer_iop = IOP (
+        system_model = sys_FIR,
+        FIR_horizon = controller_FIR_horizon
+    )
+    synthesizer_iop << IOP_Obj_H2()
+    controller_iop = synthesizer_iop.synthesizeControllerModel ()
+
+    simulator.setSystem(sys_FIR)
+    simulator.setController(controller_iop)
+    _, y_history, _, u_history, _ = simulator.run ()
+
+    plot_heat_map(y_history, u_history, 'IOP', left_title='log10(|y|)', right_title='log10(|u|)')
 
 if __name__ == '__main__':
     synthesis_algorithm_example()
