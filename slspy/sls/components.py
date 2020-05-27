@@ -30,10 +30,11 @@ class SLS_Solver:
     The base class for SLS solver
     A solver takes the objective and constraints to solve the SLS problem and generate the controller 
     '''
-    def __init__ (self, sls, optimizers=[]):
+    def __init__ (self, sls, optimizers=[], **options):
         # solvers might need to alter _Phi_x, _Phi_u, directly
         self._sls = sls
         self._solver_optimizers = optimizers
+        self._options = options
         pass
     def solve (
         self,
@@ -46,6 +47,9 @@ class SLS_Solver:
         problem_value = 0.0
         solver_status = 'feasible'
         return problem_value, solver_status
+
+    def setOptions (self, **options):
+        self._options = options
     
 class SLS_SolverOptimizer:
     '''
