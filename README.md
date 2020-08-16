@@ -26,9 +26,19 @@ then install SLSpy by typing
 
 which has been tested under Fedora 30 and Ubuntu 18.04.
 
+<!--
 ## SLSpy Wiki
 A simple wiki page with basic explanation can be found at 
 http://slswiki.cms.caltech.edu/index.php/SLSpy
+
+(The server is currently down. We will bring it back when the server is up again.
+-->
+## Get Started
+To get started, please refer to the examples in the folder ``examples.''
+
+For more detailed explanations about the basic framework structure, please refer to 
+
+Shih-Hao Tseng and Jing Shuang (Lisa) Li, ``[SLSpy: Python-Based System-Level Controller Synthesis Framework](https://arxiv.org/abs/2004.12565),'' 2020.
 
 ## Built-in Synthesis Algorithms
 * System Level Synthesis (FIR version), c.f.\
