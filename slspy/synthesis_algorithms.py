@@ -52,6 +52,7 @@ class SLS (SynthesisAlgorithm):
             self._solver = SLS_Sol_CVX(sls=self)
         else:
             self._solver = solver
+            solver._sls = self
 
     def getSolver(self):
         return self._solver

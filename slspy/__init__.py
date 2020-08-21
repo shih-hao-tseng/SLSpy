@@ -9,4 +9,4 @@ from .synthesis_algorithms import *
 from .sls import *
 from .iop import *
 
-VERSION="beta-20.5.2"
+VERSION="beta-20.8.1"
