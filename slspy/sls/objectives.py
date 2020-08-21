@@ -57,8 +57,8 @@ class SLS_Obj_LQ(SLS_Objective):
             Phi_x = sls._Phi_x
             Phi_u = sls._Phi_u
             for tau in range(len(Phi_x)):
-                self._objective_expression += cp.sum_squares(Q_sqrt * Phi_x[tau] * Cov_w_sqrt + 
-                                                             R_sqrt * Phi_u[tau] * Cov_w_sqrt)
+                self._objective_expression += cp.sum_squares(Q_sqrt @ Phi_x[tau] @ Cov_w_sqrt + 
+                                                             R_sqrt @ Phi_u[tau] @ Cov_w_sqrt)
         else:
             # output-feedback
             Phi_xx = sls._Phi_xx
@@ -68,10 +68,10 @@ class SLS_Obj_LQ(SLS_Objective):
 
             for tau in range(len(Phi_xx)):
                 self._objective_expression += cp.sum_squares(
-                    Q_sqrt * Phi_xx[tau] * Cov_w_sqrt +
-                    R_sqrt * Phi_ux[tau] * Cov_w_sqrt +
-                    Q_sqrt * Phi_xy[tau] * Cov_v_sqrt + 
-                    R_sqrt * Phi_uy[tau] * Cov_v_sqrt
+                    Q_sqrt @ Phi_xx[tau] @ Cov_w_sqrt +
+                    R_sqrt @ Phi_ux[tau] @ Cov_w_sqrt +
+                    Q_sqrt @ Phi_xy[tau] @ Cov_v_sqrt + 
+                    R_sqrt @ Phi_uy[tau] @ Cov_v_sqrt
                 )
 
         return objective_value + self._objective_expression
@@ -98,7 +98,7 @@ class SLS_Obj_HInf(SLS_Objective):
 
         horizon = len(Phi_x)
 
-        M = cp.hstack([C1 * Phi_x[k] + D12 * Phi_u[k] for k in range(1,horizon)])
+        M = cp.hstack([C1 @ Phi_x[k] + D12 @ Phi_u[k] for k in range(1,horizon)])
 
         self._objective_expression = cp.sigma_max(M)
 

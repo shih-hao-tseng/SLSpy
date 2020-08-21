@@ -43,14 +43,14 @@ class SLS_Cons_SLS (SLS_Constraint):
         constraints += [ sls._Phi_u[0] == np.zeros([Nu,Nx]) ]
         constraints += [ sls._Phi_x[1] == np.eye(Nx) ]
         constraints += [ 
-            (sls._system_model._A  * sls._Phi_x[sls._FIR_horizon] +
-             sls._system_model._B2 * sls._Phi_u[sls._FIR_horizon] ) == np.zeros([Nx, Nx]) 
+            (sls._system_model._A  @ sls._Phi_x[sls._FIR_horizon] +
+             sls._system_model._B2 @ sls._Phi_u[sls._FIR_horizon] ) == np.zeros([Nx, Nx]) 
         ]
         for tau in range(1,sls._FIR_horizon):
             constraints += [
                 sls._Phi_x[tau+1] == (
-                    sls._system_model._A  * sls._Phi_x[tau] +
-                    sls._system_model._B2 * sls._Phi_u[tau]
+                    sls._system_model._A  @ sls._Phi_x[tau] +
+                    sls._system_model._B2 @ sls._Phi_u[tau]
                 )
             ]
 
@@ -63,42 +63,42 @@ class SLS_Cons_SLS (SLS_Constraint):
 
             # output-feedback constraints
             constraints += [
-                sls._Phi_xy[1] == sls._system_model._B2 * sls._Phi_uy[0]
+                sls._Phi_xy[1] == sls._system_model._B2 @ sls._Phi_uy[0]
             ]
             constraints += [ 
-                (sls._system_model._A  * sls._Phi_xy[sls._FIR_horizon] +
-                 sls._system_model._B2 * sls._Phi_uy[sls._FIR_horizon]) == np.zeros([Nx, Ny])
+                (sls._system_model._A  @ sls._Phi_xy[sls._FIR_horizon] +
+                 sls._system_model._B2 @ sls._Phi_uy[sls._FIR_horizon]) == np.zeros([Nx, Ny])
             ]
             constraints += [ 
-                (sls._Phi_xx[sls._FIR_horizon] * sls._system_model._A  +
-                 sls._Phi_xy[sls._FIR_horizon] * sls._system_model._C2 ) == np.zeros([Nx, Nx])
+                (sls._Phi_xx[sls._FIR_horizon] @ sls._system_model._A  +
+                 sls._Phi_xy[sls._FIR_horizon] @ sls._system_model._C2 ) == np.zeros([Nx, Nx])
             ]
             constraints += [
-                sls._Phi_ux[1] == sls._Phi_uy[0] * sls._system_model._C2
+                sls._Phi_ux[1] == sls._Phi_uy[0] @ sls._system_model._C2
             ]
             constraints += [
-                (sls._Phi_ux[sls._FIR_horizon] * sls._system_model._A  +
-                 sls._Phi_uy[sls._FIR_horizon] * sls._system_model._C2 ) == np.zeros([Nu, Nx])
+                (sls._Phi_ux[sls._FIR_horizon] @ sls._system_model._A  +
+                 sls._Phi_uy[sls._FIR_horizon] @ sls._system_model._C2 ) == np.zeros([Nu, Nx])
             ]
             for tau in range(1,sls._FIR_horizon):
                 constraints += [ 
                     sls._Phi_xy[tau+1] == (
-                        sls._system_model._A  * sls._Phi_xy[tau] +
-                        sls._system_model._B2 * sls._Phi_uy[tau]
+                        sls._system_model._A  @ sls._Phi_xy[tau] +
+                        sls._system_model._B2 @ sls._Phi_uy[tau]
                     )
                 ]
 
                 constraints += [
                     sls._Phi_xx[tau+1] == (
-                        sls._Phi_xx[tau] * sls._system_model._A  +
-                        sls._Phi_xy[tau] * sls._system_model._C2
+                        sls._Phi_xx[tau] @ sls._system_model._A  +
+                        sls._Phi_xy[tau] @ sls._system_model._C2
                     )
                 ]
 
                 constraints += [
                     sls._Phi_ux[tau+1] == (
-                        sls._Phi_ux[tau] * sls._system_model._A  +
-                        sls._Phi_uy[tau] * sls._system_model._C2
+                        sls._Phi_ux[tau] @ sls._system_model._A  +
+                        sls._Phi_uy[tau] @ sls._system_model._C2
                     )
                 ]
         return constraints
@@ -208,16 +208,16 @@ class SLS_Cons_Robust (SLS_Constraint):
         # move Delta to the left hand side to omit creating zero
         constraints += [
             - self._Delta[sls._FIR_horizon] == ( 
-                sls._system_model._A  * hat_Phi_x[sls._FIR_horizon]
-              + sls._system_model._B2 * hat_Phi_u[sls._FIR_horizon]
+                sls._system_model._A  @ hat_Phi_x[sls._FIR_horizon]
+              + sls._system_model._B2 @ hat_Phi_u[sls._FIR_horizon]
             ) 
         ]
 
         for t in range(1,sls._FIR_horizon):
             constraints += [
                 hat_Phi_x[t+1] - self._Delta[t] == (
-                    sls._system_model._A  * hat_Phi_x[t]
-                  + sls._system_model._B2 * hat_Phi_u[t]
+                    sls._system_model._A  @ hat_Phi_x[t]
+                  + sls._system_model._B2 @ hat_Phi_u[t]
                 )
             ]
 

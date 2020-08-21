@@ -10,10 +10,18 @@ The synthesis workflow follows the structure in the paper
 Shih-Hao Tseng and James Anderson, ``[Deployment Architectures for Cyber-Physical Control Systems](https://arxiv.org/abs/1911.01510),'' 2019. (also in *Proc. IEEE ACC*, 2020)
 
 ## System Requirement
+<!--
 * Python 2.7 or higher
 * Python pip (or pip3 for Python 3)
 
-We recommend using Python 3 (and pip3) or above. A system with both Python 3 and Python 2.7 may encounter installation error. In that case, please make Python 3 your default choice by appropriate aliasing.
+We recommend using Python 3 (and pip3) or above. 
+-->
+* Python 3 or higher
+* Python pip3
+
+A system with both Python 3 and Python 2.7 may encounter installation error. In that case, please make Python 3 your default choice by appropriate aliasing.
+
+SLSpy might still work for Python 2.7 (or higher Python 2 versions), but one should ensure CVXPY is version 1.1 or higher.
 
 ## Install
 First install the necessary packages by

@@ -23,7 +23,7 @@ class IOP_Cons_IOP (IOP_Constraint):
                 continue
             if tmp < 0:
                 continue
-            AB += A[t] * B[tmp]
+            AB += A[t] @ B[tmp]
         return AB
 
     def addConstraints(self, iop, constraints=None):
