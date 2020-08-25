@@ -49,10 +49,10 @@ class SLS (SynthesisAlgorithm):
         if not isinstance(solver,SLS_Solver):
             solver = None
         if solver is None:
-            self._solver = SLS_Sol_CVX(sls=self)
+            self._solver = SLS_Sol_CVX()
         else:
             self._solver = solver
-            solver._sls = self
+        self._solver._sls = self
 
     def getSolver(self):
         return self._solver
@@ -204,10 +204,10 @@ class SLS (SynthesisAlgorithm):
             constraints = constraints
         )
 
-        if solver_status is 'infeasible':
+        if solver_status == 'infeasible':
             self.warningMessage('SLS problem infeasible')
             return None
-        elif solver_status is 'unbounded':
+        elif solver_status == 'unbounded':
             self.warningMessage('SLS problem unbounded')
             return None
         else:
@@ -364,10 +364,10 @@ class IOP (SynthesisAlgorithm):
         self._iop_problem = cp.Problem (cp.Minimize(objective_value), constraints)
         self._iop_problem.solve()
 
-        if self._iop_problem.status is "infeasible":
+        if self._iop_problem.status == 'infeasible':
             self.warningMessage('IOP problem infeasible')
             return None
-        elif self._iop_problem.status is "unbounded":
+        elif self._iop_problem.status == 'unbounded':
             self.warningMessage('IOP problem unbounded')
             return None
         else:

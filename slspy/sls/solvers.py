@@ -18,8 +18,8 @@ class SLS_Solver:
 '''
 
 class SLS_Sol_CVX (SLS_Solver):
-    def __init__ (self, sls, optimizers=[SLS_SolOpt_VariableReduction], **options):
-        self._sls = sls
+    def __init__ (self, optimizers=[SLS_SolOpt_VariableReduction], **options):
+        self._sls = None
         self._sls_problem = None #cp.Problem(cp.Minimize(0))
         self._solver_optimizers = []
         for sol_opt in optimizers:
