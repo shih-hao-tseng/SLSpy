@@ -34,8 +34,11 @@ class SLS_Solver:
         # solvers might need to alter _Phi_x, _Phi_u, directly
         self._sls = sls
         self._solver_optimizers = optimizers
+        self.setOptions(options)
+    
+    def setOptions(self, **options):
         self._options = options
-        pass
+
     def solve (
         self,
         objective_value,

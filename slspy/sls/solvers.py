@@ -19,13 +19,12 @@ class SLS_Solver:
 
 class SLS_Sol_CVX (SLS_Solver):
     def __init__ (self, optimizers=[SLS_SolOpt_VariableReduction], **options):
-        self._sls = None
+        SLS_Solver.__init__(self, sls=None, optimizers=optimizers, options)
         self._sls_problem = None #cp.Problem(cp.Minimize(0))
         self._solver_optimizers = []
         for sol_opt in optimizers:
             if issubclass(sol_opt, SLS_SolverOptimizer):
                 self._solver_optimizers.append(sol_opt)
-        self._options = options
 
     def get_SLS_Problem (self):
         return self._sls_problem
