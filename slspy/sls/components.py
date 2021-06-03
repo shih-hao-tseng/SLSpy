@@ -1,5 +1,6 @@
 import numpy as np
 import cvxpy as cp
+from ..core import ObjBase
 
 class SLS_Objective:
     '''
@@ -25,7 +26,7 @@ class SLS_Constraint(SLS_Objective):
     def addConstraints(self, sls, constraints):
         return constraints
 
-class SLS_Solver:
+class SLS_Solver(ObjBase):
     '''
     The base class for SLS solver
     A solver takes the objective and constraints to solve the SLS problem and generate the controller 

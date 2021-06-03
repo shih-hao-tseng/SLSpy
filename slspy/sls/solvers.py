@@ -51,7 +51,13 @@ class SLS_Sol_CVX (SLS_Solver):
             self._sls_problem = cp.Problem (cp.Minimize(objective_value), constraints)
         else:
             self._sls_problem = cp.Problem (cp.Maximize(objective_value), constraints)
-        self._sls_problem.solve(**self._options)
+        
+        try:
+            self._sls_problem.solve(**self._options)
+        except cp.error.SolverError as err:
+            self.errorMessage('SLS solver error, synthesis fails')
+            raise err
+            
 
         for sol_opt in self._solver_optimizers:
             # optimizers post-process
