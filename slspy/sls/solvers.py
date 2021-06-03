@@ -57,6 +57,10 @@ class SLS_Sol_CVX (SLS_Solver):
         except cp.error.SolverError as err:
             self.errorMessage('SLS solver error, synthesis fails.\nError message: %s' % err)
             exit()
+        except Exception as err:
+            self.errorMessage('Synthesis fails.\nError message: %s' % err)
+            exit()
+
             
 
         for sol_opt in self._solver_optimizers:
