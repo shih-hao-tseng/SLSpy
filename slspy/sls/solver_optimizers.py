@@ -201,7 +201,7 @@ class SLS_SolOpt_VariableReduction (SLS_SolverOptimizer):
             reduced_constraints.append(constraint)
 
         # organize assigned variables: replace None by cvxpy variable, and make it CVX_Constant if all the values are defined?
-        for variable in SLS_SolOpt_VariableReduction.assigned_variables.keys():
+        for variable in SLS_SolOpt_VariableReduction.assigned_variables:
             value = SLS_SolOpt_VariableReduction.assigned_variables[variable]
 
             if None in value:
