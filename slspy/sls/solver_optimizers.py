@@ -170,17 +170,7 @@ class SLS_SolOpt_VariableReduction (SLS_SolverOptimizer):
                 if value is not None:
                     if variable is not None:
                         # it is an assignment
-                        # python 3.2 above:
-                        # if variable in SLS_SolOpt_VariableReduction.assigned_variables.keys():
-
-                        # for python 2.7 compatibility
-                        matched_key = None
-                        for key in SLS_SolOpt_VariableReduction.assigned_variables.keys():
-                            if variable is key:
-                                matched_key = key
-                                break
-                        if matched_key is not None:
-
+                        if variable in SLS_SolOpt_VariableReduction.assigned_variables:
                             # have to check if there exist two conflict assignments
                             if value != SLS_SolOpt_VariableReduction.assigned_variables[variable]:
                                 # conflict assignment
@@ -192,18 +182,8 @@ class SLS_SolOpt_VariableReduction (SLS_SolverOptimizer):
                     if index is not None:
                         # get the corresponding variable
                         variable = index.args[0]
-                        
-                        # python 3.2 above
-                        # if variable in SLS_SolOpt_VariableReduction.assigned_variables.keys():
 
-                        # for python 2.7 compatibility
-                        matched_key = None
-                        for key in SLS_SolOpt_VariableReduction.assigned_variables.keys():
-                            if variable is key:                        
-                                matched_key = key
-                                break
-                        if matched_key is not None:
-
+                        if variable in SLS_SolOpt_VariableReduction.assigned_variables:
                             # have to check if there exist two conflict assignments
                             assigned_value = SLS_SolOpt_VariableReduction.assigned_variables[variable][index.key[0],index.key[1]]
                             if assigned_value[0,0] is not None:

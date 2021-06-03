@@ -1,6 +1,6 @@
 from slspy import *
 import numpy as np
-from cvxpy import ECOS, SCS # different cvxpy solvers
+from cvxpy import ECOS, GUROBI # different cvxpy solvers
 
 def state_fdbk_rfd_example():
     # specify system matrices
@@ -25,7 +25,7 @@ def state_fdbk_rfd_example():
     rfd_coeffs = [0.01, 0.1, 1, 10, 100, 1000]
 
     solver = synthesizer.getSolver()
-    solver.set_CVX_Solver(CVX_solver=SCS)
+    solver.setOptions(solver=GUROBI)
 
     ## (1) basic sls (centralized controller) with rfd
     num_acts = []
