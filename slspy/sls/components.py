@@ -30,11 +30,23 @@ class SLS_Solver:
     The base class for SLS solver
     A solver takes the objective and constraints to solve the SLS problem and generate the controller 
     '''
-    def __init__ (self, sls, optimizers=[], **options):
+    def __init__ (self, sls, optimizers=[], optimization_direction=-1, **options):
         # solvers might need to alter _Phi_x, _Phi_u, directly
         self._sls = sls
         self._solver_optimizers = optimizers
+        self.setOptimizationDirection(optimization_direction)
         self.setOptions(**options)
+
+    def setOptimizationDirection(self,optimization_direction):
+        # default: minimize
+        self._optimization_direction = -1
+        if isinstance(optimization_direction,int):
+            if optimization_direction > 0:
+                # minimize if optimization_direction >= 0
+                self._optimization_direction = 1
+        elif isinstance(optimization_direction,str):
+            if optimization_direction == 'max':
+                self._optimization_direction = 1
     
     def setOptions(self, **options):
         self._options = options

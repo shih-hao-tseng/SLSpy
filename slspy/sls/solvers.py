@@ -47,7 +47,10 @@ class SLS_Sol_CVX (SLS_Solver):
             if solver_status == 'infeasible':
                 return 0.0, solver_status
 
-        self._sls_problem = cp.Problem (cp.Minimize(objective_value), constraints)
+        if self._optimization_direction < 0:
+            self._sls_problem = cp.Problem (cp.Minimize(objective_value), constraints)
+        else:
+            self._sls_problem = cp.Problem (cp.Maximize(objective_value), constraints)
         self._sls_problem.solve(**self._options)
 
         for sol_opt in self._solver_optimizers:
