@@ -65,9 +65,9 @@ Shih-Hao Tseng and Jing Shuang (Lisa) Li, ``[SLSpy: Python-Based System-Level Co
   ``An Input-Output Parameterization of Stabilizing Controllers: Amidst Youla and System Level Synthesis,'' *IEEE Control Systems Letters*, 2019
 
 ## Applicable Scenario
-Currently, SLSpy can handle a linear time invariant (LTI) system by synthsizing finite impulse response (FIR) controller using SLS/IOP. It is possible to deal with linear time variant (LTV) system under SLSpy framework by introducing customized system model, controller model, and synthesizer.
+Currently, SLSpy can handle a linear time-invariant (LTI) system by synthesizing finite impulse response (FIR) controller using SLS/IOP. It is possible to deal with linear time-variant (LTV) system under SLSpy framework by introducing customized system model, controller model, and synthesizer.
 
-The way SLSpy works is to express trasfer matrices as a list. For example, an FIR transfer matrix <b>Φ</b> with the z-transform
+The way SLSpy works is to express transfer matrices as a list. For example, an FIR transfer matrix <b>Φ</b> with the z-transform
 
 <b>Φ</b> = Σ_{t=0}^T Φ[t] z^{-t}
 
