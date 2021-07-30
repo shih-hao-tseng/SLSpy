@@ -117,7 +117,7 @@ class SLS_Obj_L1(SLS_Objective):
 
         horizon = len(Phi_x)
 
-        M = cp.hstack([C1 * Phi_x[k] + D12 * Phi_u[k] for k in range(1,horizon)])
+        M = cp.hstack([C1 @ Phi_x[k] + D12 @ Phi_u[k] for k in range(1,horizon)])
 
         self._objective_expression = cp.norm(M,'inf')
 

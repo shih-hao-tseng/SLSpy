@@ -7,6 +7,7 @@ from cvxpy.atoms.affine.index import index as CVX_index
 from cvxpy.expressions.constants.constant import Constant as CVX_Constant
 from cvxpy.atoms.affine.binary_operators import MulExpression as CVX_Multiplication
 from cvxpy.atoms.affine.reshape import reshape as CVX_reshape
+from cvxpy.atoms.affine.add_expr import AddExpression
 
 '''
 To create a new solver optimizer, inherit the following base function and customize the specified methods.
@@ -128,6 +129,9 @@ class SLS_SolOpt_VariableReduction (SLS_SolverOptimizer):
     
     @staticmethod
     def optimize(objective_value, constraints):
+        if not isinstance(objective_value,AddExpression):
+            # only work with AddExpression at the moment...
+            return 'not optimizable', objective_value, constraints
         # parse and expand all constraints
         reduced_objective_value = None
         reduced_constraints = []
