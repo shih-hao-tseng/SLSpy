@@ -34,7 +34,7 @@ then install SLSpy by typing
 
 which has been tested under Fedora 30 and Ubuntu 18.04.
 
-For Windows Subsystem for Linux, the user might need to install without `sudo` after the setup by
+For Windows Subsystem for Linux and macOS, the user might need to install without `sudo` after the setup by
 
 `make install`
 

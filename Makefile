@@ -42,6 +42,8 @@ ifneq (,$(shell which pkg))
   # FreeBSD, not yet supported
   PM=pkg
   $(info FreeBSD is not yet supported)
+else
+  PM=
 endif
 endif
 endif
@@ -61,7 +63,9 @@ else
 endif
 
 setup:
+ifneq ($(PM),)
 	$(PM) install $(LIBS)
+endif
 	# install numpy first to avoid weird scs dependency issues
 	$(PIP) install numpy
 	$(PIP) install --no-cache-dir -I scs
