@@ -9,4 +9,5 @@ from .synthesis_algorithms import *
 from .sls import *
 from .iop import *
 
-VERSION="beta-21.9.1"
+# year.month<b -> beta release>version
+VERSION="2021.9b1"
